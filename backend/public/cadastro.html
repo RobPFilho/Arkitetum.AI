@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cadastro | Arkitetum</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="nav">
+    <a class="brand" href="/">ARKITETUM</a>
+    <a href="login.html">Já tenho uma conta</a>
+  </header>
+
+  <main class="auth-page card register-page">
+    <div class="register-steps">
+      <article class="register-step">
+        <span class="register-step-title">Ideia 1</span>
+        <span class="register-step-text">
+          Defina seu perfil e o seu objetivo de projeto.
+        </span>
+      </article>
+      <article class="register-step">
+        <span class="register-step-title">Ideia 2</span>
+        <span class="register-step-text">
+          Escolha materiais e referências compatíveis.
+        </span>
+      </article>
+      <article class="register-step">
+        <span class="register-step-title">Ideia 3</span>
+        <span class="register-step-text">
+          Revise o resumo e finalize o cadastro.
+        </span>
+      </article>
+    </div>
+
+    <div class="register-grid">
+      <section class="register-panel">
+        <div class="register-panel-head">
+          <span class="eyebrow">Perfil de estilo</span>
+          <span class="register-panel-icon">✦</span>
+        </div>
+
+        <form id="register" class="register-form">
+          <div class="form-row">
+            <label for="role">Tipo de perfil</label>
+            <select name="role" id="role">
+              <option value="client">Sou cliente</option>
+              <option value="architect">Sou arquiteto(a)</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label for="name">Nome completo</label>
+            <input name="name" placeholder="Nome completo" required />
+          </div>
+
+          <div class="form-row">
+            <label for="email">E-mail</label>
+            <input name="email" type="email" placeholder="E-mail" required />
+          </div>
+
+          <div class="form-row">
+            <label for="phone">Telefone</label>
+            <input name="phone" placeholder="Telefone" required />
+          </div>
+
+          <div class="form-inline-fields">
+            <div class="form-row">
+              <label for="city">Cidade</label>
+              <input name="city" placeholder="Cidade" />
+            </div>
+            <div class="form-row">
+              <label for="state">Estado</label>
+              <input name="state" placeholder="Estado" />
+            </div>
+          </div>
+
+          <div id="client-fields">
+            <div class="form-row">
+              <label for="preferredStyles">Estilos preferidos</label>
+              <input name="preferredStyles" placeholder="Estilos preferidos (separados por vírgula)" />
+            </div>
+
+            <div class="form-row">
+              <label for="propertyType">Tipo de imóvel ou projeto</label>
+              <input name="propertyType" placeholder="Tipo de imóvel ou projeto" />
+            </div>
+
+            <div class="form-row">
+              <label for="projectGoals">Objetivo do projeto</label>
+              <textarea name="projectGoals" placeholder="O que você quer realizar no projeto?"></textarea>
+            </div>
+
+            <div class="form-inline-fields">
+              <div class="form-row">
+                <label for="budgetMin">Orçamento mínimo</label>
+                <input name="budgetMin" type="number" min="0" placeholder="Min" />
+              </div>
+              <div class="form-row">
+                <label for="budgetMax">Orçamento máximo</label>
+                <input name="budgetMax" type="number" min="0" placeholder="Max" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label for="preferredMaterials">Materiais desejados</label>
+              <select name="preferredMaterials" id="preferredMaterials" multiple size="7">
+                <option value="material-wood">Madeira</option>
+                <option value="material-stone">Pedra</option>
+                <option value="material-concrete">Concreto</option>
+                <option value="material-steel">Metal</option>
+                <option value="material-textile">Tecido</option>
+                <option value="material-cork">Cortiça</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="architect-fields" hidden>
+            <div class="form-row">
+              <label for="styles">Estilos arquitetônicos</label>
+              <input name="styles" placeholder="Estilos arquitetônicos (separados por vírgula)" />
+            </div>
+
+            <div class="form-row">
+              <label for="specialties">Especialidades</label>
+              <input name="specialties" placeholder="Especialidades (separadas por vírgula)" />
+            </div>
+
+            <div class="form-row">
+              <label for="workingAreas">Regiões em que atende</label>
+              <input name="workingAreas" placeholder="Regiões em que atende (separadas por vírgula)" />
+            </div>
+
+            <div class="form-row">
+              <label for="yearsExperience">Anos de experiência</label>
+              <input name="yearsExperience" type="number" min="0" placeholder="Anos de experiência" />
+            </div>
+
+            <div class="form-row">
+              <label for="favoriteMaterials">Materiais favoritos</label>
+              <select name="favoriteMaterials" id="favoriteMaterials" multiple size="7">
+                <option value="material-wood">Madeira</option>
+                <option value="material-stone">Pedra</option>
+                <option value="material-concrete">Concreto</option>
+                <option value="material-steel">Metal</option>
+                <option value="material-textile">Tecido</option>
+                <option value="material-cork">Cortiça</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="bio">Breve apresentação profissional</label>
+              <textarea name="bio" placeholder="Breve apresentação profissional"></textarea>
+            </div>
+          </div>
+
+          <div class="form-inline-fields">
+            <div class="form-row">
+              <label for="password">Senha</label>
+              <input name="password" type="password" placeholder="Senha" required />
+            </div>
+            <div class="form-row">
+              <label for="confirmPassword">Confirme a senha</label>
+              <input name="confirmPassword" type="password" placeholder="Confirme a senha" required />
+            </div>
+          </div>
+
+          <button class="submit-button">Criar conta</button>
+        </form>
+        <p id="notice"></p>
+      </section>
+
+      <section class="register-preview">
+        <div class="register-preview-card">
+          <span class="preview-label">Sugestões de materiais</span>
+          <div class="preview-materials">
+            <span class="swatch swatch-1"></span>
+            <span class="swatch swatch-2"></span>
+            <span class="swatch swatch-3"></span>
+            <span class="swatch swatch-4"></span>
+          </div>
+          <div class="preview-option">
+            <span>Opção 1 — Conforto em paisagem</span>
+          </div>
+          <div class="preview-option">
+            <span>Opção 2 — Camadas de luz</span>
+          </div>
+          <div class="preview-option">
+            <span>Opção 3 — Ambiente sustentável</span>
+          </div>
+        </div>
+        <div class="register-preview-card">
+          <span class="preview-label">Resumo do projeto</span>
+          <div class="summary-list">
+            <div><span>Estilo</span><strong id="preview-style">-</strong></div>
+            <div><span>Orçamento</span><strong id="preview-budget">-</strong></div>
+            <div><span>Projeto</span><strong id="preview-project">-</strong></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="site.js"></script>
+</body>
+
+</html>

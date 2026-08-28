@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Painel | Arkitetum</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="nav">
+    <a class="brand" href="/">ARKITETUM</a>
+    <nav>
+      <a class="profile-icon-link" id="profile-icon-link" href="perfil.html" aria-label="Meu perfil">
+        <span class="profile-icon-avatar" id="profile-icon-avatar">CS</span>
+      </a>
+      <button class="link-button" id="logout">Sair</button>
+    </nav>
+  </header>
+  <main class="page">
+    <p class="eyebrow">MEU PAINEL</p>
+    <h1 id="welcome">Carregando...</h1>
+    <section id="client-dashboard" hidden>
+      <div class="card">
+        <h2>Seu Match.ai</h2>
+        <p>Encontre arquitetos alinhados às suas preferências.</p>
+        <button id="match">Encontrar arquitetos</button>
+      </div>
+      <div id="results" class="result-grid"></div>
+    </section>
+    <section id="architect-dashboard" hidden>
+      <div class="card">
+        <h2>Seu portfólio</h2>
+        <form id="portfolio">
+          <input name="title" placeholder="Nome do projeto" required /><input name="projectUrl" type="url"
+            placeholder="Link do projeto" /><input name="imageUrl" type="url" placeholder="Link da imagem" /><select
+            name="status">
+            <option value="completed">Concluído</option>
+            <option value="ongoing">Em andamento</option>
+          </select><textarea name="description" placeholder="Descrição breve"></textarea><button>Adicionar
+            projeto</button>
+        </form>
+      </div>
+      <div>
+        <h2>Projetos publicados</h2>
+        <div id="portfolio-list" class="result-grid"></div>
+      </div>
+    </section>
+    <p id="notice"></p>
+  </main>
+  <script src="site.js"></script>
+</body>
+
+</html>
