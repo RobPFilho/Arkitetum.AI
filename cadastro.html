@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Criar conta — match.IA</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="logo">
+      <img src="assets/img/mark.png" alt="" width="32" height="32">
+      <span class="logo-word">match<span class="ia">.IA</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#como-funciona">Como funciona</a></li>
+      <li><a href="cadastro.html?tipo=cliente">Para clientes</a></li>
+      <li><a href="cadastro.html?tipo=arquiteto">Para arquitetos</a></li>
+      <li><a href="projetos.html" data-page="projetos.html">Projetos</a></li>
+      <li><a href="blog.html" data-page="blog.html">Blog</a></li>
+      <li><a href="sobre.html" data-page="sobre.html">Sobre</a></li>
+    </ul>
+    <div class="nav-actions" data-auth-slot>
+      <a href="login.html" class="login-link">Entrar</a>
+      <a href="cadastro.html" class="btn btn-primary btn-sm">Cadastrar</a>
+    </div>
+    <button class="nav-toggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<main class="auth-shell">
+  <div class="container">
+    <div class="auth-card" style="max-width:700px;">
+      <div class="center" style="margin-bottom:24px;">
+        <div class="auth-badge"><img src="assets/img/mark.png" alt=""></div>
+        <span class="eyebrow">Cadastro</span>
+        <h1 style="font-size:1.7rem; margin-bottom:6px;">Crie sua conta no match.IA</h1>
+        <p style="margin:0;">Quanto mais completo o questionário, mais certeiro é o match feito pela IA.</p>
+      </div>
+
+      <div id="apiBanner" class="api-banner">
+        Não foi possível conectar à API. Confira se o back-end (<a href="https://github.com/RobPFilho/Arkitetum.AI" target="_blank" rel="noopener">Arkitetum.AI</a>) está rodando em <code id="apiBaseLabel"></code>.
+      </div>
+
+      <div class="role-toggle">
+        <button type="button" id="btnCliente" class="active" data-role="client">Sou cliente</button>
+        <button type="button" id="btnArquiteto" data-role="architect">Sou arquiteto</button>
+      </div>
+
+      <div class="wizard-progress" id="wizardProgress"></div>
+
+      <div id="formError" class="form-error"></div>
+      <div id="formSuccess" class="form-success"></div>
+
+      <form id="cadastroForm" novalidate>
+
+        <!-- ============ ETAPA 0 — CONTA (comum aos dois papéis) ============ -->
+        <div class="wizard-step active" data-step="conta">
+          <h3>Sua conta</h3>
+          <p class="wizard-step-hint">Dados básicos de acesso.</p>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="name">Nome completo</label>
+              <input type="text" id="name" name="name" required autocomplete="name">
+            </div>
+            <div class="form-field">
+              <label for="email">E-mail</label>
+              <input type="email" id="email" name="email" required autocomplete="email">
+            </div>
+            <div class="form-field">
+              <label for="phone">Telefone</label>
+              <input type="tel" id="phone" name="phone" required placeholder="(11) 99999-0000" autocomplete="tel">
+            </div>
+            <div class="form-field">
+              <div style="display:flex; gap:10px;">
+                <div style="flex:1; min-width:0;">
+                  <label for="city">Cidade</label>
+                  <input type="text" id="city" name="city" required>
+                </div>
+                <div style="width:90px; flex-shrink:0;">
+                  <label for="state">UF</label>
+                  <input type="text" id="state" name="state" maxlength="2" required placeholder="SP" style="text-transform:uppercase;">
+                </div>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="password">Senha</label>
+              <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password">
+            </div>
+            <div class="form-field">
+              <label for="confirmPassword">Confirmar senha</label>
+              <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6" autocomplete="new-password">
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= CLIENTE ================= -->
+
+        <!-- ETAPA — Sobre você -->
+        <div class="wizard-step" data-step="familia" data-role="client">
+          <h3>Sobre você</h3>
+          <p class="wizard-step-hint">Ajuda o arquiteto a entender quem vai viver no espaço.</p>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Estado civil</span>
+            <div class="chip-select" id="maritalStatus"></div>
+          </div>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="familySize">Quantas pessoas vão morar na casa?</label>
+              <input type="number" id="familySize" min="1" max="20" value="2">
+            </div>
+            <div class="form-field">
+              <label for="childrenCount">Quantos filhos <span class="hint">(opcional)</span></label>
+              <input type="number" id="childrenCount" min="0" max="15" value="0">
+            </div>
+            <div class="form-field">
+              <label for="occupation">Profissão <span class="hint">(opcional)</span></label>
+              <input type="text" id="occupation" placeholder="Ex.: professor(a), autônomo(a)...">
+            </div>
+            <div class="form-field">
+              <label for="employeesCount">Colaboradores/empregados na casa <span class="hint">(opcional)</span></label>
+              <input type="number" id="employeesCount" min="0" max="10" value="0">
+            </div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Melhor forma de contato</span>
+            <div class="chip-select" id="contactMethod"></div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Melhor horário para contato</span>
+            <div class="chip-select" id="contactTime"></div>
+          </div>
+        </div>
+
+        <!-- ETAPA — O projeto -->
+        <div class="wizard-step" data-step="projeto" data-role="client">
+          <h3>O projeto</h3>
+          <p class="wizard-step-hint">Tipo de intervenção, prazos e orçamento.</p>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Tipo de intervenção</span>
+            <div class="chip-select" id="interventionType"></div>
+          </div>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="propertyType">Tipo de imóvel / projeto</label>
+              <select id="propertyType">
+                <option value="Residencial unifamiliar">Residencial unifamiliar</option>
+                <option value="Apartamento">Apartamento</option>
+                <option value="Reforma">Reforma</option>
+                <option value="Interiores">Interiores</option>
+                <option value="Comercial">Comercial</option>
+                <option value="Paisagismo">Paisagismo</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="areaSize">Metragem aproximada (m²)</label>
+              <input type="number" id="areaSize" min="0" step="1" placeholder="100">
+            </div>
+            <div class="form-field">
+              <label for="startTimeline">Prazo para início da obra</label>
+              <select id="startTimeline">
+                <option value="Imediato">Imediato</option>
+                <option value="1 a 3 meses">1 a 3 meses</option>
+                <option value="3 a 6 meses">3 a 6 meses</option>
+                <option value="6 a 12 meses">6 a 12 meses</option>
+                <option value="Ainda não sei">Ainda não sei</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="moveInMonths">Em quantos meses pretende se mudar? <span class="hint">(opcional)</span></label>
+              <input type="number" id="moveInMonths" min="0" placeholder="6">
+            </div>
+            <div class="form-field">
+              <label for="budgetMin">Orçamento mínimo (R$)</label>
+              <input type="number" id="budgetMin" min="0" step="1000" placeholder="250000">
+            </div>
+            <div class="form-field">
+              <label for="budgetMax">Orçamento máximo (R$)</label>
+              <input type="number" id="budgetMax" min="0" step="1000" placeholder="350000">
+            </div>
+          </div>
+          <div class="form-field full">
+            <label for="fullAddress">Endereço completo <span class="hint">(opcional)</span></label>
+            <input type="text" id="fullAddress" placeholder="Rua, número, bairro">
+          </div>
+        </div>
+
+        <!-- ETAPA — Ambientes -->
+        <div class="wizard-step" data-step="ambientes" data-role="client">
+          <h3>Ambientes desejados</h3>
+          <p class="wizard-step-hint">Marque tudo que você quer reformar ou construir.</p>
+          <div class="field-subgroup">
+            <div class="chip-select" id="environmentsChips"></div>
+          </div>
+          <div class="qty-row">
+            <div class="qty-item">
+              <label for="suitesCount">Suítes</label>
+              <select id="suitesCount">
+                <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4+">4+</option>
+              </select>
+            </div>
+            <div class="qty-item">
+              <label for="bedroomsCount">Quartos</label>
+              <select id="bedroomsCount">
+                <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4+">4+</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ETAPA — Cores e materiais -->
+        <div class="wizard-step" data-step="cores" data-role="client">
+          <h3>Cores e materiais</h3>
+          <p class="wizard-step-hint">A IA usa isso para calcular compatibilidade com o portfólio do arquiteto.</p>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Tons de cor que mais agradam</span>
+            <div class="chip-select" id="colorTones"></div>
+          </div>
+          <div class="form-field full">
+            <label for="dislikedColor">Alguma cor que você não gosta? <span class="hint">(opcional)</span></label>
+            <input type="text" id="dislikedColor" placeholder="Ex.: marrom, verde">
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Materiais preferidos <span class="hint">(carregado do back-end via /api/materials)</span></span>
+            <div class="chip-select" id="clientMaterials" data-target="preferredMaterials"></div>
+          </div>
+        </div>
+
+        <!-- ETAPA — Estilo e hábitos -->
+        <div class="wizard-step" data-step="estilo" data-role="client">
+          <h3>Estilo e hábitos</h3>
+          <p class="wizard-step-hint">Como você vive o espaço no dia a dia.</p>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Estilos arquitetônicos preferidos</span>
+            <div class="chip-select" id="clientStyles" data-target="preferredStyles"></div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Setor da casa que você mais gosta</span>
+            <div class="chip-select" id="preferredSector"></div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Gosta de misturar estilos?</span>
+            <div class="chip-select" id="styleMix"></div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Iluminação preferida</span>
+            <div class="chip-select" id="lighting"></div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Plantas no ambiente</span>
+            <div class="chip-select" id="plants"></div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Funcional × estético</span>
+            <div class="chip-select" id="functionalVsAesthetic"></div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Hábitos do dia a dia <span class="hint">(marque quantos fizerem sentido)</span></span>
+            <div class="chip-select" id="habitsChips"></div>
+          </div>
+        </div>
+
+        <!-- ETAPA — Observações finais -->
+        <div class="wizard-step" data-step="observacoes" data-role="client">
+          <h3>Observações finais</h3>
+          <p class="wizard-step-hint">Últimos detalhes antes do resumo.</p>
+          <div class="form-field full">
+            <label for="projectGoals">Objetivos do projeto</label>
+            <textarea id="projectGoals" placeholder="Ex.: ampliar a área social, integrar cozinha e sala, criar um home office..."></textarea>
+          </div>
+          <div class="form-field full">
+            <label for="preferences">Preferências estéticas <span class="hint">(cores, conceitos de interior, decoração...)</span></label>
+            <textarea id="preferences" placeholder="Ex.: tons terrosos, madeira aparente, muita luz natural..."></textarea>
+          </div>
+          <div class="form-field full">
+            <label for="restrictions">Restrições do projeto <span class="hint">(estrutura existente, prazo, normas...)</span></label>
+            <input type="text" id="restrictions" placeholder="Ex.: manter estrutura existente, prazo de 4 meses">
+          </div>
+          <div class="form-field full">
+            <label for="priorities">Prioridades <span class="hint">(o que não pode faltar no projeto)</span></label>
+            <input type="text" id="priorities" placeholder="Ex.: luz natural, home office integrado, baixa manutenção">
+          </div>
+        </div>
+
+        <!-- ETAPA — Resumo do projeto (cliente) -->
+        <div class="wizard-step" data-step="resumo-cliente" data-role="client">
+          <h3>Resumo do projeto</h3>
+          <p class="wizard-step-hint">Confira se é isso mesmo — o arquiteto verá o mesmo resumo para validar depois do match.</p>
+          <div id="clientSummary"></div>
+        </div>
+
+        <!-- ================= ARQUITETO ================= -->
+
+        <!-- ETAPA — Perfil profissional -->
+        <div class="wizard-step" data-step="arch-profissional" data-role="architect">
+          <h3>Perfil profissional</h3>
+          <p class="wizard-step-hint">Como clientes vão te encontrar e reconhecer.</p>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="yearsExperience">Anos de experiência</label>
+              <input type="number" id="yearsExperience" min="0" max="60" value="5">
+            </div>
+            <div class="form-field">
+              <label for="cauRegistration">Registro CAU/A <span class="hint">(opcional, aumenta a confiança do cliente)</span></label>
+              <input type="text" id="cauRegistration" placeholder="Ex.: A123456-7">
+            </div>
+            <div class="form-field">
+              <label for="workingAreas">Áreas de atendimento <span class="hint">(separadas por vírgula)</span></label>
+              <input type="text" id="workingAreas" placeholder="São Paulo, SP, Campinas">
+            </div>
+            <div class="form-field">
+              <label for="website">Site <span class="hint">(opcional)</span></label>
+              <input type="url" id="website" placeholder="https://...">
+            </div>
+            <div class="form-field">
+              <label for="instagram">Instagram <span class="hint">(opcional)</span></label>
+              <input type="text" id="instagram" placeholder="@seu_estudio">
+            </div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Tipo de atuação</span>
+            <div class="chip-select" id="practiceType"></div>
+          </div>
+        </div>
+
+        <!-- ETAPA — Estilo e especialidades -->
+        <div class="wizard-step" data-step="arch-estilo" data-role="architect">
+          <h3>Estilo e especialidades</h3>
+          <p class="wizard-step-hint">O que te diferencia como profissional.</p>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Estilos que você domina</span>
+            <div class="chip-select" id="architectStyles" data-target="styles"></div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Especialidades <span class="hint">(tipos de projeto)</span></span>
+            <div class="chip-select" id="architectSpecialties" data-target="specialties"></div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Setor da casa que você mais gosta de projetar</span>
+            <div class="chip-select" id="preferredSectorArch"></div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Sua abordagem projetual</span>
+            <div class="chip-select" id="designApproach"></div>
+          </div>
+        </div>
+
+        <!-- ETAPA — Materiais e perfil de estilo -->
+        <div class="wizard-step" data-step="arch-materiais" data-role="architect">
+          <h3>Materiais e perfil de estilo</h3>
+          <p class="wizard-step-hint">Vira instrução fixa para a IA gerar sugestões só do seu jeito de projetar.</p>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Materiais favoritos <span class="hint">(no máximo 5)</span></span>
+            <div class="chip-select" id="architectMaterials" data-target="favoriteMaterials" data-max="5"></div>
+          </div>
+          <div class="field-subgroup">
+            <span class="field-subgroup-label">Paleta de cores</span>
+            <div class="swatch-select" id="architectPalette"></div>
+          </div>
+          <div class="form-field full">
+            <label for="keywords">Palavras-chave <span class="hint">(separadas por vírgula)</span></label>
+            <input type="text" id="keywords" placeholder="Luz natural, linhas limpas, integração">
+          </div>
+        </div>
+
+        <!-- ETAPA — Bio -->
+        <div class="wizard-step" data-step="arch-bio" data-role="architect">
+          <h3>Bio profissional</h3>
+          <p class="wizard-step-hint">Conte sua trajetória — isso também alimenta a explicação de compatibilidade gerada por IA.</p>
+          <div class="form-field full">
+            <textarea id="bio" style="min-height:160px;" placeholder="Conte sobre sua trajetória, abordagem projetual e o que te diferencia."></textarea>
+          </div>
+        </div>
+
+        <!-- ETAPA — Portfólio -->
+        <div class="wizard-step" data-step="arch-portfolio" data-role="architect">
+          <h3>Portfólio <span class="hint">(opcional)</span></h3>
+          <p class="wizard-step-hint">Adicione projetos já feitos — um perfil com portfólio aparece mais completo na lista de arquitetos. Pode pular esta etapa e adicionar depois pelo painel.</p>
+          <div id="portfolioDraftList"></div>
+          <button type="button" class="btn btn-secondary btn-sm" id="togglePortfolioDraftForm">+ Adicionar projeto</button>
+          <div id="portfolioDraftForm" style="display:none; margin-top:20px;">
+            <div class="form-grid">
+              <div class="form-field full">
+                <label for="pfTitle">Título do projeto</label>
+                <input type="text" id="pfTitle" placeholder="Ex.: Cobertura Vila Madalena">
+              </div>
+              <div class="form-field full">
+                <label for="pfDescription">Descrição <span class="hint">(opcional)</span></label>
+                <textarea id="pfDescription"></textarea>
+              </div>
+              <div class="form-field full">
+                <label>Imagem do projeto <span class="hint">(anexe um arquivo ou cole um link abaixo)</span></label>
+                <div class="file-input-row">
+                  <label class="file-btn" for="pfImageFile">📎 Anexar imagem</label>
+                  <input type="file" id="pfImageFile" accept="image/*" style="display:none;">
+                  <span class="file-hint">JPG/PNG, até 2MB</span>
+                </div>
+                <div class="file-preview" id="pfImagePreview"></div>
+                <input type="url" id="pfImageUrl" placeholder="ou cole uma URL de imagem" style="margin-top:10px;">
+              </div>
+              <div class="form-field full">
+                <label>Arquivo do projeto <span class="hint">(plantas, PDF, portfólio completo...)</span></label>
+                <div class="file-input-row">
+                  <label class="file-btn" for="pfProjectFile">📎 Anexar arquivo</label>
+                  <input type="file" id="pfProjectFile" accept=".pdf,image/*,.zip,.dwg" style="display:none;">
+                  <span class="file-hint">PDF, imagem ou ZIP, até 2MB</span>
+                </div>
+                <div class="file-preview" id="pfProjectFilePreview"></div>
+                <input type="url" id="pfProjectUrl" placeholder="ou cole um link do projeto" style="margin-top:10px;">
+              </div>
+              <div class="form-field">
+                <label for="pfStatus">Status</label>
+                <select id="pfStatus">
+                  <option value="completed">Concluído</option>
+                  <option value="ongoing">Em andamento</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button type="button" class="btn btn-primary btn-sm" id="confirmPortfolioDraft">Adicionar à lista</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="cancelPortfolioDraft">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ETAPA — Resumo (arquiteto) -->
+        <div class="wizard-step" data-step="resumo-arquiteto" data-role="architect">
+          <h3>Revisão final</h3>
+          <p class="wizard-step-hint">Confira antes de criar sua conta.</p>
+          <div id="architectSummary"></div>
+        </div>
+
+        <div class="wizard-nav">
+          <button type="button" class="btn btn-secondary" id="wizardBack">← Voltar</button>
+          <button type="button" class="btn btn-primary" id="wizardNext">Próximo →</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn" style="display:none;">Criar conta</button>
+        </div>
+        <p class="form-note">Já tem uma conta? <a href="login.html">Entrar</a></p>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/extras.js"></script>
+<script src="assets/js/color-wheel.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/cadastro.js"></script>
+</body>
+</html>

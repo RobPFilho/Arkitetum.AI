@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel — match.IA</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="logo">
+      <img src="assets/img/mark.png" alt="" width="32" height="32">
+      <span class="logo-word">match<span class="ia">.IA</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#como-funciona">Como funciona</a></li>
+      <li><a href="projetos.html" data-page="projetos.html">Projetos</a></li>
+      <li><a href="blog.html" data-page="blog.html">Blog</a></li>
+      <li><a href="sobre.html" data-page="sobre.html">Sobre</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="#" id="logoutBtn" class="login-link">Sair</a>
+    </div>
+    <button class="nav-toggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<main class="dash-shell">
+  <div class="container">
+
+    <div id="guestState" class="empty-state" style="display:none;">
+      <h2>Você precisa entrar para ver seu painel</h2>
+      <p>Faça login ou crie uma conta gratuita para acessar seus matches.</p>
+      <a href="login.html" class="btn btn-primary">Entrar</a>
+    </div>
+
+    <div id="apiBanner" class="api-banner">
+      Não foi possível conectar à API em <code id="apiBaseLabel"></code>. Rode o back-end (<a href="https://github.com/RobPFilho/Arkitetum.AI" target="_blank" rel="noopener">Arkitetum.AI</a>) com <code>npm run dev</code>.
+    </div>
+
+    <div id="dashState" style="display:none;">
+      <div class="dash-head">
+        <div>
+          <span class="eyebrow" id="roleLabel">Painel</span>
+          <h1 style="font-size:1.9rem; margin:0;">Olá, <span id="userName">—</span></h1>
+        </div>
+        <div id="clientActions">
+          <button id="runMatchBtn" class="btn btn-primary">Rodar match com IA</button>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Sidebar: perfil -->
+        <div>
+          <div class="dash-card">
+            <div class="dash-avatar" id="avatarInitials">—</div>
+            <h3 id="profileName">—</h3>
+            <p style="font-size:0.86rem; margin-bottom:16px;" id="profileEmail">—</p>
+            <div class="dash-meta-row"><span>Cidade</span><span id="profileCity">—</span></div>
+            <div class="dash-meta-row"><span>Estado</span><span id="profileState">—</span></div>
+            <div class="dash-meta-row" id="profileExtraRow1" style="display:none;"><span></span><span></span></div>
+            <div class="dash-meta-row" id="profileExtraRow2" style="display:none;"><span></span><span></span></div>
+            <button id="editProfileBtn" class="btn btn-secondary btn-sm btn-block" style="margin-top:16px;">Editar perfil</button>
+          </div>
+
+          <div class="dash-card" id="editCard" style="display:none;">
+            <h3>Editar dados</h3>
+            <div class="form-field">
+              <label for="editName">Nome</label>
+              <input type="text" id="editName">
+            </div>
+            <div class="form-field">
+              <label for="editCity">Cidade</label>
+              <input type="text" id="editCity">
+            </div>
+            <div class="form-field">
+              <label for="editState">Estado (UF)</label>
+              <input type="text" id="editState" maxlength="2">
+            </div>
+            <button id="saveProfileBtn" class="btn btn-primary btn-sm btn-block">Salvar alterações</button>
+          </div>
+        </div>
+
+        <!-- Main content -->
+        <div>
+          <!-- CLIENTE: resultados de match -->
+          <div id="clientPanel" style="display:none;">
+            <div class="dash-card">
+              <h3>Resumo do projeto</h3>
+              <p style="font-size:0.88rem;">Este é o resumo que os arquitetos veem no seu match — revise antes de validar.</p>
+              <div class="summary-grid">
+                <div class="summary-item"><span class="mock-label">Estilo desejado</span><strong id="ppStyle">—</strong></div>
+                <div class="summary-item"><span class="mock-label">Orçamento</span><strong id="ppBudget">—</strong></div>
+                <div class="summary-item"><span class="mock-label">Restrições</span><strong id="ppRestrictions">—</strong></div>
+                <div class="summary-item"><span class="mock-label">Prioridades</span><strong id="ppPriorities">—</strong></div>
+              </div>
+              <button id="validateSummaryBtn" class="btn btn-sage btn-sm">Validar resumo do projeto</button>
+            </div>
+            <div class="dash-card">
+              <h3>Compatibilidade com arquitetos</h3>
+              <p style="font-size:0.88rem;">Clique em "Rodar match com IA" para receber os 4 arquitetos mais compatíveis com o seu perfil, com pontuação e explicação gerada por IA.</p>
+            </div>
+            <div id="matchResults" class="result-list"></div>
+            <div id="matchEmpty" class="empty-state">
+              <p>Nenhum match rodado ainda. Clique em "Rodar match com IA" acima.</p>
+            </div>
+          </div>
+
+          <!-- ARQUITETO: perfil de estilo + portfólio -->
+          <div id="architectPanel" style="display:none;">
+            <div class="dash-card style-profile-card">
+              <h3>Perfil de estilo</h3>
+              <p style="font-size:0.88rem;">Isso vira instrução fixa para a IA gerar sugestões só do seu jeito de projetar — não algo genérico.</p>
+
+              <span class="mock-label">Paleta de cores</span>
+              <div class="swatch-select" id="dashPalette" style="margin-bottom:20px;"></div>
+
+              <span class="mock-label">Palavras-chave</span>
+              <div class="form-field full" style="margin-bottom:14px;">
+                <input type="text" id="dashKeywords" placeholder="Luz natural, linhas limpas, integração">
+              </div>
+              <button id="saveStyleProfileBtn" class="btn btn-secondary btn-sm">Salvar perfil de estilo</button>
+
+              <div style="margin-top:22px;">
+                <span class="mock-label">Materiais recorrentes <span style="text-transform:none; font-weight:400;">(dos favoritos cadastrados)</span></span>
+                <div class="tag-row" id="dashRecurringMaterials"></div>
+              </div>
+            </div>
+            <div class="dash-card">
+              <h3>Meu portfólio</h3>
+              <p style="font-size:0.88rem;">Projetos anteriores aumentam sua compatibilidade e visibilidade nos resultados de match.</p>
+              <div id="portfolioList" style="margin:18px 0;"></div>
+              <button id="togglePortfolioForm" class="btn btn-secondary btn-sm">+ Adicionar projeto</button>
+              <form id="portfolioForm" style="display:none; margin-top:20px;">
+                <div class="form-grid">
+                  <div class="form-field full">
+                    <label for="pTitle">Título do projeto</label>
+                    <input type="text" id="pTitle" required>
+                  </div>
+                  <div class="form-field full">
+                    <label for="pDescription">Descrição</label>
+                    <textarea id="pDescription"></textarea>
+                  </div>
+                  <div class="form-field full">
+                    <label>Imagem do projeto <span class="hint">(anexe um arquivo ou cole um link abaixo)</span></label>
+                    <div class="file-input-row">
+                      <label class="file-btn" for="pImageFile">📎 Anexar imagem</label>
+                      <input type="file" id="pImageFile" accept="image/*" style="display:none;">
+                      <span class="file-hint">JPG/PNG, até 2MB</span>
+                    </div>
+                    <div class="file-preview" id="pImagePreview"></div>
+                    <input type="url" id="pImageUrl" placeholder="ou cole uma URL de imagem" style="margin-top:10px;">
+                  </div>
+                  <div class="form-field full">
+                    <label>Arquivo do projeto <span class="hint">(plantas, PDF, portfólio completo...)</span></label>
+                    <div class="file-input-row">
+                      <label class="file-btn" for="pProjectFile">📎 Anexar arquivo</label>
+                      <input type="file" id="pProjectFile" accept=".pdf,image/*,.zip,.dwg" style="display:none;">
+                      <span class="file-hint">PDF, imagem ou ZIP, até 2MB</span>
+                    </div>
+                    <div class="file-preview" id="pProjectFilePreview"></div>
+                    <input type="url" id="pProjectUrl" placeholder="ou cole um link do projeto" style="margin-top:10px;">
+                  </div>
+                  <div class="form-field">
+                    <label for="pStatus">Status</label>
+                    <select id="pStatus">
+                      <option value="completed">Concluído</option>
+                      <option value="ongoing">Em andamento</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar projeto</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© <span data-year></span> match.IA — Projeto acadêmico (TCC), FIAP School.</span>
+      <a href="sobre.html" style="color:rgba(250,249,246,0.7);">Sobre o projeto</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/extras.js"></script>
+<script src="assets/js/color-wheel.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/dashboard.js"></script>
+</body>
+</html>

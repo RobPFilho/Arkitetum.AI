@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projetos & IA — match.IA</title>
+<meta name="description" content="Veja como a IA do match.IA apoia arquitetos após o match: sugestões de conceito, banco de materiais e um estudo volumétrico 3D interativo.">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="logo">
+      <img src="assets/img/mark.png" alt="" width="32" height="32">
+      <span class="logo-word">match<span class="ia">.IA</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#como-funciona">Como funciona</a></li>
+      <li><a href="cadastro.html?tipo=cliente">Para clientes</a></li>
+      <li><a href="cadastro.html?tipo=arquiteto">Para arquitetos</a></li>
+      <li><a href="projetos.html" data-page="projetos.html" class="active">Projetos</a></li>
+      <li><a href="blog.html" data-page="blog.html">Blog</a></li>
+      <li><a href="sobre.html" data-page="sobre.html">Sobre</a></li>
+    </ul>
+    <div class="nav-actions" data-auth-slot>
+      <a href="login.html" class="login-link">Entrar</a>
+      <a href="cadastro.html" class="btn btn-primary btn-sm">Cadastrar</a>
+    </div>
+    <button class="nav-toggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<main>
+
+  <section class="hero" style="padding-bottom:0;">
+    <div class="container center" style="max-width:720px;">
+      <span class="eyebrow">Projetos &amp; IA</span>
+      <h1>Do questionário ao volume construído</h1>
+      <p class="lead" style="margin:0 auto;">Depois que o match acontece, a IA continua trabalhando: sugere conceitos, materiais e referências visuais alinhadas ao perfil do cliente e à linguagem do arquiteto selecionado.</p>
+    </div>
+  </section>
+
+  <!-- IA SOB MEDIDA: perfil de estilo, materiais restritos, resumo validado -->
+  <section class="section" id="ia-sob-medida">
+    <div class="container">
+      <div class="insight-quote reveal">
+        <span class="mark">&ldquo;</span>
+        <div>
+          <p>Tenho medo de criar uma IA aberta e gratuita — isso gera muitos projetos lindos, mas inexequíveis, e sem personalização. Seria perfeito ter uma IA que responda ao meu jeito de projetar, com uma biblioteca alimentada por mim.</p>
+          <cite>— Teresa, arquiteta parceira na pesquisa de campo do TCC</cite>
+        </div>
+      </div>
+      <div class="section-head reveal">
+        <span class="eyebrow">IA sob medida para cada arquiteto</span>
+        <h2>A IA aprende o seu estilo — não o apaga</h2>
+        <p>Três recursos pensados a partir dessa entrevista: um perfil de estilo que vira instrução fixa para a IA, sugestões de materiais limitadas ao que o arquiteto realmente tem disponível, e um resumo do projeto que cliente e arquiteto validam juntos antes de começar.</p>
+      </div>
+
+      <div class="showcase-columns reveal">
+        <!-- Painel 1 — Perfil de estilo do arquiteto -->
+        <div class="mock-window">
+          <div class="mock-titlebar">
+            <span class="mock-brand"><img src="assets/img/mark.png" alt="">match.IA</span>
+            <span class="mock-crumb">Área do arquiteto / Perfil de estilo</span>
+            <span class="mock-user">SC</span>
+          </div>
+          <div class="mock-body">
+            <h4>Perfil de estilo</h4>
+            <p class="mock-lede">Essa é a base que a IA usa para gerar sugestões só do jeito do Studio Cantiléver projetar — não do jeito genérico de qualquer ferramenta.</p>
+
+            <span class="mock-label">Paleta de cores</span>
+            <div class="mock-palette">
+              <span class="dot" style="background:#B0755A"></span>
+              <span class="dot" style="background:#7B8E7E"></span>
+              <span class="dot" style="background:#D8CBBB"></span>
+              <span class="dot" style="background:#333333"></span>
+              <span class="dot" style="background:#6B4A30"></span>
+            </div>
+
+            <span class="mock-label">Materiais recorrentes</span>
+            <div class="tag-row" style="margin-bottom:20px;">
+              <span class="tag">Madeira natural</span>
+              <span class="tag">Concreto aparente</span>
+              <span class="tag">Vidro</span>
+              <span class="tag">Metal grafite</span>
+            </div>
+
+            <span class="mock-label">Palavras-chave</span>
+            <div class="tag-row" style="margin-bottom:20px;">
+              <span class="tag">Luz natural</span>
+              <span class="tag">Linhas limpas</span>
+              <span class="tag">Integração</span>
+            </div>
+
+            <span class="mock-label">Referências de projetos anteriores</span>
+            <div class="mock-refs">
+              <div class="ref-thumb"><img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80" alt="Cobertura Vila Madalena"></div>
+              <div class="ref-thumb"><img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&q=80" alt="Studio Jardins"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel 2 — Sugestões de materiais restritas ao que o arquiteto tem -->
+        <div class="mock-window">
+          <div class="mock-titlebar">
+            <span class="mock-brand"><img src="assets/img/mark.png" alt="">match.IA</span>
+            <span class="mock-crumb">Projeto de Ana Beatriz / Sugestões</span>
+            <span class="mock-user">AB</span>
+          </div>
+          <div class="mock-body">
+            <h4>Sugestões de materiais</h4>
+            <p class="mock-lede">Combinações geradas pela IA a partir do questionário — todas dentro do estilo do Studio Cantiléver.</p>
+
+            <div class="constraint-note">
+              <span class="dot-ic">🔒</span>
+              <span>Essas combinações usam só materiais que o arquiteto cadastrou como disponíveis — nada aqui é bonito e inviável de comprar ou executar.</span>
+            </div>
+
+            <div class="combo-card selected">
+              <div class="swatches"><span style="background:#D8CBBB"></span><span style="background:#B0755A"></span><span style="background:#6B4A30"></span></div>
+              <div>
+                <div class="combo-name">Opção 1 — Contemporâneo aconchegante</div>
+                <div class="combo-meta">Porcelanato acetinado + Freijó natural</div>
+              </div>
+            </div>
+            <div class="combo-card">
+              <div class="swatches"><span style="background:#A6A6A6"></span><span style="background:#333333"></span></div>
+              <div>
+                <div class="combo-name">Opção 2 — Sóbrio urbano</div>
+                <div class="combo-meta">Concreto polido + Nogueira escura</div>
+              </div>
+            </div>
+            <div class="combo-card">
+              <div class="swatches"><span style="background:#7B8E7E"></span><span style="background:#D8CBBB"></span></div>
+              <div>
+                <div class="combo-name">Opção 3 — Cálido natural</div>
+                <div class="combo-meta">Piso vinílico amadeirado + Carvalho claro</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel 3 — Resumo do projeto validado por ambas as partes -->
+        <div class="mock-window">
+          <div class="mock-titlebar">
+            <span class="mock-brand"><img src="assets/img/mark.png" alt="">match.IA</span>
+            <span class="mock-crumb">Projeto de Ana Beatriz / Resumo</span>
+            <span class="mock-user">AB</span>
+          </div>
+          <div class="mock-body">
+            <h4>Resumo do projeto</h4>
+            <p class="mock-lede">Gerado automaticamente a partir do questionário. Revisem juntos antes de começar — assim ninguém parte de uma expectativa diferente da do outro.</p>
+
+            <div class="summary-grid">
+              <div class="summary-item"><span class="mock-label">Estilo desejado</span><strong>Contemporâneo aconchegante, com toques naturais</strong></div>
+              <div class="summary-item"><span class="mock-label">Orçamento</span><strong>R$ 350.000 – R$ 450.000</strong></div>
+              <div class="summary-item"><span class="mock-label">Restrições</span><strong>Manter estrutura existente · prazo de 4 meses</strong></div>
+              <div class="summary-item"><span class="mock-label">Prioridades</span><strong>Luz natural, home office integrado, baixa manutenção</strong></div>
+            </div>
+
+            <div class="validate-row">
+              <button class="btn btn-sage btn-sm" disabled>✓ Cliente validou</button>
+              <button class="btn btn-secondary btn-sm" disabled>Arquiteto valida</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="showcase-hint">Estes três recursos já funcionam no seu cadastro e painel — <a href="cadastro.html?tipo=arquiteto" style="color:var(--terracotta); font-weight:600;">crie um perfil de arquiteto</a> para testar.</p>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <div class="showcase-3d reveal">
+        <span class="badge-3d">Estudo volumétrico 3D · arraste para girar, role para zoom</span>
+        <iframe src="assets/3d/mansion-3d.html" title="Residência Cantiléver — estudo volumétrico 3D interativo" loading="lazy"></iframe>
+      </div>
+      <div class="section-head reveal" style="margin-top:32px; margin-bottom:0;">
+        <h2 style="font-size:1.4rem;">Residência Cantiléver — Estudo Volumétrico</h2>
+        <p>Concreto, madeira e vidro. Exemplo de como a IA do match.IA pode transformar o briefing de um cliente — estilo contemporâneo, integração de ambientes, piscina e paisagismo — em um volume 3D navegável para apoiar a fase de concepção do arquiteto.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Como a IA apoia o arquiteto</span>
+        <h2>Recursos complementares ao desenvolvimento do projeto</h2>
+      </div>
+      <div class="feature-grid reveal">
+        <div class="feature-card">
+          <div class="icon">💡</div>
+          <h3>Sugestão de conceitos</h3>
+          <p>A partir do briefing do cliente, a IA propõe direções conceituais alinhadas ao estilo do arquiteto.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🧱</div>
+          <h3>Banco de materiais</h3>
+          <p>Biblioteca de materiais arquitetônicos com categoria, imagem e descrição — usada também no cálculo de compatibilidade.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🗂️</div>
+          <h3>Layouts de referência</h3>
+          <p>Referências visuais e de layout organizadas por estilo e tipo de projeto.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🧠</div>
+          <h3>Explicação de compatibilidade</h3>
+          <p>IA generativa (Gemini) escreve, em linguagem natural, por que cada match faz sentido.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📐</div>
+          <h3>Estudos volumétricos</h3>
+          <p>Modelos 3D exploratórios para validar volumetria antes do detalhamento executivo.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔁</div>
+          <h3>Menos retrabalho</h3>
+          <p>Alinhamento antecipado de expectativas reduz revisões e atrasos no cronograma.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Banco de materiais</span>
+        <h2>Materiais usados no match e na inspiração de projeto</h2>
+        <p>Lista carregada em tempo real de <code>GET /api/materials</code> do back-end match.IA.</p>
+      </div>
+      <div id="apiBanner" class="api-banner">Não foi possível conectar à API em <code id="apiBaseLabel"></code>. Exibindo lista de referência offline.</div>
+      <div id="materialGrid" class="material-grid reveal"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <h2>Tem um projeto em mente?</h2>
+        <p>Responda o questionário inteligente e receba os arquitetos mais compatíveis com sua ideia.</p>
+        <a href="cadastro.html?tipo=cliente" class="btn btn-primary">Começar meu match</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© <span data-year></span> match.IA — Projeto acadêmico (TCC), FIAP School.</span>
+      <a href="sobre.html" style="color:rgba(250,249,246,0.7);">Sobre o projeto</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/projetos.js"></script>
+</body>
+</html>

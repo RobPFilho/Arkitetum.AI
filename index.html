@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>match.IA — A inteligência que conecta você ao arquiteto ideal</title>
+<meta name="description" content="match.IA usa inteligência artificial para conectar clientes e arquitetos com base em estilo, orçamento e necessidades — reduzindo retrabalho e aumentando a satisfação dos projetos.">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="logo">
+      <img src="assets/img/mark.png" alt="" width="32" height="32">
+      <span class="logo-word">match<span class="ia">.IA</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#como-funciona">Como funciona</a></li>
+      <li><a href="cadastro.html?tipo=cliente">Para clientes</a></li>
+      <li><a href="cadastro.html?tipo=arquiteto">Para arquitetos</a></li>
+      <li><a href="projetos.html" data-page="projetos.html">Projetos</a></li>
+      <li><a href="blog.html" data-page="blog.html">Blog</a></li>
+      <li><a href="sobre.html" data-page="sobre.html">Sobre</a></li>
+    </ul>
+    <div class="nav-actions" data-auth-slot>
+      <a href="login.html" class="login-link">Entrar</a>
+      <a href="cadastro.html" class="btn btn-primary btn-sm">Cadastrar</a>
+    </div>
+    <button class="nav-toggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Match entre clientes &amp; arquitetos</span>
+        <h1>Encontre o arquiteto ideal com <span class="accent">Inteligência Artificial</span></h1>
+        <p class="lead">Conectamos você ao arquiteto perfeito para o seu projeto. Nossa IA analisa estilo, orçamento e necessidades para potencializar cada etapa do processo — do primeiro match ao projeto final.</p>
+        <div class="hero-actions">
+          <a href="cadastro.html?tipo=cliente" class="btn btn-primary">Encontrar meu arquiteto</a>
+          <a href="cadastro.html?tipo=arquiteto" class="btn btn-secondary">Sou arquiteto</a>
+        </div>
+        <div class="hero-stats">
+          <div><strong>4</strong><span>arquitetos por match</span></div>
+          <div><strong>95%</strong><span>compatibilidade média</span></div>
+          <div><strong>IA</strong><span>explica cada indicação</span></div>
+        </div>
+      </div>
+      <div class="hero-visual reveal">
+        <div class="hero-photo">
+          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80" alt="Residência contemporânea com fachada de vidro, madeira e concreto">
+        </div>
+        <div class="floating-card profile">
+          <div class="fc-label">Seu perfil</div>
+          <ul>
+            <li>Estilo Contemporâneo</li>
+            <li>Família com 2 filhos</li>
+            <li>R$250k – R$350k</li>
+            <li>Integração &amp; sustentabilidade</li>
+          </ul>
+        </div>
+        <div class="floating-card match">
+          <div class="fc-label">Match encontrado</div>
+          <strong>Studio Cantiléver</strong>
+          <div class="fc-score">95% de compatibilidade</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section class="section" id="como-funciona">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Como funciona</span>
+        <h2>Um processo inteligente que conecta pessoas e potencializa projetos</h2>
+      </div>
+      <div class="steps reveal">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Conte sua ideia</h3>
+          <p>Responda um questionário inteligente sobre estilo, necessidade e orçamento.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>IA analisa seu perfil</h3>
+          <p>Nosso algoritmo cruza seus dados com o portfólio de arquitetos cadastrados.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Escolha seu arquiteto</h3>
+          <p>Compare perfis, portfólios e o nível de compatibilidade de cada um.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <h3>Desenvolva com IA</h3>
+          <p>Após a contratação, a IA sugere conceitos, materiais e referências visuais.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MATCH INTELIGENTE -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Match inteligente</span>
+        <h2>A IA compara seu perfil com o portfólio de arquitetos cadastrados</h2>
+        <p>O mesmo motor de compatibilidade usado no back-end da plataforma — pontuação por estilo, materiais, localização, especialidade e disponibilidade.</p>
+      </div>
+      <div class="match-demo reveal">
+        <div class="match-card">
+          <h4>Seu perfil</h4>
+          <ul>
+            <li>Contemporâneo</li>
+            <li>Família com 2 filhos</li>
+            <li>Integração de ambientes</li>
+            <li>Sustentabilidade</li>
+            <li>Orçamento médio-alto</li>
+          </ul>
+        </div>
+        <div class="match-score">
+          <div class="score-ring"><strong>95%</strong><span>compatibilidade</span></div>
+        </div>
+        <div class="match-card result">
+          <h4>Arquiteto encontrado</h4>
+          <div class="arch-name">Studio Cantiléver</div>
+          <div class="arch-meta">São Paulo · SP — ★ 4.9 (36)</div>
+          <p style="font-size:0.86rem; color:var(--ink-soft); margin:0;">"Excelente opção por estilo arquitetônico compatível, preferências de materiais em comum e 9 anos de experiência."</p>
+          <div class="tag-row">
+            <span class="tag">Concreto aparente</span>
+            <span class="tag">Madeira</span>
+            <span class="tag">Vidro</span>
+          </div>
+        </div>
+      </div>
+      <p class="center" style="margin-top:36px;">
+        <a href="cadastro.html?tipo=cliente" class="btn btn-sage">Ver arquitetos disponíveis</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- PARA CLIENTES / ARQUITETOS -->
+  <section class="section">
+    <div class="container">
+      <div class="split-head reveal">
+        <div>
+          <span class="eyebrow">Para clientes</span>
+          <h2>Mais assertividade, menos dor de cabeça</h2>
+        </div>
+        <div>
+          <span class="eyebrow">Para arquitetos</span>
+          <h2>IA como sua parceira-chave</h2>
+        </div>
+      </div>
+      <div class="feature-grid reveal" style="margin-bottom:20px;">
+        <div class="feature-card">
+          <div class="icon">🏠</div>
+          <h3>Encontre o arquiteto ideal</h3>
+          <p>Compatibilidade calculada a partir do seu estilo, orçamento e necessidades reais.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">↺</div>
+          <h3>Menos retrabalho e alterações</h3>
+          <p>O match certo desde o início reduz revisões e mudanças de rota no projeto.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">◎</div>
+          <h3>Mais transparência no processo</h3>
+          <p>Acompanhe score, motivos do match e explicações geradas por IA.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🎯</div>
+          <h3>Projetos alinhados ao seu estilo</h3>
+          <p>Preferências estéticas e funcionais levadas a sério desde o cadastro.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">⏱</div>
+          <h3>Economia de tempo e dinheiro</h3>
+          <p>Menos reuniões de alinhamento, mais tempo dedicado ao que importa.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">✦</div>
+          <h3>Experiência personalizada do início ao fim</h3>
+          <p>Do questionário ao acompanhamento do projeto, tudo pensado para você.</p>
+        </div>
+      </div>
+      <div class="feature-grid reveal">
+        <div class="feature-card">
+          <div class="icon">🔒</div>
+          <h3>Preserve sua identidade autoral</h3>
+          <p>A IA aprende o seu estilo — não substitui sua assinatura criativa.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">⚡</div>
+          <h3>Acelere pesquisa e criação</h3>
+          <p>Sugestões de conceitos, materiais e referências visuais sob medida.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🧭</div>
+          <h3>Entenda melhor o perfil do cliente</h3>
+          <p>Dados estruturados de estilo, orçamento e composição familiar num só lugar.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🧱</div>
+          <h3>Sugestões de materiais e layouts</h3>
+          <p>Banco de materiais integrado para acelerar a etapa conceitual.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📈</div>
+          <h3>Aumente produtividade e eficiência</h3>
+          <p>Menos tempo em briefing, mais tempo em projeto.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🤝</div>
+          <h3>Mais conversões e projetos fechados</h3>
+          <p>Visibilidade priorizada nos resultados de compatibilidade.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3D SHOWCASE -->
+  <section class="section section-alt" id="ia-projeto">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">IA auxiliando no desenvolvimento do projeto</span>
+        <h2>Do match ao volume construído</h2>
+        <p>Depois da contratação, a IA apoia o arquiteto sugerindo conceitos, materiais e referências. Explore abaixo um estudo volumétrico 3D interativo — gire, dê zoom e veja o projeto de todos os ângulos.</p>
+      </div>
+      <div class="showcase-3d reveal">
+        <span class="badge-3d">Interativo · arraste para girar</span>
+        <iframe src="assets/3d/mansion-3d.html" title="Estudo volumétrico 3D — Residência Cantiléver" loading="lazy"></iframe>
+      </div>
+      <p class="showcase-hint">Modelo gerado com IA a partir do briefing de estilo do cliente · <a href="projetos.html#ia-sob-medida" style="color:var(--terracotta); font-weight:600;">ver como a IA respeita o estilo de cada arquiteto →</a></p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <h2>Pronto para encontrar seu match?</h2>
+        <p>Cadastre-se gratuitamente como cliente ou arquiteto e deixe a IA cuidar da compatibilidade.</p>
+        <div class="hero-actions" style="justify-content:center;">
+          <a href="cadastro.html?tipo=cliente" class="btn btn-primary">Criar conta gratuita</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo"><img src="assets/img/mark-light.png" width="34" height="31" alt=""><span class="logo-word">match<span class="ia">.IA</span></span></a>
+        <p>A inteligência que conecta você ao arquiteto ideal. Plataforma SaaS que une clientes e arquitetos por meio de compatibilidade orientada por IA.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Plataforma</h4>
+        <ul>
+          <li><a href="index.html#como-funciona">Como funciona</a></li>
+          <li><a href="cadastro.html">Cadastro</a></li>
+          <li><a href="login.html">Entrar</a></li>
+          <li><a href="projetos.html">Projetos &amp; IA</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="sobre.html">Sobre o match.IA</a></li>
+          <li><a href="sobre.html#modelo">Modelo de negócio</a></li>
+          <li><a href="blog.html">Blog</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="sobre.html#lgpd">Privacidade &amp; LGPD</a></li>
+          <li><a href="https://www.caubr.gov.br" target="_blank" rel="noopener">CAU/BR</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span data-year></span> match.IA — Projeto acadêmico (TCC), FIAP School.</span>
+      <span>Feito com Node.js, MongoDB &amp; IA generativa.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

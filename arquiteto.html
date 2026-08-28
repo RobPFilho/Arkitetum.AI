@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfil do arquiteto — match.IA</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="logo">
+      <img src="assets/img/mark.png" alt="" width="32" height="32">
+      <span class="logo-word">match<span class="ia">.IA</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#como-funciona">Como funciona</a></li>
+      <li><a href="cadastro.html?tipo=cliente">Para clientes</a></li>
+      <li><a href="cadastro.html?tipo=arquiteto">Para arquitetos</a></li>
+      <li><a href="projetos.html" data-page="projetos.html">Projetos</a></li>
+      <li><a href="blog.html" data-page="blog.html">Blog</a></li>
+      <li><a href="sobre.html" data-page="sobre.html">Sobre</a></li>
+    </ul>
+    <div class="nav-actions" data-auth-slot>
+      <a href="login.html" class="login-link">Entrar</a>
+      <a href="cadastro.html" class="btn btn-primary btn-sm">Cadastrar</a>
+    </div>
+    <button class="nav-toggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<main class="dash-shell">
+  <div class="container">
+
+    <div id="apiBanner" class="api-banner">
+      Não foi possível conectar à API em <code id="apiBaseLabel"></code>.
+    </div>
+
+    <div id="noId" class="empty-state" style="display:none;">
+      <h2>Nenhum arquiteto selecionado</h2>
+      <p>Acesse este perfil a partir dos resultados de match no seu painel.</p>
+      <a href="index.html" class="btn btn-secondary">Voltar ao início</a>
+    </div>
+
+    <div id="profileState" style="display:none;">
+      <div class="dash-card" style="display:flex; gap:26px; align-items:center; flex-wrap:wrap;">
+        <div class="dash-avatar" id="avatar" style="width:88px; height:88px; font-size:1.9rem;">—</div>
+        <div style="flex:1; min-width:220px;">
+          <h1 id="archName" style="font-size:1.8rem; margin-bottom:4px;">—</h1>
+          <p id="archLocation" style="margin:0;">—</p>
+        </div>
+        <div id="archAvailability" class="tag" style="font-size:0.8rem;">—</div>
+      </div>
+
+      <div class="dash-grid" style="margin-top:24px;">
+        <div>
+          <div class="dash-card">
+            <h3>Contato</h3>
+            <div class="dash-meta-row"><span>E-mail</span><span id="archEmail">—</span></div>
+            <div class="dash-meta-row"><span>Telefone</span><span id="archPhone">—</span></div>
+            <div class="dash-meta-row"><span>Experiência</span><span id="archYears">—</span></div>
+            <div class="dash-meta-row"><span>Site</span><span id="archWebsite">—</span></div>
+            <div class="dash-meta-row"><span>Instagram</span><span id="archInstagram">—</span></div>
+          </div>
+          <div class="dash-card">
+            <h3>Estilos</h3>
+            <div class="tag-row" id="archStyles"></div>
+          </div>
+          <div class="dash-card">
+            <h3>Especialidades</h3>
+            <div class="tag-row" id="archSpecialties"></div>
+          </div>
+          <div class="dash-card">
+            <h3>Materiais favoritos</h3>
+            <div class="tag-row" id="archMaterials"></div>
+          </div>
+        </div>
+        <div>
+          <div class="dash-card">
+            <h3>Bio</h3>
+            <p id="archBio" style="margin:0;">—</p>
+          </div>
+          <div class="dash-card style-profile-card" id="stylePaletteCard" style="display:none;">
+            <h3>Perfil de estilo</h3>
+            <p style="font-size:0.86rem;">Paleta e palavras-chave que guiam as sugestões de IA deste arquiteto.</p>
+            <span class="mock-label">Paleta de cores</span>
+            <div class="mock-palette" id="archPalette"></div>
+            <span class="mock-label">Palavras-chave</span>
+            <div class="tag-row" id="archKeywords"></div>
+          </div>
+          <div class="dash-card">
+            <h3>Sugestões de materiais</h3>
+            <p style="font-size:0.86rem;">Combinações geradas só a partir dos materiais favoritos deste arquiteto.</p>
+            <div id="archCombos"></div>
+          </div>
+          <div class="dash-card">
+            <h3>Portfólio</h3>
+            <div id="archPortfolio"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© <span data-year></span> match.IA — Projeto acadêmico (TCC), FIAP School.</span>
+      <a href="sobre.html" style="color:rgba(250,249,246,0.7);">Sobre o projeto</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/extras.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/architect.js"></script>
+</body>
+</html>
