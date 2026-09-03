@@ -367,9 +367,11 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .cta-banner .btn-primary:hover { background: var(--bg-alt); }
 
 /* ---------- Footer ---------- */
-.site-footer { background: var(--ink); color: rgba(250,249,246,0.7); padding: 72px 0 28px; }
+/* Faixa sempre escura, nos dois temas — por isso cores fixas em vez de var(--ink)/
+   var(--bg), que invertem no modo escuro e deixavam fundo e texto ambos claros. */
+.site-footer { background: #333333; color: rgba(250,249,246,0.7); padding: 72px 0 28px; }
 .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 52px; }
-.footer-brand .logo-word { color: var(--bg); }
+.footer-brand .logo-word { color: #FAF9F6; }
 .footer-brand p { max-width: 260px; font-size: 0.88rem; margin-top: 14px; }
 .footer-col h4 { font-family: var(--font-body); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(250,249,246,0.5); margin-bottom: 16px; }
 .footer-col li { margin-bottom: 10px; }
