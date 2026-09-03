@@ -1,0 +1,7 @@
+node_modules/
+backend/node_modules/
+backend/KEYS.env
+backend/.env
+backend/coverage/
+.DS_Store
+Thumbs.db

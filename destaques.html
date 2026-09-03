@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<script>try{var t=localStorage.getItem('matchia_theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arquitetos em destaque — match.IA</title>
+<meta name="description" content="Conheça os arquitetos cadastrados no match.IA, filtre por estilo e veja o perfil completo de cada um.">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#B0755A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="logo">
+      <img src="assets/img/mark.png" alt="" width="32" height="32">
+      <span class="logo-word">match<span class="ia">.IA</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#como-funciona">Como funciona</a></li>
+      <li><a href="projetos.html" data-page="projetos.html">Projetos</a></li>
+      <li><a href="destaques.html" data-page="destaques.html" class="active">Arquitetos</a></li>
+      <li><a href="planos.html" data-page="planos.html">Planos</a></li>
+      <li><a href="blog.html" data-page="blog.html">Blog</a></li>
+      <li><a href="sobre.html" data-page="sobre.html">Sobre</a></li>
+    </ul>
+    <div class="nav-actions" data-auth-slot>
+      <a href="login.html" class="login-link">Entrar</a>
+      <a href="cadastro.html" class="btn btn-primary btn-sm">Cadastrar</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema" type="button">🌓</button>
+    <button class="nav-toggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<main>
+  <section class="section" style="padding-top:56px;">
+    <div class="container">
+      <span class="eyebrow">Arquitetos match.IA</span>
+      <h1 style="font-size:2.1rem; margin:6px 0 10px;">Arquitetos em destaque</h1>
+      <p style="max-width:640px; color:var(--ink-soft);">Conheça quem já está na plataforma. Filtre por estilo e veja o perfil completo — portfólio, avaliações e como entrar em contato.</p>
+
+      <div id="apiBanner" class="api-banner">
+        Não foi possível conectar à API. Rode o back-end para ver os arquitetos cadastrados.
+      </div>
+
+      <div class="chip-select" id="styleFilters" style="margin:24px 0 16px;"></div>
+
+      <div class="form-grid" style="max-width:520px; margin-bottom:20px;">
+        <div class="form-field">
+          <label for="cityFilter">Cidade</label>
+          <input type="text" id="cityFilter" placeholder="Ex.: São Paulo">
+        </div>
+        <div class="form-field">
+          <label for="experienceFilter">Experiência mínima</label>
+          <select id="experienceFilter">
+            <option value="">Qualquer</option>
+            <option value="5">5+ anos</option>
+            <option value="10">10+ anos</option>
+            <option value="15">15+ anos</option>
+            <option value="20">20+ anos</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="ratingFilter">Avaliação mínima</label>
+          <select id="ratingFilter">
+            <option value="">Qualquer</option>
+            <option value="3">★ 3+</option>
+            <option value="4">★ 4+</option>
+            <option value="4.5">★ 4,5+</option>
+          </select>
+        </div>
+      </div>
+
+      <p style="font-size:0.82rem; color:var(--ink-faint); margin:-8px 0 20px;">Marque até 4 arquitetos pra comparar lado a lado, sem precisar entrar.</p>
+
+      <div id="archGrid" class="material-grid" style="margin-top:10px;"></div>
+      <div id="archEmpty" class="empty-state" style="display:none;">
+        <p>Nenhum arquiteto encontrado com esses filtros.</p>
+      </div>
+      <div style="text-align:center; margin-top:24px;">
+        <button type="button" id="loadMoreBtn" class="btn btn-secondary" style="display:none;">Carregar mais</button>
+      </div>
+
+      <div id="compareSection" class="dash-card" style="display:none; margin-top:32px;">
+        <h3>Comparativo</h3>
+        <div id="compareContent" class="compare-table-wrap"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="compareBar" style="display:none; position:sticky; bottom:0; background:var(--card, var(--bg)); border-top:1px solid var(--line); box-shadow:0 -8px 24px rgba(0,0,0,0.08); padding:14px 0; z-index:40;">
+  <div class="container" style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+    <span id="compareCount" style="font-size:0.9rem; font-weight:600;">0 selecionados</span>
+    <div style="display:flex; gap:10px;">
+      <button type="button" class="btn btn-secondary btn-sm" id="clearCompareBtn">Limpar</button>
+      <button type="button" class="btn btn-primary btn-sm" id="runCompareBtn" disabled>Comparar</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© <span data-year></span> match.IA — Projeto acadêmico (TCC), FIAP School.</span>
+      <a href="sobre.html" style="color:rgba(250,249,246,0.7);">Sobre o projeto</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/destaques.js"></script>
+</body>
+</html>

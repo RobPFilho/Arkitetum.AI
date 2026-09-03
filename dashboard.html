@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<script>try{var t=localStorage.getItem('matchia_theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel — match.IA</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#B0755A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="logo">
+      <img src="assets/img/mark.png" alt="" width="32" height="32">
+      <span class="logo-word">match<span class="ia">.IA</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#como-funciona">Como funciona</a></li>
+      <li><a href="projetos.html" data-page="projetos.html">Projetos</a></li>
+      <li><a href="destaques.html" data-page="destaques.html">Arquitetos</a></li>
+      <li><a href="planos.html" data-page="planos.html">Planos</a></li>
+      <li><a href="blog.html" data-page="blog.html">Blog</a></li>
+      <li><a href="sobre.html" data-page="sobre.html">Sobre</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="#" id="logoutBtn" class="login-link">Sair</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema" type="button">🌓</button>
+    <button class="nav-toggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<main class="dash-shell">
+  <div class="container">
+
+    <div id="guestState" class="empty-state" style="display:none;">
+      <h2>Você precisa entrar para ver seu painel</h2>
+      <p>Faça login ou crie uma conta gratuita para acessar seus matches.</p>
+      <a href="login.html" class="btn btn-primary">Entrar</a>
+    </div>
+
+    <div id="apiBanner" class="api-banner">
+      Não foi possível conectar à API em <code id="apiBaseLabel"></code>. Rode o back-end (<a href="https://github.com/RobPFilho/Arkitetum.AI" target="_blank" rel="noopener">Arkitetum.AI</a>) com <code>npm run dev</code>.
+    </div>
+
+    <div id="dashState" style="display:none;">
+      <div class="dash-head">
+        <div>
+          <span class="eyebrow" id="roleLabel">Painel</span>
+          <h1 style="font-size:1.9rem; margin:0;">Olá, <span id="userName">—</span></h1>
+        </div>
+        <div id="clientActions">
+          <button id="runMatchBtn" class="btn btn-primary">Rodar match com IA</button>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Sidebar: perfil -->
+        <div>
+          <div class="dash-card">
+            <div class="dash-avatar" id="avatarInitials">—</div>
+            <h3 id="profileName">—</h3>
+            <p style="font-size:0.86rem; margin-bottom:16px;" id="profileEmail">—</p>
+            <div class="dash-meta-row"><span>Cidade</span><span id="profileCity">—</span></div>
+            <div class="dash-meta-row"><span>Estado</span><span id="profileState">—</span></div>
+            <div class="dash-meta-row" id="profileExtraRow1" style="display:none;"><span></span><span></span></div>
+            <div class="dash-meta-row" id="profileExtraRow2" style="display:none;"><span></span><span></span></div>
+            <button id="editProfileBtn" class="btn btn-secondary btn-sm btn-block" style="margin-top:16px;">Editar perfil</button>
+          </div>
+
+          <div class="dash-card" id="editCard" style="display:none;">
+            <h3>Editar dados</h3>
+            <div class="form-field">
+              <label for="editName">Nome</label>
+              <input type="text" id="editName">
+            </div>
+            <div class="form-field">
+              <label for="editCity">Cidade</label>
+              <input type="text" id="editCity">
+            </div>
+            <div class="form-field">
+              <label for="editState">Estado (UF)</label>
+              <input type="text" id="editState" maxlength="2">
+            </div>
+            <button id="saveProfileBtn" class="btn btn-primary btn-sm btn-block">Salvar alterações</button>
+          </div>
+
+          <div class="dash-card plan-status-card">
+            <div class="plan-info">
+              <span class="mock-label" style="margin-bottom:2px;">Seu plano</span>
+              <div class="plan-name" id="planName">—</div>
+              <div class="plan-usage" id="planUsage">—</div>
+            </div>
+            <button id="upgradePlanBtn" class="btn btn-primary btn-sm" style="display:none;">Fazer upgrade</button>
+          </div>
+
+          <div class="dash-card">
+            <h3 style="font-size:1rem;">Convide e ganhe</h3>
+            <p style="font-size:0.84rem;" id="referralExplainer">Compartilhe seu link — cada pessoa que se cadastrar por ele te dá um bônus.</p>
+            <div class="share-row" style="margin-bottom:10px;">
+              <input type="text" id="referralLinkInput" readonly>
+              <button type="button" id="copyReferralLinkBtn" class="btn btn-secondary btn-sm">Copiar link</button>
+            </div>
+            <p style="font-size:0.78rem; color:var(--ink-faint); margin:0;" id="referralBonusCount"></p>
+          </div>
+
+          <div class="dash-card">
+            <h3 style="font-size:1rem;">Privacidade (LGPD)</h3>
+            <p style="font-size:0.84rem;">Seus dados são seus. Baixe tudo que a plataforma guarda sobre você ou apague sua conta permanentemente.</p>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <button type="button" id="exportDataBtn" class="btn btn-secondary btn-sm btn-block">⬇ Baixar meus dados</button>
+              <button type="button" id="deleteAccountBtn" class="btn btn-secondary btn-sm btn-block" style="color:var(--terracotta-dark); border-color:var(--terracotta-dark);">🗑 Excluir minha conta</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main content -->
+        <div>
+          <!-- CLIENTE: resultados de match -->
+          <div id="clientPanel" style="display:none;">
+            <div class="dash-card">
+              <h3>Resumo do projeto</h3>
+              <p style="font-size:0.88rem;">Este é o resumo que os arquitetos veem no seu match — revise antes de validar.</p>
+              <div class="summary-grid">
+                <div class="summary-item"><span class="mock-label">Estilo desejado</span><strong id="ppStyle">—</strong></div>
+                <div class="summary-item"><span class="mock-label">Orçamento</span><strong id="ppBudget">—</strong></div>
+                <div class="summary-item"><span class="mock-label">Restrições</span><strong id="ppRestrictions">—</strong></div>
+                <div class="summary-item"><span class="mock-label">Prioridades</span><strong id="ppPriorities">—</strong></div>
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button id="validateSummaryBtn" class="btn btn-sage btn-sm">Validar resumo do projeto</button>
+                <button id="exportPdfBtn" class="btn btn-secondary btn-sm">📄 Exportar PDF</button>
+                <button id="moodboardBtn" class="btn btn-secondary btn-sm">✨ Gerar moodboard com IA</button>
+                <button id="referenceImageBtn" class="btn btn-secondary btn-sm">🖼 Ver referência visual</button>
+              </div>
+            </div>
+
+            <div id="moodboardCard" class="dash-card" style="display:none;">
+              <h3>Moodboard do seu projeto</h3>
+              <p style="font-size:0.88rem;">Conceito gerado por IA a partir das suas respostas no questionário.</p>
+              <div id="moodboardContent"></div>
+            </div>
+
+            <div id="referenceImageCard" class="dash-card" style="display:none;">
+              <h3>É mais ou menos assim que você imagina?</h3>
+              <p style="font-size:0.88rem;">Uma foto real de arquitetura/interiores parecida com o estilo que você descreveu, pra ajudar a alinhar expectativas com o arquiteto.</p>
+              <div id="referenceImageContent"></div>
+            </div>
+
+            <div class="dash-card" id="projectsCard">
+              <h3>Meus projetos</h3>
+              <p style="font-size:0.88rem;">Tem mais de uma obra em mente? Cada projeto guarda seu próprio estilo, orçamento e prioridades — rode um match separado para cada um, sem misturar critérios.</p>
+              <div id="projectsList" style="margin:16px 0;"></div>
+              <button type="button" id="toggleProjectForm" class="btn btn-secondary btn-sm">+ Adicionar outro projeto</button>
+              <div id="projectLimitCard" class="usage-limit-card" style="display:none;">
+                <p>Seu plano Gratuito permite até 1 projeto extra além do seu perfil principal.</p>
+                <button type="button" id="upgradeFromProjectBtn" class="btn btn-primary btn-sm">Assinar Premium e ter projetos ilimitados</button>
+              </div>
+              <form id="projectForm" style="display:none; margin-top:20px;">
+                <input type="hidden" id="projEditId">
+                <div class="form-grid">
+                  <div class="form-field full">
+                    <label for="projName">Nome do projeto</label>
+                    <input type="text" id="projName" placeholder="Ex.: Reforma do apartamento da praia" required>
+                  </div>
+                  <div class="form-field">
+                    <label for="projPropertyType">Tipo de imóvel</label>
+                    <select id="projPropertyType">
+                      <option value="Residencial unifamiliar">Residencial unifamiliar</option>
+                      <option value="Apartamento">Apartamento</option>
+                      <option value="Reforma">Reforma</option>
+                      <option value="Interiores">Interiores</option>
+                      <option value="Comercial">Comercial</option>
+                      <option value="Paisagismo">Paisagismo</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label for="projBudgetMin">Orçamento mínimo (R$)</label>
+                    <input type="number" id="projBudgetMin" min="0">
+                  </div>
+                  <div class="form-field">
+                    <label for="projBudgetMax">Orçamento máximo (R$)</label>
+                    <input type="number" id="projBudgetMax" min="0">
+                  </div>
+                  <div class="form-field full">
+                    <label>Estilos desejados</label>
+                    <div class="chip-select" id="projStylesChips"></div>
+                  </div>
+                  <div class="form-field full">
+                    <label for="projMaterials">Materiais preferidos <span class="hint">(separados por vírgula)</span></label>
+                    <input type="text" id="projMaterials" placeholder="Concreto aparente, madeira de demolição">
+                  </div>
+                  <div class="form-field full">
+                    <label for="projGoals">Objetivos do projeto</label>
+                    <textarea id="projGoals"></textarea>
+                  </div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                  <button type="submit" class="btn btn-primary" id="projSaveBtn">Salvar projeto</button>
+                  <button type="button" class="btn btn-secondary" id="cancelProjectForm">Cancelar</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="dash-card">
+              <h3>Compatibilidade com arquitetos</h3>
+              <p style="font-size:0.88rem;">Clique em "Rodar match com IA" para receber os 4 arquitetos mais compatíveis com o seu perfil, com pontuação e explicação gerada por IA.</p>
+              <p style="font-size:0.82rem; color:var(--ink-faint);" id="matchContextLabel"></p>
+            </div>
+            <div id="usageLimitCard" class="usage-limit-card" style="display:none; margin-bottom:20px;">
+              <p>Você usou todas as buscas do plano Gratuito este mês.</p>
+              <button id="upgradeFromLimitBtn" class="btn btn-primary btn-sm">Assinar Premium e continuar buscando</button>
+            </div>
+            <div id="matchResults" class="result-list"></div>
+            <div id="matchEmpty" class="empty-state">
+              <p>Nenhum match rodado ainda. Clique em "Rodar match com IA" acima.</p>
+            </div>
+            <button id="compareBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">⇄ Comparar arquitetos lado a lado</button>
+            <button id="exportMatchPdfBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">📄 Exportar resultados em PDF</button>
+            <div id="compareSection" class="dash-card" style="display:none; margin-top:16px;">
+              <h3>Comparativo</h3>
+              <div id="compareContent" class="compare-table-wrap"></div>
+              <button id="exportCompareBtn" class="btn btn-secondary btn-sm" style="margin-top:14px;">📊 Exportar comparativo em PDF</button>
+            </div>
+
+            <div class="dash-card" style="margin-top:20px;">
+              <h3>Histórico de buscas</h3>
+              <p style="font-size:0.88rem;">Suas últimas buscas de match, por projeto.</p>
+              <div id="matchHistoryList"></div>
+            </div>
+
+            <div class="dash-card" style="margin-top:20px;" id="mensagens">
+              <h3>Mensagens <span class="unread-badge" id="clientUnreadBadge" style="display:none;"></span></h3>
+              <p style="font-size:0.88rem;">Converse direto com os arquitetos do seu match.</p>
+              <div class="chat-layout">
+                <div class="conversation-list" id="clientConversationList"></div>
+                <div class="chat-shell" id="clientChatShell"><div class="chat-empty">Selecione uma conversa ou envie uma mensagem a partir do perfil de um arquiteto.</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ARQUITETO: perfil de estilo + portfólio -->
+          <div id="architectPanel" style="display:none;">
+            <div class="dash-card" id="onboardingChecklistCard" style="display:none;">
+              <h3>Complete seu perfil</h3>
+              <p style="font-size:0.88rem;">Perfis completos aparecem melhor nos resultados de match e passam mais confiança pro cliente.</p>
+              <ul class="checklist" id="onboardingChecklist" style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;"></ul>
+            </div>
+            <div class="dash-card style-profile-card">
+              <h3>Perfil de estilo</h3>
+              <p style="font-size:0.88rem;">Isso vira instrução fixa para a IA gerar sugestões só do seu jeito de projetar — não algo genérico.</p>
+
+              <span class="mock-label">Paleta de cores</span>
+              <div class="swatch-select" id="dashPalette" style="margin-bottom:20px;"></div>
+
+              <span class="mock-label">Palavras-chave</span>
+              <div class="form-field full" style="margin-bottom:14px;">
+                <input type="text" id="dashKeywords" placeholder="Luz natural, linhas limpas, integração">
+              </div>
+              <button id="saveStyleProfileBtn" class="btn btn-secondary btn-sm">Salvar perfil de estilo</button>
+
+              <div style="margin-top:22px;">
+                <span class="mock-label">Materiais recorrentes <span style="text-transform:none; font-weight:400;">(dos favoritos cadastrados)</span></span>
+                <div class="tag-row" id="dashRecurringMaterials"></div>
+              </div>
+            </div>
+
+            <div class="dash-card">
+              <h3>Verificação profissional <span id="cauStatusBadge"></span></h3>
+              <p style="font-size:0.88rem;">Um selo de verificado aumenta a confiança do cliente no seu perfil. A validação é feita manualmente pela equipe match.IA.</p>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label for="cauNumberInput">Registro CAU/A</label>
+                  <input type="text" id="cauNumberInput" placeholder="Ex.: A123456-7">
+                </div>
+              </div>
+              <button id="submitCauBtn" class="btn btn-secondary btn-sm">Solicitar verificação</button>
+            </div>
+
+            <div class="dash-card" id="pendingValidationsCard" style="display:none;">
+              <h3>Resumos para confirmar</h3>
+              <p style="font-size:0.88rem;">Clientes que já validaram o resumo do projeto do lado deles e esperam sua confirmação.</p>
+              <div id="pendingValidationsList"></div>
+            </div>
+
+            <div class="dash-card">
+              <h3>Compartilhar perfil</h3>
+              <p style="font-size:0.88rem;">Divulgue seu perfil match.IA nas redes sociais ou no seu site.</p>
+              <div class="share-row">
+                <input type="text" id="shareLinkInput" readonly>
+                <button id="copyShareLinkBtn" class="btn btn-secondary btn-sm">Copiar link</button>
+                <img id="shareQrCode" class="qr-code" alt="QR code do perfil">
+              </div>
+            </div>
+
+            <div class="dash-card">
+              <h3>Meu portfólio</h3>
+              <p style="font-size:0.88rem;">Projetos anteriores aumentam sua compatibilidade e visibilidade nos resultados de match.</p>
+              <div id="portfolioList" style="margin:18px 0;"></div>
+              <button id="togglePortfolioForm" class="btn btn-secondary btn-sm">+ Adicionar projeto</button>
+              <div id="portfolioLimitCard" class="usage-limit-card" style="display:none;">
+                <p>Seu plano Gratuito permite até 3 projetos no portfólio.</p>
+                <button id="upgradeFromPortfolioBtn" class="btn btn-primary btn-sm">Assinar Pro e ter portfólio ilimitado</button>
+              </div>
+              <form id="portfolioForm" style="display:none; margin-top:20px;">
+                <div class="form-grid">
+                  <div class="form-field full">
+                    <label for="pTitle">Título do projeto</label>
+                    <input type="text" id="pTitle" required>
+                  </div>
+                  <div class="form-field full">
+                    <label for="pDescription">Descrição</label>
+                    <textarea id="pDescription"></textarea>
+                  </div>
+                  <div class="form-field full">
+                    <label>Imagem do projeto <span class="hint">(anexe um arquivo ou cole um link abaixo)</span></label>
+                    <div class="file-input-row">
+                      <label class="file-btn" for="pImageFile">📎 Anexar imagem</label>
+                      <input type="file" id="pImageFile" accept="image/*" style="display:none;">
+                      <span class="file-hint">JPG/PNG, até 2MB</span>
+                    </div>
+                    <div class="file-preview" id="pImagePreview"></div>
+                    <input type="url" id="pImageUrl" placeholder="ou cole uma URL de imagem" style="margin-top:10px;">
+                  </div>
+                  <div class="form-field full">
+                    <label>Arquivo do projeto <span class="hint">(plantas, PDF, portfólio completo...)</span></label>
+                    <div class="file-input-row">
+                      <label class="file-btn" for="pProjectFile">📎 Anexar arquivo</label>
+                      <input type="file" id="pProjectFile" accept=".pdf,image/*,.zip,.dwg" style="display:none;">
+                      <span class="file-hint">PDF, imagem ou ZIP, até 2MB</span>
+                    </div>
+                    <div class="file-preview" id="pProjectFilePreview"></div>
+                    <input type="url" id="pProjectUrl" placeholder="ou cole um link do projeto" style="margin-top:10px;">
+                  </div>
+                  <div class="form-field">
+                    <label for="pStatus">Status</label>
+                    <select id="pStatus">
+                      <option value="completed">Concluído</option>
+                      <option value="ongoing">Em andamento</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar projeto</button>
+              </form>
+            </div>
+
+            <div class="dash-card">
+              <h3>Minhas avaliações</h3>
+              <div id="architectReviews"></div>
+            </div>
+
+            <div class="dash-card">
+              <h3>Mensagens <span class="unread-badge" id="architectUnreadBadge" style="display:none;"></span></h3>
+              <p style="font-size:0.88rem;">Converse com clientes que te encontraram pelo match.</p>
+              <div class="chat-layout">
+                <div class="conversation-list" id="architectConversationList"></div>
+                <div class="chat-shell" id="architectChatShell"><div class="chat-empty">Selecione uma conversa à esquerda.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Versão para impressão/PDF do resumo do projeto (só aparece ao imprimir) -->
+<div id="printableResumo">
+  <img src="assets/img/mark.png" alt="" width="40" style="margin-bottom:10px;">
+  <h1 id="printTitle">Resumo do projeto</h1>
+  <p class="print-meta">Gerado pelo match.IA em <span id="printDate"></span></p>
+  <div id="printableContent"></div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© <span data-year></span> match.IA — Projeto acadêmico (TCC), FIAP School.</span>
+      <a href="sobre.html" style="color:rgba(250,249,246,0.7);">Sobre o projeto</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/extras.js"></script>
+<script src="assets/js/color-wheel.js"></script>
+<script src="assets/js/checkout.js"></script>
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/dashboard.js"></script>
+</body>
+</html>

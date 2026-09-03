@@ -1,0 +1,111 @@
+/**
+ * Camada de acesso à API do back-end match.IA (Arkitetum.AI — Node/Express + MongoDB).
+ * Repositório de referência: https://github.com/RobPFilho/Arkitetum.AI
+ *
+ * Em localhost aponta para http://localhost:3000/api (`npm run dev` no back-end).
+ * Fora de localhost (site publicado), usa PRODUCTION_BASE — troque o valor abaixo
+ * pela URL do back-end publicado (Render, Railway etc.) depois do deploy; veja
+ * DEPLOY.md. Também dá pra sobrescrever pontualmente salvando outra URL em
+ * localStorage("matchia_api_base").
+ */
+const MatchAPI = (() => {
+  const DEFAULT_BASE = 'http://localhost:3000/api';
+  const PRODUCTION_BASE = 'https://SEU-BACKEND.onrender.com/api';
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
+
+  function base() {
+    return localStorage.getItem('matchia_api_base') || (isLocalhost ? DEFAULT_BASE : PRODUCTION_BASE);
+  }
+  function setBase(url) {
+    if (url) localStorage.setItem('matchia_api_base', url.replace(/\/+$/, ''));
+  }
+  function token() {
+    return localStorage.getItem('matchia_token');
+  }
+  function setSession(token, user) {
+    localStorage.setItem('matchia_token', token);
+    localStorage.setItem('matchia_user', JSON.stringify(user));
+  }
+  function clearSession() {
+    localStorage.removeItem('matchia_token');
+    localStorage.removeItem('matchia_user');
+  }
+  function currentUser() {
+    try { return JSON.parse(localStorage.getItem('matchia_user') || 'null'); }
+    catch { return null; }
+  }
+
+  async function request(path, { method = 'GET', body, auth = false } = {}) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (auth) {
+      const t = token();
+      if (!t) throw { offline: false, status: 401, message: 'Faça login para continuar.' };
+      headers.Authorization = `Bearer ${t}`;
+    }
+    let res;
+    try {
+      res = await fetch(`${base()}${path}`, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+    } catch (networkError) {
+      throw { offline: true, status: 0, message: 'Não foi possível conectar à API do match.IA.' };
+    }
+    let data = null;
+    try { data = await res.json(); } catch { /* sem corpo */ }
+    if (!res.ok) {
+      throw { offline: false, status: res.status, message: (data && data.error) || 'Erro inesperado na API.' };
+    }
+    return data;
+  }
+
+  return {
+    base, setBase, token, setSession, clearSession, currentUser,
+    health: () => request('/health'),
+    stats: () => request('/stats'),
+    registerClient: (payload) => request('/auth/register/client', { method: 'POST', body: payload }),
+    registerArchitect: (payload) => request('/auth/register/architect', { method: 'POST', body: payload }),
+    login: (payload) => request('/auth/login', { method: 'POST', body: payload }),
+    me: () => request('/dashboard/me', { auth: true }),
+    updateMe: (payload) => request('/dashboard/me', { method: 'PATCH', auth: true, body: payload }),
+    exportMyData: () => request('/dashboard/me/export', { auth: true }),
+    deleteMyAccount: () => request('/dashboard/me', { method: 'DELETE', auth: true }),
+    addPortfolio: (payload) => request('/dashboard/portfolio', { method: 'POST', auth: true, body: payload }),
+    deletePortfolio: (id) => request(`/dashboard/portfolio/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true }),
+    materials: () => request('/materials'),
+    architect: (id) => request(`/architects/${id}`),
+    architectReferenceImage: (id) => request(`/architects/${id}/reference-image`),
+    architects: (params = {}) => {
+      const qs = new URLSearchParams();
+      if (params.style) qs.set('style', params.style);
+      if (params.city) qs.set('city', params.city);
+      if (params.minExperience) qs.set('minExperience', params.minExperience);
+      if (params.minRating) qs.set('minRating', params.minRating);
+      qs.set('page', params.page || 1);
+      qs.set('pageSize', params.pageSize || 9);
+      return request(`/architects?${qs.toString()}`);
+    },
+    runMatch: (projectId) => request('/matches/run', { method: 'POST', auth: true, body: projectId ? { projectId } : undefined }),
+    matchHistory: () => request('/matches/history', { auth: true }),
+    sendMessage: (to, text) => request('/messages', { method: 'POST', auth: true, body: { to, text } }),
+    conversation: (userId) => request(`/messages/${encodeURIComponent(userId)}`, { auth: true }),
+    conversations: () => request('/messages/conversations', { auth: true }),
+    unreadCount: () => request('/messages/unread-count', { auth: true }),
+    notifications: () => request('/notifications', { auth: true }),
+    notificationsUnreadCount: () => request('/notifications/unread-count', { auth: true }),
+    markNotificationsRead: () => request('/notifications/read-all', { method: 'POST', auth: true }),
+    createReview: (architect, rating, comment) => request('/reviews', { method: 'POST', auth: true, body: { architect, rating, comment } }),
+    reviews: (architectId) => request(`/reviews/${encodeURIComponent(architectId)}`),
+    moodboard: (payload) => request('/moodboard', { method: 'POST', auth: true, body: payload }),
+    referenceImage: (payload) => request('/moodboard/reference-image', { method: 'POST', auth: true, body: payload }),
+    moodboardPreview: (payload) => request('/moodboard/preview', { method: 'POST', body: payload }),
+    projects: () => request('/projects', { auth: true }),
+    createProject: (payload) => request('/projects', { method: 'POST', auth: true, body: payload }),
+    updateProject: (id, payload) => request(`/projects/${encodeURIComponent(id)}`, { method: 'PATCH', auth: true, body: payload }),
+    deleteProject: (id) => request(`/projects/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true }),
+    getValidation: (otherId) => request(`/validations/${encodeURIComponent(otherId)}`, { auth: true }),
+    confirmValidation: (otherId) => request(`/validations/${encodeURIComponent(otherId)}/confirm`, { method: 'POST', auth: true }),
+    pendingValidations: () => request('/validations/pending', { auth: true }),
+  };
+})();

@@ -1,0 +1,15 @@
+{
+  "name": "match.IA — Conecte-se ao arquiteto ideal",
+  "short_name": "match.IA",
+  "description": "Plataforma de compatibilidade por IA entre clientes e arquitetos.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FAF9F6",
+  "theme_color": "#B0755A",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "assets/img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

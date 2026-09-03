@@ -1,0 +1,10 @@
+import { Router } from "express";
+import rateLimit from "express-rate-limit";
+import { asyncHandler } from "../middleware/asyncHandler.js";
+import { getArchitectProfile, getArchitectReferenceImage, listArchitects } from "../controllers/architectController.js";
+const router = Router();
+const referenceImageLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 30 });
+router.get("/", asyncHandler(listArchitects));
+router.get("/:id/reference-image", referenceImageLimiter, asyncHandler(getArchitectReferenceImage));
+router.get("/:id", asyncHandler(getArchitectProfile));
+export default router;
