@@ -2,19 +2,17 @@
  * Camada de acesso à API do back-end match.IA (Arkitetum.AI — Node/Express + MongoDB).
  * Repositório de referência: https://github.com/RobPFilho/Arkitetum.AI
  *
- * Em localhost aponta para http://localhost:3000/api (`npm run dev` no back-end).
- * Fora de localhost (site publicado), usa PRODUCTION_BASE — troque o valor abaixo
- * pela URL do back-end publicado (Render, Railway etc.) depois do deploy; veja
- * DEPLOY.md. Também dá pra sobrescrever pontualmente salvando outra URL em
+ * O mesmo processo Express que serve este site também serve a API (mesma origem,
+ * mesma porta — veja backend/src/server.js), então "/api" relativo sempre funciona,
+ * local ou publicado. Só precisa sobrescrever se algum dia o front-end for servido
+ * separado do back-end de novo — nesse caso, salve a URL completa em
  * localStorage("matchia_api_base").
  */
 const MatchAPI = (() => {
-  const DEFAULT_BASE = 'http://localhost:3000/api';
-  const PRODUCTION_BASE = 'https://SEU-BACKEND.onrender.com/api';
-  const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
+  const DEFAULT_BASE = '/api';
 
   function base() {
-    return localStorage.getItem('matchia_api_base') || (isLocalhost ? DEFAULT_BASE : PRODUCTION_BASE);
+    return localStorage.getItem('matchia_api_base') || DEFAULT_BASE;
   }
   function setBase(url) {
     if (url) localStorage.setItem('matchia_api_base', url.replace(/\/+$/, ''));

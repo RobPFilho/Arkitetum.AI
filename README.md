@@ -35,46 +35,34 @@ assets/3d/            Estudo volumétrico 3D interativo (three.js), embutido via
 
 ## Rodando localmente
 
-**Um comando só, na raiz do projeto**, sobe o back-end e o front-end juntos:
+**Um processo só serve tudo** — o Express em `backend/src/server.js` responde a API
+(`/api/*`) e também o site estático (HTML/CSS/JS da raiz), na mesma porta:
 
 ```bash
-npm install    # só na primeira vez (instala o concurrently)
+npm install --prefix backend   # só na primeira vez
 npm run dev
 ```
 
-Isso roda o back-end (`backend/`, porta 3000) e o front-end (`serve.py`, porta 8080) ao
-mesmo tempo num terminal só, com os logs de cada um prefixados (`[BACKEND]`/`[FRONTEND]`)
-e coloridos. `Ctrl+C` encerra os dois juntos.
+Depois acesse **`http://localhost:3000`** — é a mesma URL pro site e pra API, não tem
+mais duas portas nem dois processos pra coordenar. Em desenvolvimento os arquivos do site
+são servidos sem cache (headers `Cache-Control: no-store`), então uma alteração em
+qualquer arquivo aparece no reload sem precisar de Ctrl+Shift+R.
 
-Se preferir rodar cada um separado (dois terminais, logs mais limpos pra debugar um dos
-dois isoladamente), ainda funciona do jeito de sempre:
+`Ctrl+C` encerra tudo. Se preferir, `cd backend && npm run dev` faz exatamente a mesma
+coisa (o comando na raiz só delega pra lá).
 
-```bash
-# terminal 1
-cd backend && npm run dev
-# terminal 2
-python serve.py 8080
-```
+Sem o MongoDB no ar, o servidor não sobe (a conexão é obrigatória no `connectDatabase()`);
+com o Mongo no ar mas alguma chave de API faltando (Gemini, Unsplash), as funcionalidades
+de IA caem em respostas padrão em vez de falhar — ver `KEYS.env`.
 
-O `serve.py` desliga o cache do navegador, então uma alteração em qualquer arquivo
-aparece no reload sem precisar de Ctrl+Shift+R. (Qualquer outro servidor estático também
-funciona, já que os módulos JS e o `fetch` só exigem `http://`, não `file://` — mas sem
-cabeçalhos anti-cache, um `python -m http.server` puro pode "esconder" alterações
-recentes atrás do cache do navegador.)
+## Publicando (Arkitetum.AI de referência)
 
-## Conectando ao back-end (Arkitetum.AI)
-
-1. Clone e rode o back-end: https://github.com/RobPFilho/Arkitetum.AI
-   (`npm install`, `npm run seed:materials`, `npm run dev` — sobe em `http://localhost:3000`).
-2. O front-end já aponta por padrão para `http://localhost:3000/api`
-   (ver `DEFAULT_BASE` em `assets/js/api.js`).
-3. Para apontar para uma API publicada, rode no console do navegador:
-   ```js
-   localStorage.setItem('matchia_api_base', 'https://sua-api.exemplo.com/api')
-   ```
-
-Sem o back-end no ar, o site continua navegável: formulários mostram um aviso de conexão e
-páginas com dados dinâmicos (materiais, cadastro) usam listas de referência offline.
+Como o site e a API agora são o mesmo processo, publicar é só subir a pasta `backend/`
+inteira (que inclui o site na raiz do projeto, um nível acima) num serviço Node — ver
+`DEPLOY.md` pro passo a passo com Render. O repositório de referência original,
+[Arkitetum.AI](https://github.com/RobPFilho/Arkitetum.AI), continua sendo a base do
+back-end (rotas, modelos, autenticação) — este projeto é um fork local dele mais o
+front-end e os módulos novos.
 
 ## Artefato 3D
 
