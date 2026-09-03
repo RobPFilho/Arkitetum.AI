@@ -186,42 +186,6 @@ errada nesta ferramenta de preview — trocado por `top/left/right` + `height: c
 - **Exportar PDF, moodboard com IA, comparador de arquitetos, compartilhar perfil (link + QR)**:
   tudo no painel (`dashboard.html` / `assets/js/dashboard.js`).
 
-## Preparação para a pré-banca (30/09)
-
-- **Conta de demonstração pronta**: `npm run seed:demo` (dentro de `backend/`) recria do zero
-  a conta `demo@matchia.com` / `MatchIA@Demo2026` com perfil completo, um projeto extra, um
-  match já rodado de verdade (via `scoringEngine`), conversa, avaliação e resumo do projeto
-  já validado pelos dois lados — tudo pronto pra abrir e mostrar, sem precisar cadastrar nada
-  ao vivo. Roda de novo sempre que precisar resetar o estado da demo.
-- **Decomposição visual da pontuação**: cada resultado de match tem um botão "Ver detalhes da
-  pontuação" mostrando os 6 critérios do `scoringEngine` em barras (estilo, materiais,
-  localização, especialidade, disponibilidade, experiência) — reforça visualmente a explicação
-  em texto que a IA já gera.
-- **LGPD — baixar dados / excluir conta**: no painel, qualquer usuário pode baixar um JSON com
-  tudo que a plataforma guarda sobre ele (`GET /api/dashboard/me/export`) ou apagar a conta
-  permanentemente (`DELETE /api/dashboard/me`, com cascata em projetos, mensagens, avaliações,
-  histórico e validações).
-- **Estatística real na home**: o "X% de compatibilidade média" do hero agora vem de
-  `GET /api/stats` (média real de todas as buscas já rodadas), com `95%` como valor de
-  reserva caso o banco esteja vazio ou a API esteja fora do ar.
-  ⚠️ **atenção**: como o motor de match soma 0 pontos em qualquer critério não preenchido, o
-  número real cai bastante se houver muitas buscas de teste com perfil incompleto no banco
-  (aconteceu durante o desenvolvimento — a média real ficou em ~28%, bem abaixo do "95%"
-  ilustrativo dos cards de exemplo na mesma página). Antes da banca, rodem alguns matches
-  com a conta demo (perfil completo) ou considerem excluir buscas de teste antigas via
-  `db.matchhistories.deleteMany(...)` no Mongo, senão o número real pode contradizer o
-  exemplo ilustrativo ao lado.
-- **Página 404 personalizada**: `404.html` na raiz, servida pelo `serve.py` para qualquer
-  URL inexistente (antes era o erro cru do Python).
-- **Deploy**: ver `DEPLOY.md` — checklist completo pra publicar em MongoDB Atlas + Render
-  (back-end) + Vercel (front-end), todos com plano gratuito. Exige contas próprias da equipe
-  em cada serviço (login/OAuth), então não é algo que a IA consegue fazer sozinha — o
-  `backend/render.yaml` e a troca de `PRODUCTION_BASE` em `assets/js/api.js` já estão prontos
-  pra quando vocês chegarem nessa etapa.
-- **Roteiro da apresentação**: documento separado com checklist, ordem sugerida de telas,
-  tabela "real vs. simulado" e perguntas prováveis da banca — pedir o link ao Natanael/Claude
-  se precisar de novo.
-
 ## Referência visual real (foto, não geração de imagem)
 
 Botão "🖼 Ver referência visual" ao lado do moodboard, no painel do cliente
