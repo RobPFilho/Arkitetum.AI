@@ -88,6 +88,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   wizardBack.addEventListener('click', () => showStep(stepIndex - 1));
 
+  // Enter em qualquer campo avança pra próxima etapa em vez de submeter o
+  // formulário inteiro — só o botão "Criar conta" na última etapa envia de
+  // verdade. Em textarea, Enter continua quebrando linha normalmente.
+  form.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+    if (wizardNext.style.display !== 'none') wizardNext.click();
+  });
+
   function setRole(next) {
     role = next;
     btnCliente.classList.toggle('active', role === 'client');

@@ -5,6 +5,7 @@
    ========================================================= */
 
 :root {
+  color-scheme: light;
   --bg: #FAF9F6;
   --bg-alt: #EEE3DA;
   --sage: #7B8E7E;
@@ -35,6 +36,7 @@
 /* ---- Modo escuro: segue o sistema por padrão, ou a escolha salva no botão da navbar ---- */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --bg: #1C1B19; --bg-alt: #2A2723; --sage: #8FA391; --sage-dark: #A3B6A5;
     --terracotta: #C68868; --terracotta-dark: #D9A183; --ink: #F0EDE8;
     --ink-soft: rgba(240, 237, 232, 0.75); --ink-faint: rgba(240, 237, 232, 0.5);
@@ -45,6 +47,7 @@
   }
 }
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --bg: #1C1B19; --bg-alt: #2A2723; --sage: #8FA391; --sage-dark: #A3B6A5;
   --terracotta: #C68868; --terracotta-dark: #D9A183; --ink: #F0EDE8;
   --ink-soft: rgba(240, 237, 232, 0.75); --ink-faint: rgba(240, 237, 232, 0.5);
@@ -421,6 +424,16 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   outline: none; border-color: var(--terracotta); box-shadow: 0 0 0 3px rgba(176,117,90,0.15);
 }
 .form-field textarea { resize: vertical; min-height: 90px; }
+/* Sem isso, o autopreenchimento do navegador força fundo branco/amarelo e
+   texto preto, ignorando as variáveis de tema — feio e ilegível no escuro. */
+.form-field input:-webkit-autofill,
+.form-field input:-webkit-autofill:hover,
+.form-field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--ink);
+  -webkit-box-shadow: 0 0 0 1000px var(--bg) inset;
+  box-shadow: 0 0 0 1000px var(--bg) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
 .chip-select { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip-select .chip {
   border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-size: 0.84rem;

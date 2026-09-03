@@ -308,3 +308,20 @@ do usuário na navbar de cada página depois de long tempo sem revisar isso.
   `clientProfile.bonusMatches`) ou +1 vaga de portfólio (arquiteto,
   `architectProfile.bonusPortfolioSlots`) — somado ao limite do plano em todos os
   lugares que checam esse limite no painel.
+
+## Enter no formulário de cadastro e contraste no modo escuro
+
+- **Enter não submete mais o formulário de cadastro**: o wizard de `cadastro.html` é um
+  único `<form>` com 8 etapas; sem tratamento, dar Enter em qualquer campo submetia o
+  formulário inteiro (ainda incompleto) em vez de avançar pra próxima etapa. Agora um
+  listener de `keydown` em `assets/js/cadastro.js` intercepta Enter e clica no botão
+  "Avançar" (respeitando a mesma validação de sempre), exceto em `<textarea>` (onde
+  Enter continua quebrando linha) e na última etapa (onde só o clique explícito em
+  "Criar conta" envia de verdade).
+- **Contraste no modo escuro**: nenhuma regra do CSS declarava `color-scheme`, então
+  controles nativos do navegador (o dropdown de `<select>` ao abrir, ícones de campo
+  numérico) ignoravam o tema escuro customizado e renderizavam com as cores padrão do
+  sistema — texto claro sobre fundo claro em alguns casos. Adicionado `color-scheme:
+  light`/`dark` nos três blocos de tema em `assets/css/style.css`. Também corrigido o
+  autopreenchimento do navegador (autofill), que forçava fundo branco/texto preto nos
+  campos preenchidos automaticamente, ignorando completamente o tema da página.
