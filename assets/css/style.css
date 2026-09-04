@@ -13,8 +13,12 @@
   --terracotta: #B0755A;
   --terracotta-dark: #96603F ;
   --ink: #333333;
-  --ink-soft: rgba(51, 51, 51, 0.66);
-  --ink-faint: rgba(51, 51, 51, 0.42);
+  /* Alpha calibrado pra ficar em 4.5:1+ de contraste (WCAG AA) sobre --bg,
+     mantendo --ink-faint mais claro que --ink-soft — os valores originais
+     (0.66/0.42) mediam 4.29:1 e 2.32:1, ilegíveis demais pra quem tem baixa
+     visão (--ink-faint em especial: bem abaixo até do mínimo pra texto grande). */
+  --ink-soft: rgba(51, 51, 51, 0.74);
+  --ink-faint: rgba(51, 51, 51, 0.68);
   --white: #FFFFFF;
   --line: rgba(51, 51, 51, 0.12);
   --shadow-sm: 0 2px 10px rgba(51, 51, 51, 0.06);
@@ -56,6 +60,19 @@
   --shadow-lg: 0 24px 60px rgba(0,0,0,0.5); --shadow-glow: 0 14px 34px rgba(198,136,104,0.3);
   --header-bg: rgba(28, 27, 25, 0.78); --header-glow: rgba(255, 255, 255, 0.05);
 }
+
+/* Respeita quem pede menos animação no sistema (tontura/enjoo com movimento,
+   distração com coisas piscando/deslizando) — praticamente desliga transições,
+   animações e scroll suave em todo o site. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 .theme-toggle {
   width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg);
   display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer;
@@ -725,6 +742,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 }
 .color-wheel-close:hover { background: var(--line); }
 .color-wheel-title { font-family: var(--font-display); font-size: 1.15rem; margin: 0 0 18px; flex-basis: 100%; }
+.cw-hint { flex-basis: 100%; font-size: 0.76rem; color: var(--ink-faint); margin: -10px 0 4px; }
 
 .color-wheel-wrap {
   position: relative; width: 240px; height: 240px; flex-shrink: 0;

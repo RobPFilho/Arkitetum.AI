@@ -326,3 +326,37 @@ do usuário na navbar de cada página depois de long tempo sem revisar isso.
   `og:title`/`og:description`/`og:image`/`og:type` e as tags `twitter:*`
   equivalentes, pra gerar um preview decente ao compartilhar links do site (WhatsApp,
   LinkedIn, etc.) — antes só o `<title>` aparecia, sem imagem nem descrição.
+
+## Segunda rodada de acessibilidade (baixa visão, cegueira, motora)
+
+- **Contraste de texto (WCAG AA)**: medido com a fórmula oficial de contraste —
+  `--ink-faint` no modo claro estava em **2.32:1** (mínimo exigido é 4.5:1 pra texto
+  normal), praticamente ilegível pra quem tem baixa visão; `--ink-soft` estava em
+  4.29:1, também abaixo do mínimo. Recalibrado pra 4.55:1 e 5.41:1 respectivamente,
+  mantendo `--ink-faint` visualmente mais claro que `--ink-soft`. O modo escuro já
+  media acima de 4.5:1 nos dois, não precisou mexer.
+- **Diálogos acessíveis** (modal de assinatura em `checkout.js` e roda de cores em
+  `color-wheel.js`): antes eram só uma `<div>` sobreposta, sem `role="dialog"`,
+  sem mover o foco ao abrir, sem fechar com Esc e sem devolver o foco a quem abriu
+  ao fechar — um usuário de teclado ou leitor de tela podia "perder" o diálogo ou
+  continuar navegando o conteúdo por trás dele. Agora ambos têm
+  `role="dialog"`/`aria-modal`/`aria-labelledby`, prendem o Tab dentro do diálogo,
+  fecham com Esc e devolvem o foco ao elemento que abriu o diálogo. Os campos
+  HEX/R/G/B da roda de cores ganharam `<label for>` de verdade (antes eram só texto
+  ao lado, sem associação programática) — é a alternativa acessível à roda visual
+  em si, que agora é marcada `aria-hidden` (só decorativa/mouse, sem substituto de
+  teclado possível numa interação de arrastar em círculo).
+- **Avaliação por estrelas** (`assets/js/dashboard.js`): os 5 botões de estrela
+  eram só o caractere "★" sem nome acessível nenhum — um leitor de tela lia
+  "botão" cinco vezes, sem dizer qual nota cada um representa. Agora o grupo é
+  `role="radiogroup"` com `aria-label`, e cada botão tem `aria-label="N estrelas"`
+  e `aria-checked` refletindo a nota selecionada.
+- **Movimento reduzido**: quem ativa "reduzir movimento" no sistema operacional
+  agora tem quase todas as transições/animações do site desligadas (shimmer dos
+  skeletons, hover, fade de entrada, modais) via `prefers-reduced-motion`, e as
+  rolagens automáticas (`scrollIntoView`) deixam de ser suaves e passam a ser
+  instantâneas — para quem sente tontura ou desconforto com telas em movimento.
+- Sobre "mudo/surdo": o site não depende de áudio ou vídeo em nenhum fluxo — toda
+  interação é por texto, e o chat entre cliente e arquiteto já existe como
+  alternativa à ligação telefônica. Não havia nada de específico faltando aqui além
+  do que a rodada de contraste/diálogos acima também melhora.

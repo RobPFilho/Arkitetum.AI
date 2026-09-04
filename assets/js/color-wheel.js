@@ -9,6 +9,22 @@ const ColorWheelPicker = (() => {
   let hue = 20, sat = 0.4, val = 1; // estado atual (HSV)
   let onPickCallback = null;
   let built = false;
+  let lastFocused = null;
+
+  function focusableEls() {
+    return Array.from(panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+      .filter(el => !el.disabled && el.offsetParent !== null);
+  }
+
+  function handleKeydown(e) {
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key !== 'Tab') return;
+    const items = focusableEls();
+    if (!items.length) return;
+    const first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
 
   function hsvToRgb(h, s, v) {
     const c = v * s;
@@ -52,30 +68,31 @@ const ColorWheelPicker = (() => {
     overlay = document.createElement('div');
     overlay.className = 'color-wheel-overlay';
     overlay.innerHTML = `
-      <div class="color-wheel-panel">
+      <div class="color-wheel-panel" role="dialog" aria-modal="true" aria-labelledby="colorWheelTitle">
         <button type="button" class="color-wheel-close" aria-label="Fechar">×</button>
-        <h4 class="color-wheel-title">Escolha uma cor personalizada</h4>
-        <div class="color-wheel-wrap">
+        <h4 class="color-wheel-title" id="colorWheelTitle">Escolha uma cor personalizada</h4>
+        <div class="color-wheel-wrap" aria-hidden="true">
           <canvas width="${size}" height="${size}"></canvas>
           <div class="color-wheel-cursor"></div>
         </div>
+        <p class="cw-hint">A roda de cores é visual; use os campos abaixo para digitar a cor exata.</p>
         <div class="color-wheel-controls">
           <div class="cw-preview-row">
             <div class="cw-preview"></div>
             <span>Pré-visualização</span>
           </div>
           <div class="cw-field">
-            <label>HEX</label>
-            <input type="text" class="cw-hex" maxlength="7" placeholder="#B0755A">
+            <label for="cwHexInput">HEX</label>
+            <input type="text" id="cwHexInput" class="cw-hex" maxlength="7" placeholder="#B0755A">
           </div>
           <div class="cw-field-row">
-            <div class="cw-field"><label>R</label><input type="number" class="cw-r" min="0" max="255"></div>
-            <div class="cw-field"><label>G</label><input type="number" class="cw-g" min="0" max="255"></div>
-            <div class="cw-field"><label>B</label><input type="number" class="cw-b" min="0" max="255"></div>
+            <div class="cw-field"><label for="cwRInput">R</label><input type="number" id="cwRInput" class="cw-r" min="0" max="255"></div>
+            <div class="cw-field"><label for="cwGInput">G</label><input type="number" id="cwGInput" class="cw-g" min="0" max="255"></div>
+            <div class="cw-field"><label for="cwBInput">B</label><input type="number" id="cwBInput" class="cw-b" min="0" max="255"></div>
           </div>
           <div>
-            <div class="cw-brightness-label"><span>Brilho</span><span class="cw-brightness-value">100%</span></div>
-            <input type="range" class="cw-brightness" min="0" max="100" value="100">
+            <div class="cw-brightness-label"><span id="cwBrightnessLabel">Brilho</span><span class="cw-brightness-value">100%</span></div>
+            <input type="range" class="cw-brightness" min="0" max="100" value="100" aria-labelledby="cwBrightnessLabel">
           </div>
           <button type="button" class="btn btn-primary cw-add">+ Adicionar cor à paleta</button>
         </div>
@@ -131,6 +148,7 @@ const ColorWheelPicker = (() => {
 
     closeBtn.addEventListener('click', close);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    overlay.addEventListener('keydown', handleKeydown);
     addBtn.addEventListener('click', () => {
       const hex = hexInput.value;
       if (onPickCallback) onPickCallback(hex);
@@ -197,17 +215,20 @@ const ColorWheelPicker = (() => {
 
   function close() {
     overlay.classList.remove('open');
+    if (lastFocused) lastFocused.focus();
   }
 
   /** Abre o seletor, animando o crescimento a partir do botão que disparou a ação. */
   function open(triggerEl, initialHex, onPick) {
     build();
     onPickCallback = onPick;
+    lastFocused = triggerEl || document.activeElement;
 
     const startRgb = hexToRgb(initialHex) || [176, 117, 90];
     setFromRgb(...startRgb);
 
     overlay.classList.add('open');
+    hexInput.focus();
 
     const wrap = overlay.querySelector('.color-wheel-wrap');
     const btnRect = triggerEl.getBoundingClientRect();

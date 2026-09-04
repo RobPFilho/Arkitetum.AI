@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  // Quem pede menos animação no sistema também não quer rolagem suave.
+  const SCROLL_BEHAVIOR = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
   const apiBanner = document.getElementById('apiBanner');
   document.getElementById('apiBaseLabel').textContent = MatchAPI.base();
   const uid = (u) => u.id || u._id;
@@ -333,7 +335,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     list.querySelectorAll('[data-run-project]').forEach(btn => {
       btn.addEventListener('click', () => {
         runMatch(user, btn.dataset.runProject || undefined);
-        document.getElementById('matchResults')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('matchResults')?.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'start' });
       });
     });
     list.querySelectorAll('[data-edit-project]').forEach(btn => {
@@ -355,7 +357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function openProjectForm(project) {
     const form = document.getElementById('projectForm');
     form.style.display = 'block';
-    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    form.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'nearest' });
     document.getElementById('projEditId').value = project?._id || '';
     document.getElementById('projName').value = project?.name || '';
     document.getElementById('projPropertyType').value = project?.propertyType || 'Residencial unifamiliar';
@@ -588,7 +590,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const group = star.closest('[data-stars]');
       const value = Number(star.dataset.star);
       group.dataset.value = value;
-      group.querySelectorAll('[data-star]').forEach(s => s.classList.toggle('active', Number(s.dataset.star) <= value));
+      group.querySelectorAll('[data-star]').forEach(s => {
+        const active = Number(s.dataset.star) <= value;
+        s.classList.toggle('active', active);
+        s.setAttribute('aria-checked', String(Number(s.dataset.star) === value));
+      });
       return;
     }
 
@@ -610,7 +616,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const chatBtn = e.target.closest('[data-open-chat]');
     if (chatBtn) {
-      document.getElementById('mensagens')?.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('mensagens')?.scrollIntoView({ behavior: SCROLL_BEHAVIOR });
       openConversation(chatBtn.dataset.openChat, chatBtn.dataset.openChatName, 'clientChatShell', user);
     }
   }
@@ -639,7 +645,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           ${breakdownBlock(r.architect.id, r.breakdown)}
           ${combosBlock(r.architect.id)}
           <div id="review-${r.architect.id}" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed var(--line);">
-            <div class="star-rating" data-stars="${r.architect.id}">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-star="${n}">★</button>`).join('')}</div>
+            <div class="star-rating" data-stars="${r.architect.id}" role="radiogroup" aria-label="Sua avaliação, de 1 a 5 estrelas">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-star="${n}" role="radio" aria-checked="false" aria-label="${n} estrela${n > 1 ? 's' : ''}">★</button>`).join('')}</div>
             <textarea data-review-comment="${r.architect.id}" placeholder="Comentário (opcional)" style="width:100%; margin-top:8px; padding:8px; border:1px solid var(--line); border-radius:8px; font-family:inherit;"></textarea>
             <button type="button" class="btn btn-primary btn-sm" style="margin-top:8px;" data-submit-review="${r.architect.id}">Enviar avaliação</button>
           </div>
@@ -859,7 +865,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const card = document.getElementById('moodboardCard');
       const content = document.getElementById('moodboardContent');
       card.style.display = 'block';
-      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      card.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'nearest' });
       content.innerHTML = '<p style="font-size:0.86rem; color:var(--ink-faint);"><span class="spinner"></span> Gerando conceito...</p>';
       const p = user.clientProfile || {};
       const meta = MatchExtras.getProjectMeta(uid(user));
@@ -889,7 +895,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const card = document.getElementById('referenceImageCard');
       const content = document.getElementById('referenceImageContent');
       card.style.display = 'block';
-      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      card.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'nearest' });
       content.innerHTML = '<p style="font-size:0.86rem; color:var(--ink-faint);"><span class="spinner"></span> Buscando uma referência visual...</p>';
       const p = user.clientProfile || {};
       const meta = MatchExtras.getProjectMeta(uid(user));
@@ -934,7 +940,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (section.style.display === 'block') { section.style.display = 'none'; return; }
       document.getElementById('compareContent').innerHTML = compareTableHtml(user);
       section.style.display = 'block';
-      section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      section.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'nearest' });
     });
   }
 

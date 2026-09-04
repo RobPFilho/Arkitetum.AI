@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  // Quem pede menos animação no sistema também não quer rolagem suave.
+  const SCROLL_BEHAVIOR = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
   const STYLES = ['Moderno', 'Contemporâneo', 'Minimalista', 'Industrial', 'Clássico', 'Rústico', 'Escandinavo', 'Biofílico', 'Brutalista', 'Alto padrão'];
   const SPECIALTIES = ['Residencial unifamiliar', 'Apartamento', 'Reforma', 'Interiores', 'Comercial', 'Paisagismo', 'Alto padrão'];
   const MARITAL_STATUS = ['Solteiro(a)', 'Casado(a) / União estável', 'Divorciado(a)', 'Viúvo(a)'];
@@ -65,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     renderProgress();
     formError.classList.remove('show');
-    document.querySelector('.auth-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelector('.auth-card').scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'start' });
   }
 
   function validateStep(stepEl) {

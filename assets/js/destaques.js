@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  // Quem pede menos animação no sistema também não quer rolagem suave.
+  const SCROLL_BEHAVIOR = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
   const STYLES = ['Moderno', 'Contemporâneo', 'Minimalista', 'Industrial', 'Clássico', 'Rústico', 'Escandinavo', 'Biofílico', 'Brutalista', 'Alto padrão'];
   const grid = document.getElementById('archGrid');
   const empty = document.getElementById('archEmpty');
@@ -171,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </tbody>
       </table>`;
     section.style.display = 'block';
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'start' });
   });
 
   let debounceTimer;
