@@ -91,12 +91,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  function skeletonCardHtml() {
+    return `
+      <div class="skeleton-card">
+        <div class="skeleton-block thumb"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-block line" style="width:60%;"></div>
+          <div class="skeleton-block line" style="width:85%;"></div>
+          <div class="skeleton-block line" style="width:40%;"></div>
+        </div>
+      </div>`;
+  }
+
   async function loadArchitects({ reset = false } = {}) {
     const seq = ++requestSeq;
     if (reset) {
       currentPage = 1;
       loadedArchitects = [];
-      grid.innerHTML = '<p style="font-size:0.86rem; color:var(--ink-faint);">Carregando arquitetos...</p>';
+      grid.innerHTML = skeletonCardHtml().repeat(PAGE_SIZE);
     }
     empty.style.display = 'none';
     loadMoreBtn.disabled = true;

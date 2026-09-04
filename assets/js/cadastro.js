@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       chip.type = 'button';
       chip.className = item.thumb ? 'chip has-thumb' : 'chip';
       chip.dataset.value = item.value;
+      chip.setAttribute('aria-pressed', 'false');
       if (item.thumb) {
         chip.innerHTML = `<img class="chip-thumb" src="${item.thumb}" alt="" loading="lazy">${item.label}`;
       } else {
@@ -127,6 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const activeCount = container.querySelectorAll('.chip.active').length;
         if (!chip.classList.contains('active') && max && activeCount >= max) return;
         chip.classList.toggle('active');
+        chip.setAttribute('aria-pressed', String(chip.classList.contains('active')));
       });
       container.appendChild(chip);
     });
@@ -146,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       addBtn.style.display = 'none';
       const group = document.createElement('span');
       group.className = 'chip-input-group';
-      group.innerHTML = '<input type="text" placeholder="Digite e confirme" maxlength="40"><button type="button" class="confirm" title="Adicionar">✓</button><button type="button" class="cancel" title="Cancelar">×</button>';
+      group.innerHTML = '<input type="text" placeholder="Digite e confirme" maxlength="40" aria-label="Novo valor"><button type="button" class="confirm" title="Adicionar" aria-label="Adicionar">✓</button><button type="button" class="cancel" title="Cancelar" aria-label="Cancelar">×</button>';
       container.insertBefore(group, addBtn);
       const input = group.querySelector('input');
       input.focus();
@@ -194,10 +196,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       chip.className = 'chip';
       chip.textContent = item;
       chip.dataset.value = item;
+      chip.setAttribute('aria-pressed', 'false');
       chip.addEventListener('click', () => {
         const wasActive = chip.classList.contains('active');
-        container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        if (!wasActive) chip.classList.add('active');
+        container.querySelectorAll('.chip').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-pressed', 'false'); });
+        if (!wasActive) { chip.classList.add('active'); chip.setAttribute('aria-pressed', 'true'); }
       });
       container.appendChild(chip);
     });

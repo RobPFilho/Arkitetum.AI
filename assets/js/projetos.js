@@ -37,6 +37,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     `).join('');
   }
 
+  grid.innerHTML = `
+    <div class="skeleton-card">
+      <div class="skeleton-block thumb"></div>
+      <div class="skeleton-lines">
+        <div class="skeleton-block line" style="width:40%;"></div>
+        <div class="skeleton-block line" style="width:70%;"></div>
+      </div>
+    </div>`.repeat(9);
+
   try {
     const materials = await MatchAPI.materials();
     render(materials.length ? materials : FALLBACK);

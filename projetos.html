@@ -6,6 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Projetos & IA — match.IA</title>
 <meta name="description" content="Veja como a IA do match.IA apoia arquitetos após o match: sugestões de conceito, banco de materiais e um estudo volumétrico 3D interativo.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="match.IA">
+<meta property="og:title" content="Projetos & IA — match.IA">
+<meta property="og:description" content="Veja como a IA do match.IA apoia arquitetos após o match: sugestões de conceito, banco de materiais e um estudo volumétrico 3D interativo.">
+<meta property="og:image" content="assets/img/mark.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Projetos & IA — match.IA">
+<meta name="twitter:description" content="Veja como a IA do match.IA apoia arquitetos após o match: sugestões de conceito, banco de materiais e um estudo volumétrico 3D interativo.">
+<meta name="twitter:image" content="assets/img/mark.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#B0755A">
@@ -15,6 +24,7 @@
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
 <header class="site-header">
   <nav class="nav">
@@ -39,7 +49,7 @@
   </nav>
 </header>
 
-<main>
+<main id="main-content">
 
   <section class="hero" style="padding-bottom:0;">
     <div class="container center" style="max-width:720px;">
@@ -240,7 +250,7 @@
         <h2>Materiais usados no match e na inspiração de projeto</h2>
         <p>Lista carregada em tempo real de <code>GET /api/materials</code> do back-end match.IA.</p>
       </div>
-      <div id="apiBanner" class="api-banner">Não foi possível conectar à API em <code id="apiBaseLabel"></code>. Exibindo lista de referência offline.</div>
+      <div id="apiBanner" class="api-banner" role="alert" aria-live="polite">Não foi possível conectar à API em <code id="apiBaseLabel"></code>. Exibindo lista de referência offline.</div>
       <div id="materialGrid" class="material-grid reveal"></div>
     </div>
   </section>

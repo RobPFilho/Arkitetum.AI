@@ -289,3 +289,40 @@ do usuário na navbar de cada página depois de long tempo sem revisar isso.
   light`/`dark` nos três blocos de tema em `assets/css/style.css`. Também corrigido o
   autopreenchimento do navegador (autofill), que forçava fundo branco/texto preto nos
   campos preenchidos automaticamente, ignorando completamente o tema da página.
+
+## Footer invisível no escuro e logo sobreposta no mobile
+
+- **Footer**: `.site-footer` usava `background: var(--ink)`, mas essa variável é o
+  texto do resto do site — no modo escuro ela vira clara, deixando fundo e texto do
+  footer ambos claros (ilegível). Fixado com cores literais (`#333333`/`#FAF9F6`) pra
+  manter a faixa sempre escura, nos dois temas.
+- **Navbar no celular**: logo, "Entrar", "Cadastrar" e o hamburguer não cabiam numa
+  linha só em telas estreitas; a logo encolhia mais que seu próprio conteúdo (que tem
+  `overflow: visible`), então o texto ".IA" vazava por cima do "Entrar" ao lado.
+  Espaçamentos apertados abaixo de 430px de largura resolvem sem cortar nem sobrepor
+  nada — testado em 375px e 320px.
+
+## Limpeza de histórico de teste, skeletons de carregamento e acessibilidade
+
+- **`npm run clean:matches -- email@cliente.com`** (dentro de `backend/`): apaga o
+  histórico de matches de um único cliente — pensado para remover buscas de teste
+  feitas com perfil incompleto, que distorcem a média real usada em `GET /api/stats`.
+  Segue o mesmo padrão do `approve:cau` (script pontual, com o e-mail como argumento,
+  nunca uma operação em massa).
+- **Skeletons de carregamento**: a lista de arquitetos em destaque (`destaques.html`),
+  os resultados de match no painel e o banco de materiais (`projetos.html`) agora
+  mostram um placeholder animado (`.skeleton-card`/`.skeleton-result` em
+  `assets/css/style.css`) enquanto aguardam a resposta da API, em vez de ficarem
+  simplesmente vazios/parados.
+- **Acessibilidade**: link "Pular para o conteúdo principal" (visível só ao navegar
+  por Tab) em todas as páginas; `aria-pressed` nos chips de seleção do cadastro
+  (estilos, materiais, etc.) pra leitores de tela anunciarem o estado selecionado;
+  `aria-label` nos botões só-ícone que ainda não tinham (confirmar/cancelar do "+
+  Outros..."); `role="alert"`/`aria-live` nos avisos de erro de API e de formulário,
+  pra serem anunciados automaticamente. Os básicos (`alt` em imagens, `aria-label` no
+  sino de notificações, no toggle de tema e no menu hambúrguer, `lang="pt-BR"` no
+  `<html>`, indicador de foco visível nos campos) já estavam corretos.
+- **Meta tags Open Graph e Twitter Card**: todas as páginas agora têm
+  `og:title`/`og:description`/`og:image`/`og:type` e as tags `twitter:*`
+  equivalentes, pra gerar um preview decente ao compartilhar links do site (WhatsApp,
+  LinkedIn, etc.) — antes só o `<title>` aparecia, sem imagem nem descrição.

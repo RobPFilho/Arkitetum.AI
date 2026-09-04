@@ -10,6 +10,7 @@
     "seed:architects": "node src/seeds/architects.js",
     "seed:demo": "node src/seeds/demoAccount.js",
     "approve:cau": "node src/scripts/approveCau.js",
+    "clean:matches": "node src/scripts/cleanMatchHistory.js",
     "test": "node --test"
   },
   "dependencies": {

@@ -5,6 +5,16 @@
 <script>try{var t=localStorage.getItem('matchia_theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — match.IA</title>
+<meta name="description" content="Painel do match.IA — acompanhe seus matches, mensagens e projetos.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="match.IA">
+<meta property="og:title" content="Painel — match.IA">
+<meta property="og:description" content="Painel do match.IA — acompanhe seus matches, mensagens e projetos.">
+<meta property="og:image" content="assets/img/mark.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Painel — match.IA">
+<meta name="twitter:description" content="Painel do match.IA — acompanhe seus matches, mensagens e projetos.">
+<meta name="twitter:image" content="assets/img/mark.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#B0755A">
@@ -14,6 +24,7 @@
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
 <header class="site-header">
   <nav class="nav">
@@ -37,7 +48,7 @@
   </nav>
 </header>
 
-<main class="dash-shell">
+<main id="main-content" class="dash-shell">
   <div class="container">
 
     <div id="guestState" class="empty-state" style="display:none;">
@@ -46,7 +57,7 @@
       <a href="login.html" class="btn btn-primary">Entrar</a>
     </div>
 
-    <div id="apiBanner" class="api-banner">
+    <div id="apiBanner" class="api-banner" role="alert" aria-live="polite">
       Não foi possível conectar à API em <code id="apiBaseLabel"></code>. Rode o back-end (<a href="https://github.com/RobPFilho/Arkitetum.AI" target="_blank" rel="noopener">Arkitetum.AI</a>) com <code>npm run dev</code>.
     </div>
 

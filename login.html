@@ -5,6 +5,16 @@
 <script>try{var t=localStorage.getItem('matchia_theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Entrar — match.IA</title>
+<meta name="description" content="Entre na sua conta match.IA para acompanhar seus matches e projetos.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="match.IA">
+<meta property="og:title" content="Entrar — match.IA">
+<meta property="og:description" content="Entre na sua conta match.IA para acompanhar seus matches e projetos.">
+<meta property="og:image" content="assets/img/mark.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Entrar — match.IA">
+<meta name="twitter:description" content="Entre na sua conta match.IA para acompanhar seus matches e projetos.">
+<meta name="twitter:image" content="assets/img/mark.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#B0755A">
@@ -14,6 +24,7 @@
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
 <header class="site-header">
   <nav class="nav">
@@ -38,7 +49,7 @@
   </nav>
 </header>
 
-<main class="auth-shell">
+<main id="main-content" class="auth-shell">
   <div class="container">
     <div class="auth-card" style="max-width:440px;">
       <div class="center" style="margin-bottom:28px;">
@@ -48,11 +59,11 @@
         <p style="margin:0;">Acesse seu painel de compatibilidade e projetos.</p>
       </div>
 
-      <div id="apiBanner" class="api-banner">
+      <div id="apiBanner" class="api-banner" role="alert" aria-live="polite">
         Não foi possível conectar à API. Confira se o back-end está rodando em <code id="apiBaseLabel"></code>.
       </div>
 
-      <div id="formError" class="form-error"></div>
+      <div id="formError" class="form-error" role="alert" aria-live="assertive"></div>
 
       <form id="loginForm" novalidate>
         <div class="form-field full">

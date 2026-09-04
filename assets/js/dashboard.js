@@ -667,6 +667,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Analisando compatibilidade...';
+    empty.style.display = 'none';
+    list.innerHTML = `
+      <div class="skeleton-result">
+        <div class="skeleton-block avatar"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-block line" style="width:50%;"></div>
+          <div class="skeleton-block line" style="width:80%;"></div>
+        </div>
+      </div>`.repeat(3);
     try {
       const { results, project } = await MatchAPI.runMatch(projectId);
       lastResults = results;

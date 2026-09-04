@@ -6,6 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Arquitetos em destaque — match.IA</title>
 <meta name="description" content="Conheça os arquitetos cadastrados no match.IA, filtre por estilo e veja o perfil completo de cada um.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="match.IA">
+<meta property="og:title" content="Arquitetos em destaque — match.IA">
+<meta property="og:description" content="Conheça os arquitetos cadastrados no match.IA, filtre por estilo e veja o perfil completo de cada um.">
+<meta property="og:image" content="assets/img/mark.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Arquitetos em destaque — match.IA">
+<meta name="twitter:description" content="Conheça os arquitetos cadastrados no match.IA, filtre por estilo e veja o perfil completo de cada um.">
+<meta name="twitter:image" content="assets/img/mark.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#B0755A">
@@ -15,6 +24,7 @@
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
 <header class="site-header">
   <nav class="nav">
@@ -39,14 +49,14 @@
   </nav>
 </header>
 
-<main>
+<main id="main-content">
   <section class="section" style="padding-top:56px;">
     <div class="container">
       <span class="eyebrow">Arquitetos match.IA</span>
       <h1 style="font-size:2.1rem; margin:6px 0 10px;">Arquitetos em destaque</h1>
       <p style="max-width:640px; color:var(--ink-soft);">Conheça quem já está na plataforma. Filtre por estilo e veja o perfil completo — portfólio, avaliações e como entrar em contato.</p>
 
-      <div id="apiBanner" class="api-banner">
+      <div id="apiBanner" class="api-banner" role="alert" aria-live="polite">
         Não foi possível conectar à API. Rode o back-end para ver os arquitetos cadastrados.
       </div>
 
