@@ -182,7 +182,11 @@ const ColorWheelPicker = (() => {
     hue = h; sat = s; val = v;
     const [r, g, b] = hsvToRgb(h, s, v);
     updateFields(r, g, b);
-    if (!opts.skipBrightness) { brightnessInput.value = Math.round(v * 100); overlay.querySelector('.cw-brightness-value').textContent = Math.round(v * 100) + '%'; }
+    // skipBrightness só evita reescrever o valor do próprio slider enquanto o
+    // usuário o arrasta (senão o arrasto trava) — o número "%" ao lado sempre
+    // tem que refletir o brilho atual, senão fica preso no valor inicial.
+    if (!opts.skipBrightness) brightnessInput.value = Math.round(v * 100);
+    overlay.querySelector('.cw-brightness-value').textContent = Math.round(v * 100) + '%';
     if (!opts.skipWheelRedraw) drawWheel();
     positionCursor();
   }
