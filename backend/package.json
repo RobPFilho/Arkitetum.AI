@@ -11,6 +11,7 @@
     "seed:demo": "node src/seeds/demoAccount.js",
     "approve:cau": "node src/scripts/approveCau.js",
     "clean:matches": "node src/scripts/cleanMatchHistory.js",
+    "delete:accounts": "node src/scripts/deleteAccounts.js",
     "test": "node --test"
   },
   "dependencies": {
