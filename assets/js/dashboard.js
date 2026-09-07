@@ -1,6 +1,20 @@
 document.addEventListener('DOMContentLoaded', async () => {
   // Quem pede menos animação no sistema também não quer rolagem suave.
   const SCROLL_BEHAVIOR = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  // Estado vazio compacto e consistente pra dentro de um card (portfólio,
+  // histórico, mensagens...) — ícone + texto + ação opcional, em vez de um
+  // parágrafo cinza solto sem nenhum apelo visual.
+  const emptyStateHtml = (icon, text, actionHtml = '') =>
+    `<div class="empty-state-inline"><span class="empty-icon">${icon}</span><p>${text}</p>${actionHtml}</div>`;
+  // Ids de arquitetos salvos "pra depois" (qualquer categoria, não só o match
+  // principal) — carregado uma vez ao abrir o painel (loadFavoriteIds roda
+  // logo no início, antes de qualquer match), atualizado localmente a cada
+  // clique em salvar/remover sem precisar recarregar o match inteiro.
+  // Precisa ficar declarado aqui em cima: como é lido bem no início da
+  // inicialização do painel, declará-lo lá embaixo (perto de allResultsById)
+  // causava ReferenceError de temporal dead zone — a função que o usa já
+  // tinha sido chamada antes dessa linha ser executada.
+  const favoriteIds = new Set();
   const apiBanner = document.getElementById('apiBanner');
   document.getElementById('apiBaseLabel').textContent = MatchAPI.base();
   const uid = (u) => u.id || u._id;
@@ -57,6 +71,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('matchResults').addEventListener('click', (e) => handleResultClick(e, me));
     document.getElementById('matchExtraPanels').addEventListener('click', (e) => handleResultClick(e, me));
     setupMatchTabs();
+    await loadFavoriteIds(me);
+    renderFavorites(me);
     document.getElementById('upgradeFromLimitBtn').addEventListener('click', () => openUpgrade(me, () => { renderPlanCard(me); document.getElementById('usageLimitCard').style.display = 'none'; }));
     renderProjectSummary(me);
     setupProjectSummary(me);
@@ -479,6 +495,55 @@ document.addEventListener('DOMContentLoaded', async () => {
   // match principal, o único que entra no limite do plano Gratuito).
   const allResultsById = new Map();
 
+  async function loadFavoriteIds(user) {
+    if (user.role !== 'client') return;
+    try {
+      const favorites = await MatchAPI.favorites();
+      favorites.forEach(f => favoriteIds.add(f.id));
+    } catch { /* offline: só não pré-marca os botões de salvar, sem travar o painel */ }
+  }
+
+  async function renderFavorites(user) {
+    const list = document.getElementById('favoritesList');
+    if (!list) return;
+    try {
+      const favorites = await MatchAPI.favorites();
+      if (!favorites.length) {
+        list.innerHTML = emptyStateHtml('⭐', 'Nenhum arquiteto salvo ainda. Use o botão "Salvar para depois" nos resultados do match.');
+        return;
+      }
+      list.innerHTML = favorites.map(a => `
+        <div class="favorite-item">
+          <div>
+            <h4 style="margin:0;"><a href="arquiteto.html?id=${a.id}" style="color:inherit;">${a.name}</a></h4>
+            <div class="muted">${[a.city, a.state].filter(Boolean).join(' · ') || 'Localização não informada'}</div>
+            <div class="tag-row" style="margin-top:6px;">${(a.profile?.styles || []).slice(0, 4).map(s => `<span class="tag">${s}</span>`).join('')}</div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" data-remove-favorite="${a.id}">Remover</button>
+        </div>`).join('');
+      list.querySelectorAll('[data-remove-favorite]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const archId = btn.dataset.removeFavorite;
+          btn.disabled = true;
+          try {
+            await MatchAPI.removeFavorite(archId);
+            favoriteIds.delete(archId);
+            document.querySelectorAll(`[data-toggle-favorite="${archId}"]`).forEach(b => {
+              b.textContent = '☆ Salvar para depois';
+              b.setAttribute('aria-pressed', 'false');
+            });
+            renderFavorites(user);
+          } catch (err) {
+            alert(err.message || 'Não foi possível remover o favorito agora.');
+            btn.disabled = false;
+          }
+        });
+      });
+    } catch (err) {
+      list.innerHTML = `<p style="font-size:0.86rem; color:var(--ink-faint);">${err.message || 'Não foi possível carregar seus favoritos agora.'}</p>`;
+    }
+  }
+
   function validationRow(architectId) {
     return `
       <div id="validation-${architectId}" style="margin-top:14px; padding-top:14px; border-top:1px dashed var(--line);">
@@ -568,6 +633,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    const favoriteBtn = e.target.closest('[data-toggle-favorite]');
+    if (favoriteBtn) {
+      const archId = favoriteBtn.dataset.toggleFavorite;
+      const nowFavorited = !favoriteIds.has(archId);
+      favoriteBtn.disabled = true;
+      const request = nowFavorited ? MatchAPI.addFavorite(archId) : MatchAPI.removeFavorite(archId);
+      request.then(() => {
+        if (nowFavorited) favoriteIds.add(archId); else favoriteIds.delete(archId);
+        document.querySelectorAll(`[data-toggle-favorite="${archId}"]`).forEach(b => {
+          b.textContent = nowFavorited ? '★ Salvo' : '☆ Salvar para depois';
+          b.setAttribute('aria-pressed', String(nowFavorited));
+          b.disabled = false;
+        });
+        renderFavorites(user);
+      }).catch(err => {
+        alert(err.message || 'Não foi possível salvar agora.');
+        favoriteBtn.disabled = false;
+      });
+      return;
+    }
+
     const validateBtn = e.target.closest('[data-validate]');
     if (validateBtn) {
       const archId = validateBtn.dataset.validate;
@@ -649,6 +735,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <button type="button" class="btn btn-secondary btn-sm" data-toggle-combos="${r.architect.id}">Ver sugestões de materiais</button>
             <button type="button" class="btn btn-secondary btn-sm" data-toggle-review="${r.architect.id}">★ Avaliar arquiteto</button>
             <button type="button" class="btn btn-secondary btn-sm" data-open-chat="${r.architect.id}" data-open-chat-name="${r.architect.name}">💬 Mensagem</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-toggle-favorite="${r.architect.id}" aria-pressed="${favoriteIds.has(r.architect.id)}">${favoriteIds.has(r.architect.id) ? '★ Salvo' : '☆ Salvar para depois'}</button>
           </div>
           ${breakdownBlock(r.architect.id, r.breakdown)}
           ${combosBlock(r.architect.id)}
@@ -852,7 +939,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('portfolioLimitCard').style.display = atLimit ? 'block' : 'none';
 
     if (!items.length) {
-      list.innerHTML = '<p style="font-size:0.86rem; color:var(--ink-faint);">Você ainda não adicionou projetos ao portfólio.</p>';
+      list.innerHTML = emptyStateHtml('🗂️', 'Você ainda não adicionou projetos ao portfólio.',
+        '<button type="button" class="btn btn-secondary btn-sm" data-empty-add-portfolio>+ Adicionar o primeiro projeto</button>');
+      list.querySelector('[data-empty-add-portfolio]')?.addEventListener('click', () => document.getElementById('togglePortfolioForm').click());
       return;
     }
     list.innerHTML = `<div class="material-grid">${items.map(p => `
@@ -1056,7 +1145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const history = await MatchAPI.matchHistory();
       if (!history.length) {
-        container.innerHTML = '<p style="font-size:0.86rem; color:var(--ink-faint);">Nenhuma busca registrada ainda.</p>';
+        container.innerHTML = emptyStateHtml('🔍', 'Nenhuma busca registrada ainda — clique em "Rodar match com IA" no topo da página.');
         return;
       }
       container.innerHTML = history.map(h => `
@@ -1185,7 +1274,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const conversations = await MatchAPI.conversations();
       if (!conversations.length) {
-        listEl.innerHTML = '<p style="font-size:0.8rem; color:var(--ink-faint); padding:10px;">Nenhuma conversa ainda.</p>';
+        listEl.innerHTML = emptyStateHtml('💬', 'Nenhuma conversa ainda.');
         return;
       }
       listEl.innerHTML = conversations.map(c => `

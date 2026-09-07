@@ -105,5 +105,8 @@ const MatchAPI = (() => {
     getValidation: (otherId) => request(`/validations/${encodeURIComponent(otherId)}`, { auth: true }),
     confirmValidation: (otherId) => request(`/validations/${encodeURIComponent(otherId)}/confirm`, { method: 'POST', auth: true }),
     pendingValidations: () => request('/validations/pending', { auth: true }),
+    favorites: () => request('/favorites', { auth: true }),
+    addFavorite: (architectId) => request(`/favorites/${encodeURIComponent(architectId)}`, { method: 'POST', auth: true }),
+    removeFavorite: (architectId) => request(`/favorites/${encodeURIComponent(architectId)}`, { method: 'DELETE', auth: true }),
   };
 })();

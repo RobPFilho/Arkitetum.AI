@@ -7,12 +7,14 @@ export async function createReview(req, res) {
   const { architect, rating, comment } = req.body;
   if (!architect || !rating)
     return res.status(400).json({ error: "Arquiteto e nota são obrigatórios" });
-  const review = await Review.create({
-    client: req.user.id,
-    architect,
-    rating: Number(rating),
-    comment,
-  });
+  // upsert: reenvio (clique duplo, ou o cliente mudando de ideia) atualiza a
+  // mesma avaliação em vez de criar outra — um cliente só avalia uma vez
+  // cada arquiteto (reforçado pelo índice único client+architect no model).
+  const review = await Review.findOneAndUpdate(
+    { client: req.user.id, architect },
+    { rating: Number(rating), comment },
+    { new: true, upsert: true, setDefaultsOnInsert: true },
+  );
   res.status(201).json(review);
 
   const architectUser = await User.findById(architect);

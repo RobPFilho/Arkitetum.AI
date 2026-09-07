@@ -1,14 +1,18 @@
 import mongoose from "mongoose";
 
-export default mongoose.model(
-  "Review",
-  new mongoose.Schema(
-    {
-      client: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-      architect: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-      rating: { type: Number, required: true, min: 1, max: 5 },
-      comment: { type: String, trim: true, maxlength: 1000 },
-    },
-    { timestamps: true },
-  ),
+const reviewSchema = new mongoose.Schema(
+  {
+    client: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    architect: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    comment: { type: String, trim: true, maxlength: 1000 },
+  },
+  { timestamps: true },
 );
+
+// Um cliente só tem uma avaliação por arquiteto — sem isso, cliques duplos ou
+// reenvios acidentais criavam várias avaliações da mesma pessoa, inflando a
+// média sem representar clientes distintos de verdade.
+reviewSchema.index({ client: 1, architect: 1 }, { unique: true });
+
+export default mongoose.model("Review", reviewSchema);

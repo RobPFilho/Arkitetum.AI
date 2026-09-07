@@ -420,3 +420,40 @@ pra se destacar do resto sem gritar. Parágrafos e fileiras de botão que
 repetiam `style="font-size:0.88rem"`/`style="display:flex; gap:10px"` inline
 em cada card viraram classes (`.card-lead`, `.card-actions`), centralizando o
 espaçamento num lugar só em vez de espalhado pelo HTML.
+
+## Favoritos, aviso de disponibilidade, avaliação sem duplicata e estados vazios
+
+- **Favoritar arquiteto pra depois**: botão "☆ Salvar para depois" em qualquer
+  resultado do match — inclusive nas categorias extras (indisponível, fora da
+  região, fora do orçamento), que é onde mais faz sentido guardar alguém que
+  não virou o match principal agora mas pode valer a pena revisitar. Nova
+  seção "⭐ Favoritos" no painel do cliente lista tudo que foi salvo, mesmo
+  sem rodar um novo match. Model novo (`Favorite`, único por
+  cliente+arquiteto), rotas `/api/favorites` (`GET`/`POST /:id`/`DELETE /:id`,
+  só para clientes), incluído na exportação e exclusão de dados (LGPD) e no
+  script `delete:accounts`.
+- **Aviso quando um arquiteto "indisponível" libera agenda**: se um arquiteto
+  muda `availability` de `"unavailable"` para qualquer outro valor,
+  `dashboardController.updateMe` busca (últimos 30 dias) quem teve esse
+  arquiteto na categoria "indisponível" numa busca de match e manda uma
+  notificação — reaproveitando o sino que já existia, em vez de deixar essa
+  mudança passar batido pro cliente que só via aquele card "sem agenda
+  aberta agora".
+- **Avaliação não duplica mais**: `Review` ganhou índice único
+  (cliente+arquiteto) e `createReview` virou upsert — reenvio ou clique duplo
+  atualiza a mesma avaliação em vez de criar outra. Descoberto ao limpar uma
+  avaliação de teste duplicada que tinha sobrado de uma sessão anterior.
+- **Estados vazios com ícone**: portfólio vazio, histórico sem buscas,
+  conversa sem mensagens e favoritos vazios agora usam um bloco padrão
+  (ícone + texto + ação quando faz sentido, tipo "+ Adicionar o primeiro
+  projeto") em vez de um parágrafo cinza solto sem nenhum apelo visual.
+- **`projetos.html` não precisou da mesma reorganização em seções do
+  painel** — ao revisar, já é uma página de seções bem demarcadas (mesmo
+  padrão do resto do site institucional), diferente da pilha de cards
+  idênticos que o painel era antes.
+- **Bug real encontrado no caminho**: `favoriteIds` (o `Set` que marca quais
+  arquitetos já estão salvos) tinha sido declarado no meio do arquivo,
+  depois do ponto em que já era lido — um `ReferenceError` de "temporal dead
+  zone" silenciosamente engolido pelo `catch`, fazendo o botão de favoritar
+  nunca refletir o estado real salvo no banco. Corrigido movendo a
+  declaração pro topo do arquivo.

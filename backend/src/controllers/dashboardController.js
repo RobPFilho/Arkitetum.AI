@@ -3,6 +3,8 @@ import Message from "../models/Message.js";
 import Review from "../models/Review.js";
 import MatchHistory from "../models/MatchHistory.js";
 import Validation from "../models/Validation.js";
+import Favorite from "../models/Favorite.js";
+import { notify } from "../services/notificationService.js";
 
 export function getMe(req, res) {
   res.json(req.user);
@@ -14,7 +16,7 @@ export function getMe(req, res) {
  */
 export async function exportMyData(req, res) {
   const userId = req.user.id;
-  const [messages, matchHistory, validations, projects, reviewsGiven, reviewsReceived] =
+  const [messages, matchHistory, validations, projects, reviewsGiven, reviewsReceived, favorites] =
     await Promise.all([
       Message.find({ $or: [{ from: userId }, { to: userId }] }).sort("createdAt"),
       req.user.role === "client" ? MatchHistory.find({ client: userId }).sort("createdAt") : [],
@@ -22,6 +24,7 @@ export async function exportMyData(req, res) {
       req.user.role === "client" ? Project.find({ client: userId }) : [],
       req.user.role === "client" ? Review.find({ client: userId }) : [],
       req.user.role === "architect" ? Review.find({ architect: userId }) : [],
+      req.user.role === "client" ? Favorite.find({ client: userId }) : [],
     ]);
 
   res.setHeader("Content-Disposition", "attachment; filename=matchia-meus-dados.json");
@@ -34,6 +37,7 @@ export async function exportMyData(req, res) {
     validacoesDeResumo: validations,
     avaliacoesEnviadas: reviewsGiven,
     avaliacoesRecebidas: reviewsReceived,
+    arquitetosFavoritados: favorites,
   });
 }
 
@@ -49,6 +53,7 @@ export async function deleteMyAccount(req, res) {
     Review.deleteMany({ $or: [{ client: userId }, { architect: userId }] }),
     MatchHistory.deleteMany({ client: userId }),
     Validation.deleteMany({ $or: [{ client: userId }, { architect: userId }] }),
+    Favorite.deleteMany({ $or: [{ client: userId }, { architect: userId }] }),
   ]);
   await req.user.deleteOne();
   res.json({ ok: true });
@@ -58,6 +63,8 @@ export async function updateMe(req, res) {
   const allowed = ["name", "phone", "city", "state"];
   for (const key of allowed)
     if (req.body[key] !== undefined) req.user[key] = req.body[key];
+
+  const wasUnavailable = req.user.role === "architect" && req.user.architectProfile?.availability === "unavailable";
 
   const profileKey = req.user.role + "Profile";
   if (req.body[profileKey]) {
@@ -77,6 +84,41 @@ export async function updateMe(req, res) {
 
   await req.user.save();
   res.json(req.user);
+
+  if (wasUnavailable && req.user.architectProfile?.availability !== "unavailable") {
+    notifyClientsArchitectAvailableAgain(req.user).catch((err) =>
+      console.error("Falha ao notificar clientes sobre disponibilidade:", err.message),
+    );
+  }
+}
+
+/**
+ * Um arquiteto que estava "indisponível" some da categoria principal do
+ * match — o cliente só o vê na aba "compatível, mas indisponível". Quando
+ * ele libera agenda de novo, avisa quem tinha esse arquiteto nessa categoria
+ * numa busca recente, em vez de deixar essa mudança passar em silêncio.
+ */
+async function notifyClientsArchitectAvailableAgain(architect) {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const recentMatches = await MatchHistory.find({
+    "results.architect": architect._id,
+    "results.category": "unavailable",
+    createdAt: { $gte: thirtyDaysAgo },
+  })
+    .sort("-createdAt")
+    .limit(50);
+
+  const clientIds = [...new Set(recentMatches.map((m) => String(m.client)))];
+  await Promise.all(
+    clientIds.map((clientId) =>
+      notify(
+        clientId,
+        "availability",
+        `${architect.name} está disponível de novo — pode valer a pena entrar em contato.`,
+        `arquiteto.html?id=${architect.id}`,
+      ),
+    ),
+  );
 }
 
 export async function addPortfolio(req, res) {

@@ -8,6 +8,7 @@ import Review from "../models/Review.js";
 import MatchHistory from "../models/MatchHistory.js";
 import Validation from "../models/Validation.js";
 import Notification from "../models/Notification.js";
+import Favorite from "../models/Favorite.js";
 import mongoose from "mongoose";
 
 const emails = process.argv.slice(2);
@@ -34,6 +35,7 @@ for (const email of emails) {
     MatchHistory.deleteMany({ client: userId }),
     Validation.deleteMany({ $or: [{ client: userId }, { architect: userId }] }),
     Notification.deleteMany({ user: userId }),
+    Favorite.deleteMany({ $or: [{ client: userId }, { architect: userId }] }),
   ]);
   await user.deleteOne();
   console.log(`Conta removida: ${user.name} (${user.email}, ${user.role}).`);

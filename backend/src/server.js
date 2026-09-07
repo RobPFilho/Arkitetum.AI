@@ -18,6 +18,7 @@ import projectRoutes from "./routes/projects.js";
 import validationRoutes from "./routes/validations.js";
 import statsRoutes from "./routes/stats.js";
 import notificationRoutes from "./routes/notifications.js";
+import favoriteRoutes from "./routes/favorites.js";
 
 const app = express(),
   root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
@@ -43,6 +44,7 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/validations", validationRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/favorites", favoriteRoutes);
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
 // Site (front-end) servido pelo mesmo processo/porta que a API — sem

@@ -16,6 +16,7 @@ import Message from "../models/Message.js";
 import Review from "../models/Review.js";
 import Validation from "../models/Validation.js";
 import MatchHistory from "../models/MatchHistory.js";
+import Favorite from "../models/Favorite.js";
 import { rankArchitects } from "../services/scoringEngine.js";
 import mongoose from "mongoose";
 
@@ -33,6 +34,7 @@ if (existing) {
     Review.deleteMany({ client: existing._id }),
     Validation.deleteMany({ client: existing._id }),
     MatchHistory.deleteMany({ client: existing._id }),
+    Favorite.deleteMany({ client: existing._id }),
   ]);
   await existing.deleteOne();
 }
@@ -105,6 +107,8 @@ await Validation.create({
   clientConfirmed: true,
   architectConfirmed: true,
 });
+
+await Favorite.create({ client: client._id, architect: architect._id });
 
 console.log("Conta de demonstração pronta:");
 console.log(`  Login: ${DEMO_EMAIL} / MatchIA@Demo2026`);
