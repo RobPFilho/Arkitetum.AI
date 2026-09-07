@@ -478,6 +478,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       ${line('CAU/A', val('cauRegistration'))}
       ${line('Atuação', singleChipValue(document.getElementById('practiceType')))}
       ${line('Áreas de atendimento', val('workingAreas'))}
+      ${line('Faixa de preço', (val('priceMin') || val('priceMax')) ? `R$ ${val('priceMin') || '?'} – R$ ${val('priceMax') || '?'}` : '')}
 
       <div class="summary-section-title">Estilo e especialidades</div>
       ${line('Estilos', chipValues(document.getElementById('architectStyles')).join(', '))}
@@ -609,6 +610,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         favoriteMaterials: chipValues(document.getElementById('architectMaterials')),
         yearsExperience: Number(val('yearsExperience')) || 0,
         workingAreas: val('workingAreas').split(',').map(s => s.trim()).filter(Boolean),
+        priceMin: val('priceMin') || undefined,
+        priceMax: val('priceMax') || undefined,
         website: val('website'),
         instagram: val('instagram'),
         bio: [val('bio'), bioExtra].filter(Boolean).join('\n\n— Perfil complementar —\n'),

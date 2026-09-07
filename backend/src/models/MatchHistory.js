@@ -14,6 +14,7 @@ export default mongoose.model(
           architect: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
           score: Number,
           explanation: String,
+          category: { type: String, default: "main" },
         },
       ],
     },

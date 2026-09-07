@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('roleLabel').textContent = 'Painel do cliente';
     document.getElementById('runMatchBtn').addEventListener('click', () => runMatch(me));
     document.getElementById('matchResults').addEventListener('click', (e) => handleResultClick(e, me));
+    document.getElementById('matchExtraCategories').addEventListener('click', (e) => handleResultClick(e, me));
     document.getElementById('upgradeFromLimitBtn').addEventListener('click', () => openUpgrade(me, () => { renderPlanCard(me); document.getElementById('usageLimitCard').style.display = 'none'; }));
     renderProjectSummary(me);
     setupProjectSummary(me);
@@ -471,6 +472,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   let lastResults = [];
+  // Todos os resultados já renderizados (match principal + categorias extras),
+  // por id de arquiteto — usado por ações que agem sobre qualquer card, tipo
+  // "ver sugestões de materiais", sem depender só de lastResults (que é só o
+  // match principal, o único que entra no limite do plano Gratuito).
+  const allResultsById = new Map();
 
   function validationRow(architectId) {
     return `
@@ -550,7 +556,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const box = document.getElementById(`combos-${archId}`);
       const isOpen = box.style.display !== 'none';
       if (isOpen) { box.style.display = 'none'; comboBtn.textContent = 'Ver sugestões de materiais'; return; }
-      const result = lastResults.find(r => r.architect.id === archId);
+      const result = allResultsById.get(archId);
       const combos = MatchExtras.generateMaterialCombos(result?.architect.profile?.favoriteMaterials);
       box.innerHTML = combos.length
         ? `<div class="constraint-note"><span class="dot-ic">🔒</span><span>Combinações geradas só com os materiais que ${result.architect.name} cadastrou como favoritos.</span></div>` +
@@ -634,6 +640,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <p class="explanation">${r.explanation}</p>
           <div class="tag-row">
+            ${r.architect.sameCity ? '<span class="tag tag-samecity">📍 Mesma cidade</span>' : ''}
             ${(r.architect.profile?.styles || []).slice(0, 4).map(s => `<span class="tag">${s}</span>`).join('')}
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
@@ -654,6 +661,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="result-score"><strong>${r.score}</strong><span>pontos</span></div>`;
   }
 
+  /** Categorias extras (indisponível/fora da região/fora do orçamento/bem
+   * avaliado) — mostradas abaixo do match principal, sempre visíveis (não
+   * entram no limite de resultados bloqueados do plano Gratuito). */
+  function renderExtraCategories(categories, user) {
+    const container = document.getElementById('matchExtraCategories');
+    if (!categories.length) { container.innerHTML = ''; return; }
+    container.innerHTML = categories.map(cat => `
+      <div class="match-category" style="margin-top:28px;">
+        <h4 style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">${cat.icon} ${cat.label}</h4>
+        <p style="font-size:0.84rem; color:var(--ink-faint); margin:0 0 14px;">${cat.note}</p>
+        <div class="result-list">
+          ${cat.results.map((r, i) => `<div class="result-card" style="grid-template-columns:auto 1fr auto; align-items:start;">${resultCardHtml(r, i, user)}</div>`).join('')}
+        </div>
+      </div>`).join('');
+    const allExtraResults = categories.flatMap(cat => cat.results);
+    allExtraResults.forEach(r => allResultsById.set(r.architect.id, r));
+    loadValidationStatuses(allExtraResults);
+    loadResultThumbnails(allExtraResults);
+  }
+
   async function runMatch(user, projectId) {
     const btn = document.getElementById('runMatchBtn');
     const list = document.getElementById('matchResults');
@@ -667,6 +694,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       limitCard.style.display = 'block';
       list.innerHTML = '';
       empty.style.display = 'none';
+      document.getElementById('matchExtraCategories').innerHTML = '';
       return;
     }
     limitCard.style.display = 'none';
@@ -683,8 +711,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       </div>`.repeat(3);
     try {
-      const { results, project } = await MatchAPI.runMatch(projectId);
+      const { results, extra, project } = await MatchAPI.runMatch(projectId);
       lastResults = results;
+      allResultsById.clear();
+      results.forEach(r => allResultsById.set(r.architect.id, r));
       contextLabel.textContent = project ? `Resultados para o projeto "${project.name}".` : 'Resultados para o seu perfil principal (dados do cadastro).';
       MatchExtras.recordMatchRun(uid(user));
       renderPlanCard(user);
@@ -712,11 +742,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('exportMatchPdfBtn').style.display = results.length ? '' : 'none';
       loadValidationStatuses(results.slice(0, plan.visibleResults));
       loadResultThumbnails(results.slice(0, plan.visibleResults));
+      renderExtraCategories(extra || [], user);
       renderMatchHistory(user);
     } catch (err) {
       list.innerHTML = '';
       empty.style.display = 'block';
       empty.innerHTML = `<p>${err.message || 'Não foi possível rodar o match agora.'}</p>`;
+      document.getElementById('matchExtraCategories').innerHTML = '';
       if (err.offline) apiBanner.classList.add('show');
     } finally {
       btn.disabled = false;

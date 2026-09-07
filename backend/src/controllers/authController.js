@@ -27,13 +27,9 @@ const normalizeStringArray = (value) =>
         .filter(Boolean)
       : [];
 
-const normalizeBudget = (body) => {
-  const min = body.budgetMin !== undefined && body.budgetMin !== ""
-    ? Number(body.budgetMin)
-    : undefined;
-  const max = body.budgetMax !== undefined && body.budgetMax !== ""
-    ? Number(body.budgetMax)
-    : undefined;
+const normalizeRange = (rawMin, rawMax) => {
+  const min = rawMin !== undefined && rawMin !== "" ? Number(rawMin) : undefined;
+  const max = rawMax !== undefined && rawMax !== "" ? Number(rawMax) : undefined;
 
   if (min === undefined && max === undefined) return undefined;
 
@@ -42,6 +38,8 @@ const normalizeBudget = (body) => {
     max: Number.isFinite(max) ? max : undefined,
   };
 };
+const normalizeBudget = (body) => normalizeRange(body.budgetMin, body.budgetMax);
+const normalizePriceRange = (body) => normalizeRange(body.priceMin, body.priceMax);
 
 export async function register(req, res) {
   const role = req.params.role;
@@ -74,6 +72,7 @@ export async function register(req, res) {
           ? Number(req.body.yearsExperience)
           : undefined,
         workingAreas: normalizeStringArray(req.body.workingAreas),
+        priceRange: normalizePriceRange(req.body),
         favoriteMaterials: (req.body.favoriteMaterials || []).slice(0, 5),
         bio: req.body.bio,
         website: req.body.website,

@@ -1,8 +1,51 @@
 import User from "../models/User.js";
 import Project from "../models/Project.js";
 import MatchHistory from "../models/MatchHistory.js";
-import { rankArchitects } from "../services/scoringEngine.js";
+import Review from "../models/Review.js";
+import { categorizeMatches } from "../services/scoringEngine.js";
 import { explainCompatibility } from "../services/geminiService.js";
+
+const CATEGORY_META = {
+  unavailable: {
+    label: "Compatível, mas indisponível no momento",
+    icon: "⏳",
+    note: "Combina bem com o que você procura, mas está sem agenda aberta agora — vale entrar em contato mesmo assim para uma futura vaga.",
+  },
+  outOfRegion: {
+    label: "Fora da sua região",
+    icon: "📍",
+    note: "Bom encaixe de estilo e perfil, mas esse arquiteto não atende a sua cidade/estado hoje.",
+  },
+  outOfBudget: {
+    label: "Fora do seu orçamento",
+    icon: "💰",
+    note: "Estilo compatível, mas a faixa de preço dos projetos desse arquiteto não cruza com o orçamento informado.",
+  },
+  wellRated: {
+    label: "Fora do estilo pedido, mas muito bem avaliado",
+    icon: "🌟",
+    note: "Não é o estilo que você descreveu, mas tem nota alta de clientes anteriores — pode valer a pena conhecer o portfólio.",
+  },
+};
+
+function templatedExplanation(architect, reasons) {
+  return reasons.length
+    ? `${architect.name} é uma ótima opção por ${reasons.join(", ")}.`
+    : `${architect.name} é uma opção com boa avaliação de clientes anteriores, mesmo fora do estilo pedido.`;
+}
+
+function shapeArchitect(architect, sameCity) {
+  return {
+    id: architect.id,
+    name: architect.name,
+    email: architect.email,
+    phone: architect.phone,
+    city: architect.city,
+    state: architect.state,
+    profile: architect.architectProfile,
+    sameCity,
+  };
+}
 
 export async function runMatch(req, res) {
   const { projectId } = req.body || {};
@@ -28,37 +71,72 @@ export async function runMatch(req, res) {
       }
     : req.user;
 
-  const architects = await User.find({
-    role: "architect",
-    "architectProfile.availability": { $ne: "unavailable" },
-  }).populate("architectProfile.favoriteMaterials");
-  const ranked = rankArchitects(clientForScoring, architects);
-  const results = await Promise.all(
-    ranked.map(async ({ architect, score, reasons, breakdown }) => ({
-      architect: {
-        id: architect.id,
-        name: architect.name,
-        email: architect.email,
-        phone: architect.phone,
-        city: architect.city,
-        state: architect.state,
-        profile: architect.architectProfile,
-      },
+  // Antes essa query já excluía quem estava indisponível — o que impedia
+  // qualquer categoria de "indisponível, mas compatível" existir. Agora
+  // busca todo mundo e deixa a categorização decidir o que fazer com cada um.
+  const architects = await User.find({ role: "architect" }).populate(
+    "architectProfile.favoriteMaterials",
+  );
+  const { main, unavailable, outOfRegion, outOfBudget, uncategorized } =
+    categorizeMatches(clientForScoring, architects);
+
+  const wellRated = await buildWellRatedBonus(uncategorized);
+
+  const mainResults = await Promise.all(
+    main.map(async ({ architect, score, breakdown, reasons, sameCity }) => ({
+      architect: shapeArchitect(architect, sameCity),
       score,
       breakdown,
       explanation: await explainCompatibility(clientForScoring, architect, reasons),
     })),
   );
+
+  const extra = await Promise.all(
+    [
+      ["unavailable", unavailable],
+      ["outOfRegion", outOfRegion],
+      ["outOfBudget", outOfBudget],
+      ["wellRated", wellRated],
+    ]
+      .filter(([, entries]) => entries.length)
+      .map(async ([key, entries]) => ({
+        key,
+        ...CATEGORY_META[key],
+        results: entries.map(({ architect, score, breakdown, reasons, sameCity }) => ({
+          architect: shapeArchitect(architect, sameCity),
+          score,
+          breakdown,
+          explanation: templatedExplanation(architect, reasons),
+        })),
+      })),
+  );
+
   await MatchHistory.create({
     client: req.user.id,
     project: project?.id,
-    results: results.map((r) => ({
-      architect: r.architect.id,
-      score: r.score,
-      explanation: r.explanation,
-    })),
+    results: [
+      ...mainResults.map((r) => ({ architect: r.architect.id, score: r.score, explanation: r.explanation, category: "main" })),
+      ...extra.flatMap((cat) =>
+        cat.results.map((r) => ({ architect: r.architect.id, score: r.score, explanation: r.explanation, category: cat.key })),
+      ),
+    ],
   });
-  res.json({ results, project: project ? { id: project.id, name: project.name } : null });
+
+  res.json({ results: mainResults, extra, project: project ? { id: project.id, name: project.name } : null });
+}
+
+async function buildWellRatedBonus(uncategorized) {
+  if (!uncategorized.length) return [];
+  const ratings = await Review.aggregate([
+    { $match: { architect: { $in: uncategorized.map((e) => e.architect._id) } } },
+    { $group: { _id: "$architect", avg: { $avg: "$rating" }, count: { $sum: 1 } } },
+  ]);
+  const ratingMap = new Map(ratings.map((r) => [String(r._id), r.avg]));
+  return uncategorized
+    .filter((e) => (ratingMap.get(String(e.architect._id)) || 0) >= 4)
+    .sort((a, b) => (ratingMap.get(String(b.architect._id)) || 0) - (ratingMap.get(String(a.architect._id)) || 0))
+    .slice(0, 3)
+    .map((e) => ({ ...e, reasons: [`nota ${ratingMap.get(String(e.architect._id)).toFixed(1)} de clientes anteriores`] }));
 }
 
 export async function listMatchHistory(req, res) {

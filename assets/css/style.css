@@ -351,6 +351,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .match-card.result .arch-meta { font-size: 0.82rem; color: var(--ink-faint); margin-bottom: 10px; }
 .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .tag { background: var(--bg-alt); color: var(--ink); font-size: 0.72rem; padding: 5px 12px; border-radius: 999px; }
+.tag-samecity { background: var(--sage); color: var(--white); }
 .tag.custom { background: transparent; border: 1px dashed var(--ink-faint); }
 @media (max-width: 860px) { .match-demo { grid-template-columns: 1fr; } }
 

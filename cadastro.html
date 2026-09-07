@@ -330,6 +330,14 @@
               <input type="text" id="workingAreas" placeholder="São Paulo, SP, Campinas">
             </div>
             <div class="form-field">
+              <label for="priceMin">Faixa de preço mínima dos seus projetos (R$) <span class="hint">(opcional)</span></label>
+              <input type="number" id="priceMin" min="0" step="1000" placeholder="150000">
+            </div>
+            <div class="form-field">
+              <label for="priceMax">Faixa de preço máxima dos seus projetos (R$) <span class="hint">(opcional)</span></label>
+              <input type="number" id="priceMax" min="0" step="1000" placeholder="400000">
+            </div>
+            <div class="form-field">
               <label for="website">Site <span class="hint">(opcional)</span></label>
               <input type="url" id="website" placeholder="https://...">
             </div>
@@ -338,6 +346,7 @@
               <input type="text" id="instagram" placeholder="@seu_estudio">
             </div>
           </div>
+          <p class="wizard-step-hint" style="margin-top:-4px;">A faixa de preço ajuda a IA a avisar o cliente quando o orçamento dele não é compatível com o seu, em vez de simplesmente não te mostrar.</p>
           <div class="field-subgroup">
             <span class="field-subgroup-label">Tipo de atuação</span>
             <div class="chip-select" id="practiceType"></div>

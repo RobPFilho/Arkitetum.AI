@@ -50,6 +50,10 @@ const userSchema = new mongoose.Schema(
       specialties: [String],
       yearsExperience: Number,
       workingAreas: [String],
+      priceRange: {
+        min: { type: Number, default: undefined },
+        max: { type: Number, default: undefined },
+      },
       favoriteMaterials: [String],
       bio: String,
       website: String,

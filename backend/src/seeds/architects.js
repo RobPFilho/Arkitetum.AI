@@ -20,6 +20,7 @@ const architects = [
       bio: "Especialista em residências minimalistas com forte presença de luz natural e materiais crus.",
       instagram: "@fernanda.arq",
       availability: "available",
+      priceRange: { min: 200000, max: 450000 },
     },
   },
   {
@@ -36,7 +37,8 @@ const architects = [
       favoriteMaterials: ["Mármore Carrara", "Granito", "Aço"],
       bio: "Vinte anos projetando residências e coberturas de alto padrão na Zona Sul carioca.",
       website: "https://ricardoprado.arq.br",
-      availability: "limited",
+      availability: "unavailable",
+      priceRange: { min: 600000, max: 1500000 },
     },
   },
   {
@@ -54,6 +56,7 @@ const architects = [
       bio: "Projetos de interiores que aproximam apartamentos urbanos da natureza, com paletas claras e plantas.",
       instagram: "@juliana.biofilico",
       availability: "available",
+      priceRange: { min: 150000, max: 350000 },
     },
   },
   {
@@ -70,6 +73,7 @@ const architects = [
       favoriteMaterials: ["Concreto aparente", "Tijolo aparente", "Aço"],
       bio: "Referência em retrofit de galpões e lofts comerciais com estética industrial exposta.",
       availability: "available",
+      priceRange: { min: 250000, max: 600000 },
     },
   },
   {
@@ -87,6 +91,7 @@ const architects = [
       bio: "Reinterpreta linhas clássicas em residências contemporâneas, com acabamentos atemporais.",
       website: "https://camilareis.com.br",
       availability: "available",
+      priceRange: { min: 500000, max: 1200000 },
     },
   },
   {
@@ -104,6 +109,7 @@ const architects = [
       bio: "Casas de praia e sítios que dialogam com o entorno natural, priorizando ventilação cruzada.",
       instagram: "@thiago.paisagismo",
       availability: "available",
+      priceRange: { min: 180000, max: 400000 },
     },
   },
   {
@@ -120,6 +126,7 @@ const architects = [
       favoriteMaterials: ["Carvalho", "Porcelanato", "Vidro"],
       bio: "Apartamentos compactos e funcionais, com marcenaria sob medida e paleta neutra.",
       availability: "available",
+      priceRange: { min: 120000, max: 280000 },
     },
   },
   {
@@ -137,6 +144,7 @@ const architects = [
       bio: "Projetos comerciais e corporativos de grande porte, do estudo de viabilidade à entrega de obra.",
       website: "https://eduardofaria.arq.br",
       availability: "limited",
+      priceRange: { min: 700000, max: 2000000 },
     },
   },
   {
@@ -153,6 +161,7 @@ const architects = [
       favoriteMaterials: ["Madeira de demolição", "Tijolo aparente", "Ardósia"],
       bio: "Reformas de casas antigas com respeito à estrutura original e toque rústico contemporâneo.",
       availability: "available",
+      priceRange: { min: 200000, max: 500000 },
     },
   },
   {
@@ -170,6 +179,7 @@ const architects = [
       bio: "Arquiteto em início de carreira, focado em interiores comerciais enxutos e de rápida execução.",
       instagram: "@gustavo.amaral.arq",
       availability: "available",
+      priceRange: { min: 100000, max: 250000 },
     },
   },
 ];

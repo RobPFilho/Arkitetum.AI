@@ -360,3 +360,33 @@ do usuário na navbar de cada página depois de long tempo sem revisar isso.
   interação é por texto, e o chat entre cliente e arquiteto já existe como
   alternativa à ligação telefônica. Não havia nada de específico faltando aqui além
   do que a rodada de contraste/diálogos acima também melhora.
+
+## Categorias de match (não é só o "top 4")
+
+Antes, `POST /api/matches/run` buscava só arquitetos com `availability !== "unavailable"`
+e devolvia os 4 com maior pontuação — todo o resto (indisponível, fora da região, fora
+do orçamento) simplesmente desaparecia sem explicação. Agora `categorizeMatches()`
+(`backend/src/services/scoringEngine.js`) avalia **todos** os arquitetos e separa por
+motivo:
+
+- **🏆 Melhor compatibilidade**: o match de sempre (disponível, atende a região, dentro
+  do orçamento) — é o único grupo que entra no limite de resultados do plano Gratuito.
+- **⏳ Compatível, mas indisponível no momento**: bom estilo/materiais, mas
+  `availability: "unavailable"` — antes não aparecia em lugar nenhum.
+- **📍 Fora da sua região**: bom estilo, mas não atende a cidade/estado do cliente.
+- **💰 Fora do seu orçamento**: exige que o arquiteto tenha cadastrado uma faixa de
+  preço (`architectProfile.priceRange`, campo novo no cadastro — etapa "Perfil
+  profissional") que não cruza com o orçamento do cliente. Sem faixa de preço
+  cadastrada de um dos lados, não classifica nessa categoria (falta de dado não vira
+  suposição de incompatibilidade).
+- **🌟 Fora do estilo pedido, mas muito bem avaliado**: arquitetos sem nenhuma afinidade
+  real de estilo/material/especialidade, mas com nota média ≥ 4 e pelo menos uma
+  avaliação — um bônus de "a IA também pensa fora da caixa".
+- Tag **"📍 Mesma cidade"** direto no card (em vez de mais uma categoria separada,
+  que ficaria redundante com o grupo principal).
+
+Cada categoria extra é limitada a 3 resultados e usa uma explicação padrão (sem
+chamada à Gemini) para não estourar a cota de IA — só o grupo principal recebe a
+explicação gerada por IA, como já era antes. As categorias extras ficam sempre
+visíveis, sem entrar no bloqueio do plano Gratuito, e continuam totalmente
+interativas (chat, avaliação, detalhes da pontuação, sugestões de materiais).

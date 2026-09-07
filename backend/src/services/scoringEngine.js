@@ -53,3 +53,71 @@ export function rankArchitects(client, architects) {
     .sort((a, b) => b.score - a.score)
     .slice(0, 4);
 }
+
+/** true se as faixas se sobrepõem, ou se falta informação de um dos lados
+ * (nesse caso não penaliza — só classifica "fora do orçamento" quando dá
+ * pra provar que as faixas realmente não se cruzam). */
+function budgetsOverlap(clientBudget, architectPriceRange) {
+  const cMin = clientBudget?.min, cMax = clientBudget?.max;
+  const aMin = architectPriceRange?.min, aMax = architectPriceRange?.max;
+  if (cMin == null && cMax == null) return true;
+  if (aMin == null && aMax == null) return true;
+  const lo1 = cMin ?? -Infinity, hi1 = cMax ?? Infinity;
+  const lo2 = aMin ?? -Infinity, hi2 = aMax ?? Infinity;
+  return lo2 <= hi1 && hi2 >= lo1;
+}
+
+/**
+ * Em vez de só descartar quem não é "o melhor match", separa por que motivo
+ * cada arquiteto compatível não entrou no grupo principal — indisponível,
+ * fora da região ou fora do orçamento — pra mostrar isso pro cliente em vez
+ * de simplesmente escondê-lo. Quem não tem nenhuma afinidade real de
+ * estilo/material/especialidade fica em `uncategorized`, pro chamador decidir
+ * se entra no bônus de "bem avaliado mesmo fora do estilo".
+ */
+export function categorizeMatches(client, architects) {
+  const clientBudget = client.clientProfile?.budget;
+
+  const evaluated = architects.map((architect) => {
+    const { score, reasons, breakdown } = scoreArchitect(client, architect);
+    const a = architect.architectProfile || {};
+    const locationValue = breakdown.find((b) => b.label === "Localização")?.value || 0;
+    const availabilityValue = breakdown.find((b) => b.label === "Disponibilidade")?.value || 0;
+    const coreScore = score - locationValue - availabilityValue;
+    const sameCity = !!(
+      client.city &&
+      architect.city &&
+      client.city.trim().toLowerCase() === architect.city.trim().toLowerCase()
+    );
+    return {
+      architect,
+      score,
+      reasons,
+      breakdown,
+      coreScore,
+      sameCity,
+      available: a.availability !== "unavailable",
+      inRegion: locationValue > 0,
+      inBudget: budgetsOverlap(clientBudget, a.priceRange),
+    };
+  });
+
+  const main = [], unavailable = [], outOfRegion = [], outOfBudget = [], uncategorized = [];
+  for (const e of evaluated) {
+    if (e.coreScore <= 0) { uncategorized.push(e); continue; }
+    if (!e.available) unavailable.push(e);
+    else if (!e.inRegion) outOfRegion.push(e);
+    else if (!e.inBudget) outOfBudget.push(e);
+    else main.push(e);
+  }
+
+  const byBestScore = (a, b) => b.score - a.score;
+  const byCoreScore = (a, b) => b.coreScore - a.coreScore;
+  return {
+    main: main.sort(byBestScore).slice(0, 4),
+    unavailable: unavailable.sort(byCoreScore).slice(0, 3),
+    outOfRegion: outOfRegion.sort(byCoreScore).slice(0, 3),
+    outOfBudget: outOfBudget.sort(byCoreScore).slice(0, 3),
+    uncategorized,
+  };
+}
