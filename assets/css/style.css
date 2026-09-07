@@ -528,6 +528,55 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .dash-shell { padding: 48px 0 96px; }
 .dash-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 36px; flex-wrap: wrap; gap: 16px; }
 .dash-grid { display: grid; grid-template-columns: 320px 1fr; gap: 28px; align-items: start; }
+
+/* ---- Painel como página de perfil (inspirado em Instagram/X/TikTok): capa
+   com avatar grande + bio, uma fileira de números tipo "posts/seguidores", e
+   abas horizontais trocando o conteúdo abaixo — em vez da barra lateral fixa
+   com uma pilha de cards que o painel era antes. ---- */
+.profile-header { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; padding-bottom: 24px; }
+.profile-avatar-lg {
+  width: 96px; height: 96px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--terracotta); flex-shrink: 0;
+  background: linear-gradient(var(--bg-alt), var(--bg-alt)) padding-box, var(--brand-gradient) border-box;
+  border: 3px solid transparent;
+}
+/* min-width:0 é essencial aqui: sem isso, um item flex não encolhe além do
+   tamanho do seu conteúdo — um e-mail comprido sem espaços (não quebra
+   sozinho) empurrava a largura do card inteiro e vazava um scroll horizontal
+   na página toda, no celular. */
+.profile-header-info { flex: 1; min-width: 0; }
+.profile-header-info h1 { font-size: 1.6rem; margin: 2px 0 0; overflow-wrap: anywhere; }
+.profile-handle { font-size: 0.9rem; color: var(--ink-faint); margin: 4px 0 0; overflow-wrap: anywhere; }
+.profile-location { font-size: 0.86rem; color: var(--ink-soft); margin: 6px 0 0; overflow-wrap: anywhere; }
+.profile-header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.profile-details-row { display: flex; gap: 32px; flex-wrap: wrap; padding: 20px 0; border-top: 1px solid var(--line); }
+.profile-detail { display: flex; flex-direction: column; gap: 3px; }
+.profile-detail span:first-child { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); font-weight: 700; }
+.profile-detail span:last-child { font-size: 0.9rem; font-weight: 600; max-width: 320px; }
+
+.profile-stats { display: flex; gap: 40px; flex-wrap: wrap; padding: 20px 0; border-top: 1px solid var(--line); }
+.profile-stats .stat { text-align: left; }
+.profile-stats .stat strong { display: block; font-family: var(--font-display); font-size: 1.5rem; color: var(--ink); line-height: 1.2; }
+.profile-stats .stat span { font-size: 0.78rem; color: var(--ink-faint); }
+
+.profile-tabs {
+  display: flex; gap: 4px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  margin-bottom: 32px; overflow-x: auto; overflow-y: hidden;
+}
+.profile-tab {
+  background: none; border: none; border-bottom: 2px solid transparent; padding: 15px 18px; margin-bottom: -1px;
+  font-size: 0.88rem; font-weight: 600; color: var(--ink-faint); cursor: pointer; white-space: nowrap;
+  transition: color .15s ease, border-color .15s ease; display: flex; align-items: center; gap: 6px;
+}
+.profile-tab:hover { color: var(--ink); }
+.profile-tab.active { color: var(--terracotta); border-bottom-color: var(--terracotta); }
+@media (max-width: 700px) {
+  .profile-header { gap: 16px; }
+  .profile-avatar-lg { width: 72px; height: 72px; font-size: 1.5rem; }
+  .profile-header-info h1 { font-size: 1.3rem; }
+  .profile-details-row, .profile-stats { gap: 22px; }
+}
 .dash-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 26px; margin-bottom: 20px; }
 .dash-card h3 { font-size: 1rem; margin-bottom: 14px; }
 /* Parágrafo introdutório padrão de card — antes cada dash-card repetia
@@ -539,25 +588,6 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
    style="display:flex; gap:10px; flex-wrap:wrap" repetido em cada card. */
 .card-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
-/* Agrupa cards relacionados sob um título de seção, pra a coluna principal do
-   painel parecer capítulos organizados em vez de uma pilha de caixas iguais
-   sem hierarquia nenhuma entre elas. */
-.dash-section { margin-bottom: 44px; }
-.dash-section:last-child { margin-bottom: 0; }
-.dash-section .dash-card:last-child { margin-bottom: 0; }
-.dash-section-title {
-  display: flex; align-items: center; gap: 10px;
-  font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; color: var(--ink);
-  margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line);
-}
-.dash-section-title .icon { font-size: 1.05rem; }
-/* Bloco leve (sem virar mais um dash-card) pra separar ações secundárias de
-   conta na barra lateral, sem competir visualmente com o conteúdo principal. */
-.dash-sidebar-label {
-  font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700;
-  color: var(--ink-faint); margin: 28px 0 12px; padding-left: 2px;
-}
-.dash-sidebar-label:first-child { margin-top: 0; }
 .dash-avatar {
   width: 68px; height: 68px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display); font-size: 1.5rem; color: var(--terracotta); margin-bottom: 14px;

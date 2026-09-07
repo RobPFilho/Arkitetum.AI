@@ -457,3 +457,42 @@ espaçamento num lugar só em vez de espalhado pelo HTML.
   zone" silenciosamente engolido pelo `catch`, fazendo o botão de favoritar
   nunca refletir o estado real salvo no banco. Corrigido movendo a
   declaração pro topo do arquivo.
+
+## Painel virou uma página de perfil (capa + abas), inspirado em redes sociais
+
+Reorganização anterior (seções com título) ainda parecia uma pilha de caixas.
+Reformulado do zero pra se parecer com um perfil de Instagram/X/TikTok:
+
+- **Capa de perfil**: avatar grande, nome, "handle" (e-mail), localização e os
+  botões de ação (Rodar match / Editar perfil), tudo num cabeçalho só —
+  substitui a barra lateral fixa que existia antes.
+- **Fileira de números** tipo posts/seguidores: buscas feitas e favoritos (
+  cliente) ou avaliação média e projetos no portfólio (arquiteto), mais o
+  plano atual — todos computados a partir de dados que as próprias funções de
+  render já buscavam, sem chamada de API extra.
+- **Abas horizontais** no lugar da pilha de seções: "Seu projeto" /
+  "Compatibilidade" / "Favoritos" / "Mensagens" / "Conta" pro cliente; "Perfil"
+  / "Portfólio" / "Avaliações" / "Mensagens" / "Conta" pro arquiteto. Só uma
+  aba de conteúdo fica visível por vez — as abas de categoria de match (do
+  round anterior) continuam existindo *dentro* da aba "Compatibilidade",
+  então agora tem dois níveis de abas, como um menu com submenu.
+- **"Conta"** (editar dados, plano, indicação, LGPD) é compartilhada entre os
+  dois papéis — vive fora de `clientPanel`/`architectPanel`, e a aba de cada
+  papel só aponta pra ela, em vez de duplicar o card de editar perfil duas
+  vezes na página.
+- Botões que levam a um conteúdo em outra aba (Rodar match, Rodar match de um
+  projeto específico, Mensagem num resultado, Editar perfil) agora trocam de
+  aba automaticamente antes de agir — sem isso, o conteúdo era gerado
+  corretamente mas ficava invisível numa aba fechada.
+
+**Dois bugs reais achados testando isso:**
+- Um scrollbar vertical de 1px aparecia do nada na barra de abas: CSS
+  `overflow-x: auto` sem `overflow-y` explícito faz o navegador tratar o eixo
+  Y também como `auto` (não pode misturar `visible` com outro valor entre os
+  eixos) — um sub-pixel de overflow bastava pra desenhar a barra de rolagem.
+  Corrigido com `overflow-y: hidden` explícito.
+- No celular, um e-mail comprido sem espaços (não quebra sozinho) empurrava a
+  largura do cabeçalho e vazava um scroll horizontal na página inteira —
+  mesma causa-raiz do bug da navbar corrigido antes nesta sessão: item flex
+  sem `min-width: 0` não encolhe além do tamanho do próprio conteúdo.
+  Corrigido com `min-width: 0` + `overflow-wrap: anywhere`.

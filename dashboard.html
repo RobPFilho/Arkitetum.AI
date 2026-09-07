@@ -62,349 +62,352 @@
     </div>
 
     <div id="dashState" style="display:none;">
-      <div class="dash-head">
-        <div>
+
+      <!-- Cabeçalho de perfil (avatar + nome + bio), inspirado em como
+           Instagram/X/TikTok mostram um perfil, em vez da barra lateral
+           fixa que o painel tinha antes. -->
+      <div class="profile-header">
+        <div class="profile-avatar-lg" id="avatarInitials">—</div>
+        <div class="profile-header-info">
           <span class="eyebrow" id="roleLabel">Painel</span>
-          <h1 style="font-size:1.9rem; margin:0;">Olá, <span id="userName">—</span></h1>
+          <h1 id="profileName">—</h1>
+          <p class="profile-handle" id="profileEmail">—</p>
+          <p class="profile-location">📍 <span id="profileCity">—</span>, <span id="profileState">—</span></p>
         </div>
-        <div id="clientActions">
-          <button id="runMatchBtn" class="btn btn-primary">Rodar match com IA</button>
+        <div class="profile-header-actions">
+          <div id="clientActions" style="display:none;">
+            <button id="runMatchBtn" class="btn btn-primary">Rodar match com IA</button>
+          </div>
+          <button id="editProfileBtn" class="btn btn-secondary btn-sm">Editar perfil</button>
+        </div>
+      </div>
+
+      <div class="profile-details-row">
+        <div class="profile-detail" id="profileExtraRow1" style="display:none;"><span></span><span></span></div>
+        <div class="profile-detail" id="profileExtraRow2" style="display:none;"><span></span><span></span></div>
+      </div>
+
+      <div class="profile-stats">
+        <div class="stat" id="clientStatMatch" style="display:none;"><strong id="statMatchCount">0</strong><span>buscas feitas</span></div>
+        <div class="stat" id="clientStatFav" style="display:none;"><strong id="statFavCount">0</strong><span>favoritos</span></div>
+        <div class="stat" id="architectStatRating" style="display:none;"><strong id="statRatingValue">—</strong><span id="statReviewCount">avaliação</span></div>
+        <div class="stat" id="architectStatPortfolio" style="display:none;"><strong id="statPortfolioCount">0</strong><span>no portfólio</span></div>
+        <div class="stat"><strong id="planName">—</strong><span id="planUsage">plano</span></div>
+      </div>
+      <button id="upgradePlanBtn" class="btn btn-primary btn-sm" style="display:none; margin:-8px 0 20px;">Fazer upgrade</button>
+
+      <!-- CLIENTE -->
+      <div id="clientPanel" style="display:none;">
+        <div class="profile-tabs" id="clientProfileTabs" role="tablist" aria-label="Seções do painel">
+          <button type="button" class="profile-tab active" data-profile-panel="projeto" role="tab" aria-selected="true">📁 Seu projeto</button>
+          <button type="button" class="profile-tab" data-profile-panel="match" role="tab" aria-selected="false">🤝 Compatibilidade</button>
+          <button type="button" class="profile-tab" data-profile-panel="favoritos" role="tab" aria-selected="false">⭐ Favoritos</button>
+          <button type="button" class="profile-tab" data-profile-panel="mensagens" role="tab" aria-selected="false">💬 Mensagens <span class="unread-badge" id="clientUnreadBadge" style="display:none;"></span></button>
+          <button type="button" class="profile-tab" data-profile-panel="conta" role="tab" aria-selected="false">⚙️ Conta</button>
+        </div>
+
+        <div class="profile-panel" data-profile-panel-content="projeto">
+          <div class="dash-card">
+            <h3>Resumo do projeto</h3>
+            <p class="card-lead">Este é o resumo que os arquitetos veem no seu match — revise antes de validar.</p>
+            <div class="summary-grid">
+              <div class="summary-item"><span class="mock-label">Estilo desejado</span><strong id="ppStyle">—</strong></div>
+              <div class="summary-item"><span class="mock-label">Orçamento</span><strong id="ppBudget">—</strong></div>
+              <div class="summary-item"><span class="mock-label">Restrições</span><strong id="ppRestrictions">—</strong></div>
+              <div class="summary-item"><span class="mock-label">Prioridades</span><strong id="ppPriorities">—</strong></div>
+            </div>
+            <div class="card-actions">
+              <button id="validateSummaryBtn" class="btn btn-sage btn-sm">Validar resumo do projeto</button>
+              <button id="exportPdfBtn" class="btn btn-secondary btn-sm">📄 Exportar PDF</button>
+              <button id="moodboardBtn" class="btn btn-secondary btn-sm">✨ Gerar moodboard com IA</button>
+              <button id="referenceImageBtn" class="btn btn-secondary btn-sm">🖼 Ver referência visual</button>
+            </div>
+          </div>
+
+          <div id="moodboardCard" class="dash-card" style="display:none;">
+            <h3>Moodboard do seu projeto</h3>
+            <p class="card-lead">Conceito gerado por IA a partir das suas respostas no questionário.</p>
+            <div id="moodboardContent"></div>
+          </div>
+
+          <div id="referenceImageCard" class="dash-card" style="display:none;">
+            <h3>É mais ou menos assim que você imagina?</h3>
+            <p class="card-lead">Uma foto real de arquitetura/interiores parecida com o estilo que você descreveu, pra ajudar a alinhar expectativas com o arquiteto.</p>
+            <div id="referenceImageContent"></div>
+          </div>
+
+          <div class="dash-card" id="projectsCard">
+            <h3>Meus projetos</h3>
+            <p class="card-lead">Tem mais de uma obra em mente? Cada projeto guarda seu próprio estilo, orçamento e prioridades — rode um match separado para cada um, sem misturar critérios.</p>
+            <div id="projectsList" style="margin:16px 0;"></div>
+            <button type="button" id="toggleProjectForm" class="btn btn-secondary btn-sm">+ Adicionar outro projeto</button>
+            <div id="projectLimitCard" class="usage-limit-card" style="display:none;">
+              <p>Seu plano Gratuito permite até 1 projeto extra além do seu perfil principal.</p>
+              <button type="button" id="upgradeFromProjectBtn" class="btn btn-primary btn-sm">Assinar Premium e ter projetos ilimitados</button>
+            </div>
+            <form id="projectForm" style="display:none; margin-top:20px;">
+              <input type="hidden" id="projEditId">
+              <div class="form-grid">
+                <div class="form-field full">
+                  <label for="projName">Nome do projeto</label>
+                  <input type="text" id="projName" placeholder="Ex.: Reforma do apartamento da praia" required>
+                </div>
+                <div class="form-field">
+                  <label for="projPropertyType">Tipo de imóvel</label>
+                  <select id="projPropertyType">
+                    <option value="Residencial unifamiliar">Residencial unifamiliar</option>
+                    <option value="Apartamento">Apartamento</option>
+                    <option value="Reforma">Reforma</option>
+                    <option value="Interiores">Interiores</option>
+                    <option value="Comercial">Comercial</option>
+                    <option value="Paisagismo">Paisagismo</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label for="projBudgetMin">Orçamento mínimo (R$)</label>
+                  <input type="number" id="projBudgetMin" min="0">
+                </div>
+                <div class="form-field">
+                  <label for="projBudgetMax">Orçamento máximo (R$)</label>
+                  <input type="number" id="projBudgetMax" min="0">
+                </div>
+                <div class="form-field full">
+                  <label>Estilos desejados</label>
+                  <div class="chip-select" id="projStylesChips"></div>
+                </div>
+                <div class="form-field full">
+                  <label for="projMaterials">Materiais preferidos <span class="hint">(separados por vírgula)</span></label>
+                  <input type="text" id="projMaterials" placeholder="Concreto aparente, madeira de demolição">
+                </div>
+                <div class="form-field full">
+                  <label for="projGoals">Objetivos do projeto</label>
+                  <textarea id="projGoals"></textarea>
+                </div>
+              </div>
+              <div style="display:flex; gap:10px;">
+                <button type="submit" class="btn btn-primary" id="projSaveBtn">Salvar projeto</button>
+                <button type="button" class="btn btn-secondary" id="cancelProjectForm">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="profile-panel" data-profile-panel-content="match" hidden>
+          <p class="card-lead">Clique em "Rodar match com IA" para receber os arquitetos mais compatíveis com o seu perfil, com pontuação e explicação gerada por IA.</p>
+          <p style="font-size:0.82rem; color:var(--ink-faint); margin:-8px 0 16px;" id="matchContextLabel"></p>
+          <div id="usageLimitCard" class="usage-limit-card" style="display:none; margin-bottom:20px;">
+            <p>Você usou todas as buscas do plano Gratuito este mês.</p>
+            <button id="upgradeFromLimitBtn" class="btn btn-primary btn-sm">Assinar Premium e continuar buscando</button>
+          </div>
+          <div id="matchTabs" class="match-tabs" role="tablist" aria-label="Categorias de match" style="display:none;"></div>
+          <div id="matchPanelMain" class="match-tabpanel" role="tabpanel" aria-labelledby="matchTab-main">
+            <div id="matchResults" class="result-list"></div>
+            <div id="matchEmpty" class="empty-state">
+              <p>Nenhum match rodado ainda. Clique em "Rodar match com IA" acima.</p>
+            </div>
+            <button id="compareBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">⇄ Comparar arquitetos lado a lado</button>
+            <button id="exportMatchPdfBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">📄 Exportar resultados em PDF</button>
+            <div id="compareSection" class="dash-card" style="display:none; margin-top:16px;">
+              <h3>Comparativo</h3>
+              <div id="compareContent" class="compare-table-wrap"></div>
+              <button id="exportCompareBtn" class="btn btn-secondary btn-sm" style="margin-top:14px;">📊 Exportar comparativo em PDF</button>
+            </div>
+          </div>
+          <div id="matchExtraPanels"></div>
+
+          <div class="dash-card" style="margin-top:20px;">
+            <h3>Histórico de buscas</h3>
+            <p class="card-lead">Suas últimas buscas de match, por projeto.</p>
+            <div id="matchHistoryList"></div>
+          </div>
+        </div>
+
+        <div class="profile-panel" data-profile-panel-content="favoritos" hidden>
+          <p class="card-lead">Arquitetos que você salvou pra lembrar depois — de qualquer categoria do match, mesmo os que não deram certo agora (indisponível, fora da região ou do orçamento).</p>
+          <div id="favoritesList"></div>
+        </div>
+
+        <div class="profile-panel" data-profile-panel-content="mensagens" hidden>
+          <p class="card-lead">Converse direto com os arquitetos do seu match.</p>
+          <div class="chat-layout" id="mensagens">
+            <div class="conversation-list" id="clientConversationList"></div>
+            <div class="chat-shell" id="clientChatShell"><div class="chat-empty">💬 Selecione uma conversa ou envie uma mensagem a partir do perfil de um arquiteto.</div></div>
+          </div>
         </div>
       </div>
 
-      <div class="dash-grid">
-        <!-- Sidebar: perfil -->
-        <div>
-          <div class="dash-card">
-            <div class="dash-avatar" id="avatarInitials">—</div>
-            <h3 id="profileName">—</h3>
-            <p style="font-size:0.86rem; margin-bottom:16px;" id="profileEmail">—</p>
-            <div class="dash-meta-row"><span>Cidade</span><span id="profileCity">—</span></div>
-            <div class="dash-meta-row"><span>Estado</span><span id="profileState">—</span></div>
-            <div class="dash-meta-row" id="profileExtraRow1" style="display:none;"><span></span><span></span></div>
-            <div class="dash-meta-row" id="profileExtraRow2" style="display:none;"><span></span><span></span></div>
-            <button id="editProfileBtn" class="btn btn-secondary btn-sm btn-block" style="margin-top:16px;">Editar perfil</button>
+      <!-- ARQUITETO -->
+      <div id="architectPanel" style="display:none;">
+        <div class="profile-tabs" id="architectProfileTabs" role="tablist" aria-label="Seções do painel">
+          <button type="button" class="profile-tab active" data-profile-panel="perfil" role="tab" aria-selected="true">✅ Perfil</button>
+          <button type="button" class="profile-tab" data-profile-panel="portfolio" role="tab" aria-selected="false">📁 Portfólio</button>
+          <button type="button" class="profile-tab" data-profile-panel="avaliacoes" role="tab" aria-selected="false">⭐ Avaliações</button>
+          <button type="button" class="profile-tab" data-profile-panel="mensagens" role="tab" aria-selected="false">💬 Mensagens <span class="unread-badge" id="architectUnreadBadge" style="display:none;"></span></button>
+          <button type="button" class="profile-tab" data-profile-panel="conta" role="tab" aria-selected="false">⚙️ Conta</button>
+        </div>
+
+        <div class="profile-panel" data-profile-panel-content="perfil">
+          <div class="dash-card" id="onboardingChecklistCard" style="display:none;">
+            <h3>Complete seu perfil</h3>
+            <p class="card-lead">Perfis completos aparecem melhor nos resultados de match e passam mais confiança pro cliente.</p>
+            <ul class="checklist" id="onboardingChecklist" style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;"></ul>
           </div>
-
-          <div class="dash-card" id="editCard" style="display:none;">
-            <h3>Editar dados</h3>
-            <div class="form-field">
-              <label for="editName">Nome</label>
-              <input type="text" id="editName">
-            </div>
-            <div class="form-field">
-              <label for="editCity">Cidade</label>
-              <input type="text" id="editCity">
-            </div>
-            <div class="form-field">
-              <label for="editState">Estado (UF)</label>
-              <input type="text" id="editState" maxlength="2">
-            </div>
-            <button id="saveProfileBtn" class="btn btn-primary btn-sm btn-block">Salvar alterações</button>
+          <div class="dash-card" id="pendingValidationsCard" style="display:none;">
+            <h3>Resumos para confirmar</h3>
+            <p class="card-lead">Clientes que já validaram o resumo do projeto do lado deles e esperam sua confirmação.</p>
+            <div id="pendingValidationsList"></div>
           </div>
+          <div class="dash-card style-profile-card">
+            <h3>Perfil de estilo</h3>
+            <p class="card-lead">Isso vira instrução fixa para a IA gerar sugestões só do seu jeito de projetar — não algo genérico.</p>
 
-          <div class="dash-card plan-status-card">
-            <div class="plan-info">
-              <span class="mock-label" style="margin-bottom:2px;">Seu plano</span>
-              <div class="plan-name" id="planName">—</div>
-              <div class="plan-usage" id="planUsage">—</div>
+            <span class="mock-label">Paleta de cores</span>
+            <div class="swatch-select" id="dashPalette" style="margin-bottom:20px;"></div>
+
+            <span class="mock-label">Palavras-chave</span>
+            <div class="form-field full" style="margin-bottom:14px;">
+              <input type="text" id="dashKeywords" placeholder="Luz natural, linhas limpas, integração">
             </div>
-            <button id="upgradePlanBtn" class="btn btn-primary btn-sm" style="display:none;">Fazer upgrade</button>
-          </div>
+            <button id="saveStyleProfileBtn" class="btn btn-secondary btn-sm">Salvar perfil de estilo</button>
 
-          <p class="dash-sidebar-label">Conta</p>
-
-          <div class="dash-card">
-            <h3 style="font-size:1rem;">Convide e ganhe</h3>
-            <p class="card-lead" id="referralExplainer">Compartilhe seu link — cada pessoa que se cadastrar por ele te dá um bônus.</p>
-            <div class="share-row" style="margin-bottom:10px;">
-              <input type="text" id="referralLinkInput" readonly>
-              <button type="button" id="copyReferralLinkBtn" class="btn btn-secondary btn-sm">Copiar link</button>
+            <div style="margin-top:22px;">
+              <span class="mock-label">Materiais recorrentes <span style="text-transform:none; font-weight:400;">(dos favoritos cadastrados)</span></span>
+              <div class="tag-row" id="dashRecurringMaterials"></div>
             </div>
-            <p style="font-size:0.78rem; color:var(--ink-faint); margin:0;" id="referralBonusCount"></p>
           </div>
 
           <div class="dash-card">
-            <h3 style="font-size:1rem;">Privacidade (LGPD)</h3>
-            <p class="card-lead">Seus dados são seus. Baixe tudo que a plataforma guarda sobre você ou apague sua conta permanentemente.</p>
-            <div style="display:flex; flex-direction:column; gap:8px;">
-              <button type="button" id="exportDataBtn" class="btn btn-secondary btn-sm btn-block">⬇ Baixar meus dados</button>
-              <button type="button" id="deleteAccountBtn" class="btn btn-secondary btn-sm btn-block" style="color:var(--terracotta-dark); border-color:var(--terracotta-dark);">🗑 Excluir minha conta</button>
+            <h3>Verificação profissional <span id="cauStatusBadge"></span></h3>
+            <p class="card-lead">Um selo de verificado aumenta a confiança do cliente no seu perfil. A validação é feita manualmente pela equipe match.IA.</p>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="cauNumberInput">Registro CAU/A</label>
+                <input type="text" id="cauNumberInput" placeholder="Ex.: A123456-7">
+              </div>
             </div>
+            <button id="submitCauBtn" class="btn btn-secondary btn-sm">Solicitar verificação</button>
           </div>
         </div>
 
-        <!-- Main content -->
-        <div>
-          <!-- CLIENTE: resultados de match -->
-          <div id="clientPanel" style="display:none;">
-            <section class="dash-section">
-              <h2 class="dash-section-title"><span class="icon">📁</span> Seu projeto</h2>
-              <div class="dash-card">
-                <h3>Resumo do projeto</h3>
-                <p class="card-lead">Este é o resumo que os arquitetos veem no seu match — revise antes de validar.</p>
-                <div class="summary-grid">
-                  <div class="summary-item"><span class="mock-label">Estilo desejado</span><strong id="ppStyle">—</strong></div>
-                  <div class="summary-item"><span class="mock-label">Orçamento</span><strong id="ppBudget">—</strong></div>
-                  <div class="summary-item"><span class="mock-label">Restrições</span><strong id="ppRestrictions">—</strong></div>
-                  <div class="summary-item"><span class="mock-label">Prioridades</span><strong id="ppPriorities">—</strong></div>
-                </div>
-                <div class="card-actions">
-                  <button id="validateSummaryBtn" class="btn btn-sage btn-sm">Validar resumo do projeto</button>
-                  <button id="exportPdfBtn" class="btn btn-secondary btn-sm">📄 Exportar PDF</button>
-                  <button id="moodboardBtn" class="btn btn-secondary btn-sm">✨ Gerar moodboard com IA</button>
-                  <button id="referenceImageBtn" class="btn btn-secondary btn-sm">🖼 Ver referência visual</button>
-                </div>
-              </div>
-
-              <div id="moodboardCard" class="dash-card" style="display:none;">
-                <h3>Moodboard do seu projeto</h3>
-                <p class="card-lead">Conceito gerado por IA a partir das suas respostas no questionário.</p>
-                <div id="moodboardContent"></div>
-              </div>
-
-              <div id="referenceImageCard" class="dash-card" style="display:none;">
-                <h3>É mais ou menos assim que você imagina?</h3>
-                <p class="card-lead">Uma foto real de arquitetura/interiores parecida com o estilo que você descreveu, pra ajudar a alinhar expectativas com o arquiteto.</p>
-                <div id="referenceImageContent"></div>
-              </div>
-
-              <div class="dash-card" id="projectsCard">
-                <h3>Meus projetos</h3>
-                <p class="card-lead">Tem mais de uma obra em mente? Cada projeto guarda seu próprio estilo, orçamento e prioridades — rode um match separado para cada um, sem misturar critérios.</p>
-                <div id="projectsList" style="margin:16px 0;"></div>
-                <button type="button" id="toggleProjectForm" class="btn btn-secondary btn-sm">+ Adicionar outro projeto</button>
-              <div id="projectLimitCard" class="usage-limit-card" style="display:none;">
-                <p>Seu plano Gratuito permite até 1 projeto extra além do seu perfil principal.</p>
-                <button type="button" id="upgradeFromProjectBtn" class="btn btn-primary btn-sm">Assinar Premium e ter projetos ilimitados</button>
-              </div>
-              <form id="projectForm" style="display:none; margin-top:20px;">
-                <input type="hidden" id="projEditId">
-                <div class="form-grid">
-                  <div class="form-field full">
-                    <label for="projName">Nome do projeto</label>
-                    <input type="text" id="projName" placeholder="Ex.: Reforma do apartamento da praia" required>
-                  </div>
-                  <div class="form-field">
-                    <label for="projPropertyType">Tipo de imóvel</label>
-                    <select id="projPropertyType">
-                      <option value="Residencial unifamiliar">Residencial unifamiliar</option>
-                      <option value="Apartamento">Apartamento</option>
-                      <option value="Reforma">Reforma</option>
-                      <option value="Interiores">Interiores</option>
-                      <option value="Comercial">Comercial</option>
-                      <option value="Paisagismo">Paisagismo</option>
-                    </select>
-                  </div>
-                  <div class="form-field">
-                    <label for="projBudgetMin">Orçamento mínimo (R$)</label>
-                    <input type="number" id="projBudgetMin" min="0">
-                  </div>
-                  <div class="form-field">
-                    <label for="projBudgetMax">Orçamento máximo (R$)</label>
-                    <input type="number" id="projBudgetMax" min="0">
-                  </div>
-                  <div class="form-field full">
-                    <label>Estilos desejados</label>
-                    <div class="chip-select" id="projStylesChips"></div>
-                  </div>
-                  <div class="form-field full">
-                    <label for="projMaterials">Materiais preferidos <span class="hint">(separados por vírgula)</span></label>
-                    <input type="text" id="projMaterials" placeholder="Concreto aparente, madeira de demolição">
-                  </div>
-                  <div class="form-field full">
-                    <label for="projGoals">Objetivos do projeto</label>
-                    <textarea id="projGoals"></textarea>
-                  </div>
-                </div>
-                <div style="display:flex; gap:10px;">
-                  <button type="submit" class="btn btn-primary" id="projSaveBtn">Salvar projeto</button>
-                  <button type="button" class="btn btn-secondary" id="cancelProjectForm">Cancelar</button>
-                </div>
-              </form>
+        <div class="profile-panel" data-profile-panel-content="portfolio" hidden>
+          <div class="dash-card">
+            <h3>Compartilhar perfil</h3>
+            <p class="card-lead">Divulgue seu perfil match.IA nas redes sociais ou no seu site.</p>
+            <div class="share-row">
+              <input type="text" id="shareLinkInput" readonly>
+              <button id="copyShareLinkBtn" class="btn btn-secondary btn-sm">Copiar link</button>
+              <img id="shareQrCode" class="qr-code" alt="QR code do perfil">
             </div>
-            </section>
-
-            <section class="dash-section">
-              <h2 class="dash-section-title"><span class="icon">🤝</span> Compatibilidade com arquitetos</h2>
-              <p class="card-lead">Clique em "Rodar match com IA" para receber os arquitetos mais compatíveis com o seu perfil, com pontuação e explicação gerada por IA.</p>
-              <p style="font-size:0.82rem; color:var(--ink-faint); margin:-8px 0 16px;" id="matchContextLabel"></p>
-              <div id="usageLimitCard" class="usage-limit-card" style="display:none; margin-bottom:20px;">
-                <p>Você usou todas as buscas do plano Gratuito este mês.</p>
-                <button id="upgradeFromLimitBtn" class="btn btn-primary btn-sm">Assinar Premium e continuar buscando</button>
-              </div>
-              <div id="matchTabs" class="match-tabs" role="tablist" aria-label="Categorias de match" style="display:none;"></div>
-              <div id="matchPanelMain" class="match-tabpanel" role="tabpanel" aria-labelledby="matchTab-main">
-                <div id="matchResults" class="result-list"></div>
-                <div id="matchEmpty" class="empty-state">
-                  <p>Nenhum match rodado ainda. Clique em "Rodar match com IA" acima.</p>
-                </div>
-                <button id="compareBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">⇄ Comparar arquitetos lado a lado</button>
-                <button id="exportMatchPdfBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">📄 Exportar resultados em PDF</button>
-                <div id="compareSection" class="dash-card" style="display:none; margin-top:16px;">
-                  <h3>Comparativo</h3>
-                  <div id="compareContent" class="compare-table-wrap"></div>
-                  <button id="exportCompareBtn" class="btn btn-secondary btn-sm" style="margin-top:14px;">📊 Exportar comparativo em PDF</button>
-                </div>
-              </div>
-              <div id="matchExtraPanels"></div>
-
-              <div class="dash-card" style="margin-top:20px;">
-                <h3>Histórico de buscas</h3>
-                <p class="card-lead">Suas últimas buscas de match, por projeto.</p>
-                <div id="matchHistoryList"></div>
-              </div>
-            </section>
-
-            <section class="dash-section">
-              <h2 class="dash-section-title"><span class="icon">⭐</span> Favoritos</h2>
-              <div class="dash-card">
-                <p class="card-lead">Arquitetos que você salvou pra lembrar depois — de qualquer categoria do match, mesmo os que não deram certo agora (indisponível, fora da região ou do orçamento).</p>
-                <div id="favoritesList"></div>
-              </div>
-            </section>
-
-            <section class="dash-section">
-              <h2 class="dash-section-title"><span class="icon">💬</span> Mensagens <span class="unread-badge" id="clientUnreadBadge" style="display:none;"></span></h2>
-              <div class="dash-card" id="mensagens">
-                <p class="card-lead">Converse direto com os arquitetos do seu match.</p>
-                <div class="chat-layout">
-                  <div class="conversation-list" id="clientConversationList"></div>
-                  <div class="chat-shell" id="clientChatShell"><div class="chat-empty">💬 Selecione uma conversa ou envie uma mensagem a partir do perfil de um arquiteto.</div></div>
-                </div>
-              </div>
-            </section>
           </div>
 
-          <!-- ARQUITETO: perfil de estilo + portfólio -->
-          <div id="architectPanel" style="display:none;">
-            <div class="dash-card" id="onboardingChecklistCard" style="display:none;">
-              <h3>Complete seu perfil</h3>
-              <p class="card-lead">Perfis completos aparecem melhor nos resultados de match e passam mais confiança pro cliente.</p>
-              <ul class="checklist" id="onboardingChecklist" style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;"></ul>
+          <div class="dash-card">
+            <h3>Meu portfólio</h3>
+            <p class="card-lead">Projetos anteriores aumentam sua compatibilidade e visibilidade nos resultados de match.</p>
+            <div id="portfolioList" style="margin:18px 0;"></div>
+            <button id="togglePortfolioForm" class="btn btn-secondary btn-sm">+ Adicionar projeto</button>
+            <div id="portfolioLimitCard" class="usage-limit-card" style="display:none;">
+              <p>Seu plano Gratuito permite até 3 projetos no portfólio.</p>
+              <button id="upgradeFromPortfolioBtn" class="btn btn-primary btn-sm">Assinar Pro e ter portfólio ilimitado</button>
             </div>
-            <div class="dash-card" id="pendingValidationsCard" style="display:none;">
-              <h3>Resumos para confirmar</h3>
-              <p class="card-lead">Clientes que já validaram o resumo do projeto do lado deles e esperam sua confirmação.</p>
-              <div id="pendingValidationsList"></div>
-            </div>
-
-            <section class="dash-section">
-              <h2 class="dash-section-title"><span class="icon">✅</span> Seu perfil</h2>
-              <div class="dash-card style-profile-card">
-                <h3>Perfil de estilo</h3>
-                <p class="card-lead">Isso vira instrução fixa para a IA gerar sugestões só do seu jeito de projetar — não algo genérico.</p>
-
-                <span class="mock-label">Paleta de cores</span>
-                <div class="swatch-select" id="dashPalette" style="margin-bottom:20px;"></div>
-
-                <span class="mock-label">Palavras-chave</span>
-                <div class="form-field full" style="margin-bottom:14px;">
-                  <input type="text" id="dashKeywords" placeholder="Luz natural, linhas limpas, integração">
+            <form id="portfolioForm" style="display:none; margin-top:20px;">
+              <div class="form-grid">
+                <div class="form-field full">
+                  <label for="pTitle">Título do projeto</label>
+                  <input type="text" id="pTitle" required>
                 </div>
-                <button id="saveStyleProfileBtn" class="btn btn-secondary btn-sm">Salvar perfil de estilo</button>
-
-                <div style="margin-top:22px;">
-                  <span class="mock-label">Materiais recorrentes <span style="text-transform:none; font-weight:400;">(dos favoritos cadastrados)</span></span>
-                  <div class="tag-row" id="dashRecurringMaterials"></div>
+                <div class="form-field full">
+                  <label for="pDescription">Descrição</label>
+                  <textarea id="pDescription"></textarea>
                 </div>
-              </div>
-
-              <div class="dash-card">
-                <h3>Verificação profissional <span id="cauStatusBadge"></span></h3>
-                <p class="card-lead">Um selo de verificado aumenta a confiança do cliente no seu perfil. A validação é feita manualmente pela equipe match.IA.</p>
-                <div class="form-grid">
-                  <div class="form-field">
-                    <label for="cauNumberInput">Registro CAU/A</label>
-                    <input type="text" id="cauNumberInput" placeholder="Ex.: A123456-7">
+                <div class="form-field full">
+                  <label>Imagem do projeto <span class="hint">(anexe um arquivo ou cole um link abaixo)</span></label>
+                  <div class="file-input-row">
+                    <label class="file-btn" for="pImageFile">📎 Anexar imagem</label>
+                    <input type="file" id="pImageFile" accept="image/*" style="display:none;">
+                    <span class="file-hint">JPG/PNG, até 2MB</span>
                   </div>
+                  <div class="file-preview" id="pImagePreview"></div>
+                  <input type="url" id="pImageUrl" placeholder="ou cole uma URL de imagem" style="margin-top:10px;">
                 </div>
-                <button id="submitCauBtn" class="btn btn-secondary btn-sm">Solicitar verificação</button>
-              </div>
-            </section>
-
-            <section class="dash-section">
-              <h2 class="dash-section-title"><span class="icon">📁</span> Portfólio &amp; divulgação</h2>
-              <div class="dash-card">
-                <h3>Compartilhar perfil</h3>
-                <p class="card-lead">Divulgue seu perfil match.IA nas redes sociais ou no seu site.</p>
-                <div class="share-row">
-                  <input type="text" id="shareLinkInput" readonly>
-                  <button id="copyShareLinkBtn" class="btn btn-secondary btn-sm">Copiar link</button>
-                  <img id="shareQrCode" class="qr-code" alt="QR code do perfil">
-                </div>
-              </div>
-
-              <div class="dash-card">
-                <h3>Meu portfólio</h3>
-                <p class="card-lead">Projetos anteriores aumentam sua compatibilidade e visibilidade nos resultados de match.</p>
-                <div id="portfolioList" style="margin:18px 0;"></div>
-                <button id="togglePortfolioForm" class="btn btn-secondary btn-sm">+ Adicionar projeto</button>
-                <div id="portfolioLimitCard" class="usage-limit-card" style="display:none;">
-                  <p>Seu plano Gratuito permite até 3 projetos no portfólio.</p>
-                  <button id="upgradeFromPortfolioBtn" class="btn btn-primary btn-sm">Assinar Pro e ter portfólio ilimitado</button>
-                </div>
-                <form id="portfolioForm" style="display:none; margin-top:20px;">
-                  <div class="form-grid">
-                    <div class="form-field full">
-                      <label for="pTitle">Título do projeto</label>
-                      <input type="text" id="pTitle" required>
-                    </div>
-                    <div class="form-field full">
-                      <label for="pDescription">Descrição</label>
-                      <textarea id="pDescription"></textarea>
-                    </div>
-                    <div class="form-field full">
-                      <label>Imagem do projeto <span class="hint">(anexe um arquivo ou cole um link abaixo)</span></label>
-                      <div class="file-input-row">
-                        <label class="file-btn" for="pImageFile">📎 Anexar imagem</label>
-                        <input type="file" id="pImageFile" accept="image/*" style="display:none;">
-                        <span class="file-hint">JPG/PNG, até 2MB</span>
-                      </div>
-                      <div class="file-preview" id="pImagePreview"></div>
-                      <input type="url" id="pImageUrl" placeholder="ou cole uma URL de imagem" style="margin-top:10px;">
-                    </div>
-                    <div class="form-field full">
-                      <label>Arquivo do projeto <span class="hint">(plantas, PDF, portfólio completo...)</span></label>
-                      <div class="file-input-row">
-                        <label class="file-btn" for="pProjectFile">📎 Anexar arquivo</label>
-                        <input type="file" id="pProjectFile" accept=".pdf,image/*,.zip,.dwg" style="display:none;">
-                        <span class="file-hint">PDF, imagem ou ZIP, até 2MB</span>
-                      </div>
-                      <div class="file-preview" id="pProjectFilePreview"></div>
-                      <input type="url" id="pProjectUrl" placeholder="ou cole um link do projeto" style="margin-top:10px;">
-                    </div>
-                    <div class="form-field">
-                      <label for="pStatus">Status</label>
-                      <select id="pStatus">
-                        <option value="completed">Concluído</option>
-                        <option value="ongoing">Em andamento</option>
-                      </select>
-                    </div>
+                <div class="form-field full">
+                  <label>Arquivo do projeto <span class="hint">(plantas, PDF, portfólio completo...)</span></label>
+                  <div class="file-input-row">
+                    <label class="file-btn" for="pProjectFile">📎 Anexar arquivo</label>
+                    <input type="file" id="pProjectFile" accept=".pdf,image/*,.zip,.dwg" style="display:none;">
+                    <span class="file-hint">PDF, imagem ou ZIP, até 2MB</span>
                   </div>
-                  <button type="submit" class="btn btn-primary">Salvar projeto</button>
-                </form>
-              </div>
-
-              <div class="dash-card">
-                <h3>Minhas avaliações</h3>
-                <div id="architectReviews"></div>
-              </div>
-            </section>
-
-            <section class="dash-section">
-              <h2 class="dash-section-title"><span class="icon">💬</span> Mensagens <span class="unread-badge" id="architectUnreadBadge" style="display:none;"></span></h2>
-              <div class="dash-card">
-                <p class="card-lead">Converse com clientes que te encontraram pelo match.</p>
-                <div class="chat-layout">
-                  <div class="conversation-list" id="architectConversationList"></div>
-                  <div class="chat-shell" id="architectChatShell"><div class="chat-empty">💬 Selecione uma conversa à esquerda.</div></div>
+                  <div class="file-preview" id="pProjectFilePreview"></div>
+                  <input type="url" id="pProjectUrl" placeholder="ou cole um link do projeto" style="margin-top:10px;">
+                </div>
+                <div class="form-field">
+                  <label for="pStatus">Status</label>
+                  <select id="pStatus">
+                    <option value="completed">Concluído</option>
+                    <option value="ongoing">Em andamento</option>
+                  </select>
                 </div>
               </div>
-            </section>
+              <button type="submit" class="btn btn-primary">Salvar projeto</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="profile-panel" data-profile-panel-content="avaliacoes" hidden>
+          <div class="dash-card">
+            <h3>Minhas avaliações</h3>
+            <div id="architectReviews"></div>
+          </div>
+        </div>
+
+        <div class="profile-panel" data-profile-panel-content="mensagens" hidden>
+          <p class="card-lead">Converse com clientes que te encontraram pelo match.</p>
+          <div class="chat-layout">
+            <div class="conversation-list" id="architectConversationList"></div>
+            <div class="chat-shell" id="architectChatShell"><div class="chat-empty">💬 Selecione uma conversa à esquerda.</div></div>
           </div>
         </div>
       </div>
+
+      <!-- Conta: compartilhado entre cliente e arquiteto, uma "aba" de cada
+           barra aponta pra este mesmo bloco em vez de duplicar o conteúdo. -->
+      <div id="contaPanel" class="profile-panel" hidden>
+        <div class="dash-card" id="editCard" style="display:none;">
+          <h3>Editar dados</h3>
+          <div class="form-field">
+            <label for="editName">Nome</label>
+            <input type="text" id="editName">
+          </div>
+          <div class="form-field">
+            <label for="editCity">Cidade</label>
+            <input type="text" id="editCity">
+          </div>
+          <div class="form-field">
+            <label for="editState">Estado (UF)</label>
+            <input type="text" id="editState" maxlength="2">
+          </div>
+          <button id="saveProfileBtn" class="btn btn-primary btn-sm btn-block">Salvar alterações</button>
+        </div>
+
+        <div class="dash-card">
+          <h3 style="font-size:1rem;">Convide e ganhe</h3>
+          <p class="card-lead" id="referralExplainer">Compartilhe seu link — cada pessoa que se cadastrar por ele te dá um bônus.</p>
+          <div class="share-row" style="margin-bottom:10px;">
+            <input type="text" id="referralLinkInput" readonly>
+            <button type="button" id="copyReferralLinkBtn" class="btn btn-secondary btn-sm">Copiar link</button>
+          </div>
+          <p style="font-size:0.78rem; color:var(--ink-faint); margin:0;" id="referralBonusCount"></p>
+        </div>
+
+        <div class="dash-card">
+          <h3 style="font-size:1rem;">Privacidade (LGPD)</h3>
+          <p class="card-lead">Seus dados são seus. Baixe tudo que a plataforma guarda sobre você ou apague sua conta permanentemente.</p>
+          <div style="display:flex; flex-direction:column; gap:8px; max-width:320px;">
+            <button type="button" id="exportDataBtn" class="btn btn-secondary btn-sm btn-block">⬇ Baixar meus dados</button>
+            <button type="button" id="deleteAccountBtn" class="btn btn-secondary btn-sm btn-block" style="color:var(--terracotta-dark); border-color:var(--terracotta-dark);">🗑 Excluir minha conta</button>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </div>

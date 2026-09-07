@@ -67,10 +67,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('clientPanel').style.display = 'block';
     document.getElementById('clientActions').style.display = 'block';
     document.getElementById('roleLabel').textContent = 'Painel do cliente';
-    document.getElementById('runMatchBtn').addEventListener('click', () => runMatch(me));
+    document.getElementById('runMatchBtn').addEventListener('click', () => {
+      activateProfileTab(document.getElementById('clientProfileTabs'), document.getElementById('clientPanel'), 'match');
+      runMatch(me);
+    });
     document.getElementById('matchResults').addEventListener('click', (e) => handleResultClick(e, me));
     document.getElementById('matchExtraPanels').addEventListener('click', (e) => handleResultClick(e, me));
     setupMatchTabs();
+    setupProfileTabs('clientProfileTabs', 'clientPanel');
+    document.getElementById('clientStatMatch').style.display = '';
+    document.getElementById('clientStatFav').style.display = '';
     await loadFavoriteIds(me);
     renderFavorites(me);
     document.getElementById('upgradeFromLimitBtn').addEventListener('click', () => openUpgrade(me, () => { renderPlanCard(me); document.getElementById('usageLimitCard').style.display = 'none'; }));
@@ -91,6 +97,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('architectPanel').style.display = 'block';
     document.getElementById('clientActions').style.display = 'none';
     document.getElementById('roleLabel').textContent = 'Painel do arquiteto';
+    setupProfileTabs('architectProfileTabs', 'architectPanel');
+    document.getElementById('architectStatRating').style.display = '';
+    document.getElementById('architectStatPortfolio').style.display = '';
     renderOnboardingChecklist(me);
     renderPortfolio(me);
     setupPortfolioForm(me);
@@ -110,7 +119,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupReferral(me);
 
   function renderProfile(user) {
-    document.getElementById('userName').textContent = user.name.split(' ')[0];
     document.getElementById('profileName').textContent = user.name;
     document.getElementById('profileEmail').textContent = user.email;
     document.getElementById('profileCity').textContent = user.city || '—';
@@ -187,10 +195,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const editBtn = document.getElementById('editProfileBtn');
     const editCard = document.getElementById('editCard');
     editBtn.addEventListener('click', () => {
-      editCard.style.display = editCard.style.display === 'none' ? 'block' : 'none';
+      goToAccountTab(user);
+      editCard.style.display = 'block';
       document.getElementById('editName').value = user.name;
       document.getElementById('editCity').value = user.city || '';
       document.getElementById('editState').value = user.state || '';
+      editCard.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'start' });
     });
     document.getElementById('saveProfileBtn').addEventListener('click', async () => {
       try {
@@ -352,6 +362,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     list.querySelectorAll('[data-run-project]').forEach(btn => {
       btn.addEventListener('click', () => {
+        activateProfileTab(document.getElementById('clientProfileTabs'), document.getElementById('clientPanel'), 'match');
         runMatch(user, btn.dataset.runProject || undefined);
         document.getElementById('matchResults')?.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'start' });
       });
@@ -508,6 +519,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!list) return;
     try {
       const favorites = await MatchAPI.favorites();
+      document.getElementById('statFavCount').textContent = favorites.length;
       if (!favorites.length) {
         list.innerHTML = emptyStateHtml('⭐', 'Nenhum arquiteto salvo ainda. Use o botão "Salvar para depois" nos resultados do match.');
         return;
@@ -709,6 +721,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const chatBtn = e.target.closest('[data-open-chat]');
     if (chatBtn) {
+      activateProfileTab(document.getElementById('clientProfileTabs'), document.getElementById('clientPanel'), 'mensagens');
       document.getElementById('mensagens')?.scrollIntoView({ behavior: SCROLL_BEHAVIOR });
       openConversation(chatBtn.dataset.openChat, chatBtn.dataset.openChatName, 'clientChatShell', user);
     }
@@ -789,6 +802,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     allExtraResults.forEach(r => allResultsById.set(r.architect.id, r));
     loadValidationStatuses(allExtraResults);
     loadResultThumbnails(allExtraResults);
+  }
+
+  /** Abas de nível superior do painel (Seu projeto / Compatibilidade /
+   * Favoritos / Mensagens / Conta, ou o equivalente do arquiteto) — trocam
+   * qual bloco de conteúdo aparece, tipo as abas de um perfil de rede
+   * social. "Conta" é compartilhada entre os dois papéis (mesmo card de
+   * editar perfil, plano, indicação, LGPD), por isso vive fora de
+   * clientPanel/architectPanel e é tratada à parte aqui. */
+  function setupProfileTabs(tabsId, panelsScopeId) {
+    const tabsBar = document.getElementById(tabsId);
+    const scope = document.getElementById(panelsScopeId);
+    if (!tabsBar || !scope) return;
+    tabsBar.addEventListener('click', (e) => {
+      const btn = e.target.closest('.profile-tab');
+      if (btn) activateProfileTab(tabsBar, scope, btn.dataset.profilePanel);
+    });
+  }
+
+  function activateProfileTab(tabsBar, scope, key) {
+    tabsBar.querySelectorAll('.profile-tab').forEach(btn => {
+      const active = btn.dataset.profilePanel === key;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', String(active));
+    });
+    scope.querySelectorAll(':scope > [data-profile-panel-content]').forEach(panel => {
+      panel.hidden = panel.dataset.profilePanelContent !== key;
+    });
+    document.getElementById('contaPanel').hidden = key !== 'conta';
+  }
+
+  /** Troca pra aba "Conta" (compartilhada) de qualquer papel e mostra o
+   * card de edição — usado pelo botão "Editar perfil" no cabeçalho, que
+   * fica fora de qualquer aba específica. */
+  function goToAccountTab(user) {
+    const tabsId = user.role === 'client' ? 'clientProfileTabs' : 'architectProfileTabs';
+    const scopeId = user.role === 'client' ? 'clientPanel' : 'architectPanel';
+    const tabsBar = document.getElementById(tabsId);
+    activateProfileTab(tabsBar, document.getElementById(scopeId), 'conta');
   }
 
   /** Clique e navegação por teclado (setas/Home/End) nas abas, seguindo o
@@ -932,6 +983,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderPortfolio(user) {
     const list = document.getElementById('portfolioList');
     const items = (user.architectProfile && user.architectProfile.portfolio) || [];
+    document.getElementById('statPortfolioCount').textContent = items.length;
 
     const plan = MatchExtras.getPlan(uid(user), 'architect');
     const atLimit = items.length >= portfolioLimitFor(user, plan);
@@ -1144,6 +1196,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('matchHistoryList');
     try {
       const history = await MatchAPI.matchHistory();
+      document.getElementById('statMatchCount').textContent = history.length;
       if (!history.length) {
         container.innerHTML = emptyStateHtml('🔍', 'Nenhuma busca registrada ainda — clique em "Rodar match com IA" no topo da página.');
         return;
@@ -1241,8 +1294,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('architectReviews');
     try {
       const { reviews, average, count } = await MatchAPI.reviews(uid(user));
+      document.getElementById('statRatingValue').textContent = count ? `★ ${average}` : '—';
+      document.getElementById('statReviewCount').textContent = count ? `${count} avaliaç${count > 1 ? 'ões' : 'ão'}` : 'sem avaliações';
       if (!count) {
-        container.innerHTML = '<p style="font-size:0.86rem; color:var(--ink-faint);">Você ainda não recebeu avaliações.</p>';
+        container.innerHTML = emptyStateHtml('⭐', 'Você ainda não recebeu avaliações.');
         return;
       }
       container.innerHTML = `
