@@ -229,18 +229,21 @@
               <p>Você usou todas as buscas do plano Gratuito este mês.</p>
               <button id="upgradeFromLimitBtn" class="btn btn-primary btn-sm">Assinar Premium e continuar buscando</button>
             </div>
-            <div id="matchResults" class="result-list"></div>
-            <div id="matchEmpty" class="empty-state">
-              <p>Nenhum match rodado ainda. Clique em "Rodar match com IA" acima.</p>
+            <div id="matchTabs" class="match-tabs" role="tablist" aria-label="Categorias de match" style="display:none;"></div>
+            <div id="matchPanelMain" class="match-tabpanel" role="tabpanel" aria-labelledby="matchTab-main">
+              <div id="matchResults" class="result-list"></div>
+              <div id="matchEmpty" class="empty-state">
+                <p>Nenhum match rodado ainda. Clique em "Rodar match com IA" acima.</p>
+              </div>
+              <button id="compareBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">⇄ Comparar arquitetos lado a lado</button>
+              <button id="exportMatchPdfBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">📄 Exportar resultados em PDF</button>
+              <div id="compareSection" class="dash-card" style="display:none; margin-top:16px;">
+                <h3>Comparativo</h3>
+                <div id="compareContent" class="compare-table-wrap"></div>
+                <button id="exportCompareBtn" class="btn btn-secondary btn-sm" style="margin-top:14px;">📊 Exportar comparativo em PDF</button>
+              </div>
             </div>
-            <button id="compareBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">⇄ Comparar arquitetos lado a lado</button>
-            <button id="exportMatchPdfBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">📄 Exportar resultados em PDF</button>
-            <div id="matchExtraCategories"></div>
-            <div id="compareSection" class="dash-card" style="display:none; margin-top:16px;">
-              <h3>Comparativo</h3>
-              <div id="compareContent" class="compare-table-wrap"></div>
-              <button id="exportCompareBtn" class="btn btn-secondary btn-sm" style="margin-top:14px;">📊 Exportar comparativo em PDF</button>
-            </div>
+            <div id="matchExtraPanels"></div>
 
             <div class="dash-card" style="margin-top:20px;">
               <h3>Histórico de buscas</h3>

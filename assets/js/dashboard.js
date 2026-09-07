@@ -55,7 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('roleLabel').textContent = 'Painel do cliente';
     document.getElementById('runMatchBtn').addEventListener('click', () => runMatch(me));
     document.getElementById('matchResults').addEventListener('click', (e) => handleResultClick(e, me));
-    document.getElementById('matchExtraCategories').addEventListener('click', (e) => handleResultClick(e, me));
+    document.getElementById('matchExtraPanels').addEventListener('click', (e) => handleResultClick(e, me));
+    setupMatchTabs();
     document.getElementById('upgradeFromLimitBtn').addEventListener('click', () => openUpgrade(me, () => { renderPlanCard(me); document.getElementById('usageLimitCard').style.display = 'none'; }));
     renderProjectSummary(me);
     setupProjectSummary(me);
@@ -662,23 +663,84 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /** Categorias extras (indisponível/fora da região/fora do orçamento/bem
-   * avaliado) — mostradas abaixo do match principal, sempre visíveis (não
-   * entram no limite de resultados bloqueados do plano Gratuito). */
-  function renderExtraCategories(categories, user) {
-    const container = document.getElementById('matchExtraCategories');
-    if (!categories.length) { container.innerHTML = ''; return; }
-    container.innerHTML = categories.map(cat => `
-      <div class="match-category" style="margin-top:28px;">
-        <h4 style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">${cat.icon} ${cat.label}</h4>
-        <p style="font-size:0.84rem; color:var(--ink-faint); margin:0 0 14px;">${cat.note}</p>
+   * avaliado) — viram abas ao lado do match principal, em vez de uma lista
+   * comprida empilhada. Sem nenhuma categoria extra, some a barra de abas e
+   * só o match principal aparece, como antes. Nenhuma delas entra no limite
+   * de resultados bloqueados do plano Gratuito. */
+  function renderMatchTabs(mainCount, categories, user) {
+    const tabsBar = document.getElementById('matchTabs');
+    const mainPanel = document.getElementById('matchPanelMain');
+    const extraPanels = document.getElementById('matchExtraPanels');
+
+    if (!categories.length) {
+      tabsBar.style.display = 'none';
+      tabsBar.innerHTML = '';
+      extraPanels.innerHTML = '';
+      mainPanel.hidden = false;
+      return;
+    }
+
+    const tabs = [{ key: 'main', label: '🏆 Melhor compatibilidade', count: mainCount }, ...categories.map(c => ({ key: c.key, label: `${c.icon} ${c.label}`, count: c.results.length }))];
+    tabsBar.style.display = 'flex';
+    tabsBar.innerHTML = tabs.map((t, i) => `
+      <button type="button" class="match-tab${i === 0 ? ' active' : ''}" id="matchTab-${t.key}" role="tab"
+        aria-selected="${i === 0}" aria-controls="matchPanel-${t.key}" tabindex="${i === 0 ? '0' : '-1'}" data-tab-key="${t.key}">
+        ${t.label} <span class="count">(${t.count})</span>
+      </button>`).join('');
+
+    extraPanels.innerHTML = categories.map(cat => `
+      <div id="matchPanel-${cat.key}" class="match-tabpanel" role="tabpanel" aria-labelledby="matchTab-${cat.key}" hidden>
+        <p class="match-tabpanel-note">${cat.note}</p>
         <div class="result-list">
           ${cat.results.map((r, i) => `<div class="result-card" style="grid-template-columns:auto 1fr auto; align-items:start;">${resultCardHtml(r, i, user)}</div>`).join('')}
         </div>
       </div>`).join('');
+
+    mainPanel.hidden = false;
+
     const allExtraResults = categories.flatMap(cat => cat.results);
     allExtraResults.forEach(r => allResultsById.set(r.architect.id, r));
     loadValidationStatuses(allExtraResults);
     loadResultThumbnails(allExtraResults);
+  }
+
+  /** Clique e navegação por teclado (setas/Home/End) nas abas, seguindo o
+   * padrão de acessibilidade de abas (roving tabindex) — ligado uma única
+   * vez, já que o conteúdo das abas é recriado a cada match rodado. */
+  function setupMatchTabs() {
+    const tabsBar = document.getElementById('matchTabs');
+    tabsBar.addEventListener('click', (e) => {
+      const btn = e.target.closest('.match-tab');
+      if (btn) activateMatchTab(btn.dataset.tabKey);
+    });
+    tabsBar.addEventListener('keydown', (e) => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+      const buttons = Array.from(tabsBar.querySelectorAll('.match-tab'));
+      const currentIndex = buttons.findIndex(b => b.classList.contains('active'));
+      let nextIndex = currentIndex;
+      if (e.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+      else if (e.key === 'ArrowRight') nextIndex = (currentIndex + 1) % buttons.length;
+      else if (e.key === 'Home') nextIndex = 0;
+      else if (e.key === 'End') nextIndex = buttons.length - 1;
+      e.preventDefault();
+      activateMatchTab(buttons[nextIndex].dataset.tabKey);
+      buttons[nextIndex].focus();
+    });
+  }
+
+  function activateMatchTab(key) {
+    const tabsBar = document.getElementById('matchTabs');
+    const buttons = Array.from(tabsBar.querySelectorAll('.match-tab'));
+    buttons.forEach(btn => {
+      const isActive = btn.dataset.tabKey === key;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', String(isActive));
+      btn.tabIndex = isActive ? 0 : -1;
+    });
+    document.getElementById('matchPanelMain').hidden = key !== 'main';
+    document.querySelectorAll('#matchExtraPanels .match-tabpanel').forEach(panel => {
+      panel.hidden = panel.id !== `matchPanel-${key}`;
+    });
   }
 
   async function runMatch(user, projectId) {
@@ -694,7 +756,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       limitCard.style.display = 'block';
       list.innerHTML = '';
       empty.style.display = 'none';
-      document.getElementById('matchExtraCategories').innerHTML = '';
+      document.getElementById('matchTabs').style.display = 'none';
+      document.getElementById('matchExtraPanels').innerHTML = '';
       return;
     }
     limitCard.style.display = 'none';
@@ -742,13 +805,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('exportMatchPdfBtn').style.display = results.length ? '' : 'none';
       loadValidationStatuses(results.slice(0, plan.visibleResults));
       loadResultThumbnails(results.slice(0, plan.visibleResults));
-      renderExtraCategories(extra || [], user);
+      renderMatchTabs(results.length, extra || [], user);
       renderMatchHistory(user);
     } catch (err) {
       list.innerHTML = '';
       empty.style.display = 'block';
       empty.innerHTML = `<p>${err.message || 'Não foi possível rodar o match agora.'}</p>`;
-      document.getElementById('matchExtraCategories').innerHTML = '';
+      document.getElementById('matchTabs').style.display = 'none';
+      document.getElementById('matchExtraPanels').innerHTML = '';
       if (err.offline) apiBanner.classList.add('show');
     } finally {
       btn.disabled = false;

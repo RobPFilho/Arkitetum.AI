@@ -390,3 +390,17 @@ chamada à Gemini) para não estourar a cota de IA — só o grupo principal rec
 explicação gerada por IA, como já era antes. As categorias extras ficam sempre
 visíveis, sem entrar no bloqueio do plano Gratuito, e continuam totalmente
 interativas (chat, avaliação, detalhes da pontuação, sugestões de materiais).
+
+As categorias aparecem como **abas** (`#matchTabs`) em vez de uma lista comprida
+empilhada — só a aba ativa fica visível, com contagem entre parênteses em cada
+uma. Segue o padrão de acessibilidade de abas: `role="tab"`/`role="tabpanel"`,
+`aria-selected`, e navegação por teclado (setas, Home/End) com foco seguindo a
+aba ativa. Sem nenhuma categoria extra, a barra de abas some e só o match
+principal aparece — igual a antes de existir a categorização.
+
+**Bug relacionado corrigido**: o SDK do Gemini não tem timeout embutido — sob
+alta demanda da API (visto ao vivo durante o desenvolvimento, erros 503), uma
+chamada podia ficar pendurada sem nunca resolver nem falhar, travando o match
+inteiro indefinidamente em vez de cair na explicação padrão. Adicionado um
+timeout de 8s (`Promise.race`) em `explainCompatibility()` — na pior das
+hipóteses, o cliente espera 8s e recebe a explicação padrão, nunca trava.

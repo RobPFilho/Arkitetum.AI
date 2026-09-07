@@ -540,6 +540,18 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .dash-meta-row:last-child { border-bottom: none; }
 .dash-meta-row span:first-child { color: var(--ink-faint); flex-shrink: 0; white-space: nowrap; }
 .dash-meta-row span:last-child { text-align: right; overflow-wrap: anywhere; min-width: 0; }
+/* ---- Abas de categoria de match ---- */
+.match-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--line); padding-bottom: 2px; }
+.match-tab {
+  background: none; border: none; border-bottom: 2px solid transparent; padding: 10px 4px; margin-bottom: -1px;
+  font-size: 0.86rem; font-weight: 600; color: var(--ink-faint); cursor: pointer; white-space: nowrap;
+  transition: color .15s ease, border-color .15s ease;
+}
+.match-tab:hover { color: var(--ink); }
+.match-tab.active { color: var(--terracotta); border-bottom-color: var(--terracotta); }
+.match-tab .count { color: var(--ink-faint); font-weight: 500; }
+.match-tab.active .count { color: var(--terracotta); }
+.match-tabpanel-note { font-size: 0.84rem; color: var(--ink-faint); margin: 0 0 16px; }
 .result-list { display: flex; flex-direction: column; gap: 16px; }
 .result-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 24px; display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center; }
 .result-rank {
