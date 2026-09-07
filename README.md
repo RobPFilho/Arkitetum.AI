@@ -404,3 +404,19 @@ chamada podia ficar pendurada sem nunca resolver nem falhar, travando o match
 inteiro indefinidamente em vez de cair na explicação padrão. Adicionado um
 timeout de 8s (`Promise.race`) em `explainCompatibility()` — na pior das
 hipóteses, o cliente espera 8s e recebe a explicação padrão, nunca trava.
+
+## Painel reorganizado em seções
+
+O painel (`dashboard.html`) era uma pilha de ~10 cards brancos idênticos, sem
+nenhuma hierarquia visual entre eles — difícil de escanear, parecia "tudo
+jogado na tela". Reorganizado em **seções com título** (`.dash-section`,
+`.dash-section-title`): pro cliente, "📁 Seu projeto" (resumo, moodboard,
+referência visual, projetos), "🤝 Compatibilidade com arquitetos" (as abas de
+categoria, histórico) e "💬 Mensagens"; pro arquiteto, "✅ Seu perfil" (estilo,
+verificação), "📁 Portfólio & divulgação" (compartilhar, portfólio,
+avaliações) e "💬 Mensagens". Os cards "precisam da sua atenção" (checklist
+incompleto, resumo esperando confirmação) ganharam um risco na cor da marca
+pra se destacar do resto sem gritar. Parágrafos e fileiras de botão que
+repetiam `style="font-size:0.88rem"`/`style="display:flex; gap:10px"` inline
+em cada card viraram classes (`.card-lead`, `.card-actions`), centralizando o
+espaçamento num lugar só em vez de espalhado pelo HTML.

@@ -530,6 +530,34 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .dash-grid { display: grid; grid-template-columns: 320px 1fr; gap: 28px; align-items: start; }
 .dash-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 26px; margin-bottom: 20px; }
 .dash-card h3 { font-size: 1rem; margin-bottom: 14px; }
+/* Parágrafo introdutório padrão de card — antes cada dash-card repetia
+   style="font-size:0.88rem" inline; centralizado aqui pra manter consistência
+   e poder ajustar espaçamento num lugar só. */
+.card-lead { font-size: 0.88rem; color: var(--ink-soft); margin: 0 0 16px; }
+.card-lead:last-child { margin-bottom: 0; }
+/* Fileira de botões de ação de um card — idem, substitui o
+   style="display:flex; gap:10px; flex-wrap:wrap" repetido em cada card. */
+.card-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Agrupa cards relacionados sob um título de seção, pra a coluna principal do
+   painel parecer capítulos organizados em vez de uma pilha de caixas iguais
+   sem hierarquia nenhuma entre elas. */
+.dash-section { margin-bottom: 44px; }
+.dash-section:last-child { margin-bottom: 0; }
+.dash-section .dash-card:last-child { margin-bottom: 0; }
+.dash-section-title {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; color: var(--ink);
+  margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line);
+}
+.dash-section-title .icon { font-size: 1.05rem; }
+/* Bloco leve (sem virar mais um dash-card) pra separar ações secundárias de
+   conta na barra lateral, sem competir visualmente com o conteúdo principal. */
+.dash-sidebar-label {
+  font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700;
+  color: var(--ink-faint); margin: 28px 0 12px; padding-left: 2px;
+}
+.dash-sidebar-label:first-child { margin-top: 0; }
 .dash-avatar {
   width: 68px; height: 68px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display); font-size: 1.5rem; color: var(--terracotta); margin-bottom: 14px;
@@ -927,9 +955,16 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .pricing-card ul li.unavailable { color: var(--ink-faint); }
 .pricing-card ul li.unavailable::before { content: '—'; color: var(--ink-faint); }
 
-.plan-status-card { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.plan-status-card {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  background: linear-gradient(135deg, var(--bg-alt), var(--white) 70%);
+}
 .plan-status-card .plan-info { flex: 1; min-width: 180px; }
 .plan-status-card .plan-name { font-family: var(--font-display); font-size: 1.15rem; margin-bottom: 2px; }
+/* Cards de "precisa da sua atenção" (checklist incompleto, resumo esperando
+   confirmação) — um risco sutil na cor da marca pra se destacar do resto do
+   conteúdo sem gritar. */
+#onboardingChecklistCard, #pendingValidationsCard { border-left: 3px solid var(--terracotta); }
 .plan-status-card .plan-usage { font-size: 0.82rem; color: var(--ink-faint); }
 
 .badge-pro {
