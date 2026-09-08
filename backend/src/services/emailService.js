@@ -22,7 +22,11 @@ function getTransporter() {
 export async function sendEmail({ to, subject, html }) {
   const client = getTransporter();
   if (!client) {
-    console.log(`[email simulado] Para: ${to} | Assunto: ${subject}`);
+    // Sem o corpo aqui, um e-mail simulado com link (redefinição de senha,
+    // por exemplo) era impossível de testar localmente — o link só existia
+    // dentro do HTML, que nunca aparecia em lugar nenhum.
+    const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    console.log(`[email simulado] Para: ${to} | Assunto: ${subject}\n  ${text}`);
     return { simulated: true };
   }
   try {
@@ -68,6 +72,14 @@ export function newReviewEmail(architect, clientName, rating, comment) {
     to: architect.email,
     subject: `Você recebeu uma nova avaliação no match.IA`,
     html: `<p>Olá, ${architect.name}!</p><p>${clientName} avaliou seu atendimento com ${rating} de 5 estrelas${comment ? `:</p><blockquote>${comment}</blockquote>` : "."}<p>Veja no seu perfil público ou no painel.</p>`,
+  });
+}
+
+export function passwordResetEmail(user, resetUrl) {
+  return sendEmail({
+    to: user.email,
+    subject: "Redefinir sua senha — match.IA",
+    html: `<p>Olá, ${user.name}!</p><p>Pediram a redefinição da senha da sua conta match.IA. Se foi você, clique no link abaixo para escolher uma nova senha (válido por 1 hora):</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Se você não pediu isso, pode ignorar este e-mail — sua senha continua a mesma.</p>`,
   });
 }
 

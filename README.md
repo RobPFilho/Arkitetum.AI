@@ -496,3 +496,55 @@ Reformulado do zero pra se parecer com um perfil de Instagram/X/TikTok:
   mesma causa-raiz do bug da navbar corrigido antes nesta sessão: item flex
   sem `min-width: 0` não encolhe além do tamanho do próprio conteúdo.
   Corrigido com `min-width: 0` + `overflow-wrap: anywhere`.
+
+## "Esqueci minha senha"
+
+Fluxo completo de redefinição de senha, no mesmo padrão de segurança do
+`passwordHash` já existente:
+
+- `POST /api/auth/forgot-password` (e-mail) → gera um token aleatório,
+  guarda só o **hash SHA-256** dele no usuário (`passwordResetTokenHash`,
+  `passwordResetExpires`, ambos `select:false`) e manda um e-mail com o link
+  `redefinir-senha.html?token=...`, válido por 1h. Sempre responde a mesma
+  mensagem de sucesso, exista ou não a conta — senão dá pra descobrir e-mails
+  cadastrados só tentando "esqueci minha senha" com cada um.
+- `POST /api/auth/reset-password` (token + nova senha) → acha o usuário pelo
+  hash do token (dentro da validade), troca a senha (reaproveitando o hook
+  `pre("save")` que já hasheia com bcrypt) e invalida o token — só serve uma
+  vez.
+- Páginas novas `recuperar-senha.html` (pedir o link) e
+  `redefinir-senha.html` (escolher a nova senha, lê `?token=` da URL; sem
+  token ou com token inválido/expirado, mostra estado de "link inválido" com
+  botão pra pedir outro). Link "Esqueci minha senha" adicionado no
+  `login.html`.
+- **Melhoria no caminho**: o e-mail simulado (sem SMTP configurado) só
+  logava "Para/Assunto" — impossível testar um fluxo com link (como esse)
+  sem ver o corpo. `sendEmail` agora loga o texto do e-mail também.
+
+Testado de ponta a ponta: pedido → e-mail simulado com o link → redefinição
+→ login com a senha nova funciona e a antiga não → reenviar o mesmo token
+depois de usado é rejeitado (uso único) → sem token na URL mostra o estado
+de link inválido.
+
+## Verificação: os três cards de "IA sob medida" (`projetos.html`) são reais?
+
+Pergunta levantada: será que a funcionalidade do card do meio ("Sugestões de
+materiais") — mockup mostrando materiais restritos ao que o arquiteto tem —
+existe de verdade no site, ou é só uma imagem ilustrativa?
+
+Testado ao vivo: **os três são reais**, não só ilustração.
+- Card 1 (Perfil de estilo): painel do arquiteto, aba "Perfil".
+- Card 2 (Sugestões de materiais): botão "Ver sugestões de materiais" em
+  cada resultado de match do cliente — gera combinações reais
+  (`MatchExtras.generateMaterialCombos`) só com os `favoriteMaterials` que
+  aquele arquiteto específico cadastrou, com a mesma nota de restrição do
+  mockup. Confirmado com dados reais: `Fernanda Albuquerque` → "Concreto
+  aparente + Madeira de demolição" e "Vidro + Concreto aparente".
+- Card 3 (Resumo do projeto validado): card "Resumo do projeto" do cliente
+  + "Resumos para confirmar" do arquiteto, com botão de validação dos dois
+  lados.
+
+Só não fica no mesmo lugar do mockup (que mostra uma tela dedicada
+"Projeto de Ana Beatriz / Sugestões") — na implementação real, fica dentro
+de cada resultado de match, o que faz mais sentido: a sugestão já nasce
+amarrada ao arquiteto específico que vai executar o projeto.

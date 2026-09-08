@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema(
     },
     phone: { type: String, required: true },
     passwordHash: { type: String, required: true, select: false },
+    // Guarda o hash do token de redefinição, nunca o token cru (o mesmo
+    // princípio do passwordHash) — mesmo com o banco vazado, ninguém
+    // consegue forjar um link de redefinição válido a partir daqui.
+    passwordResetTokenHash: { type: String, select: false },
+    passwordResetExpires: { type: Date, select: false },
     role: { type: String, required: true, enum: ["client", "architect"] },
     city: String,
     state: String,

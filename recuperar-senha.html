@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <script>try{var t=localStorage.getItem('matchia_theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Entrar — match.IA</title>
-<meta name="description" content="Entre na sua conta match.IA para acompanhar seus matches e projetos.">
+<title>Recuperar senha — match.IA</title>
+<meta name="description" content="Esqueceu sua senha do match.IA? Peça um link de redefinição pelo seu e-mail cadastrado.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="match.IA">
-<meta property="og:title" content="Entrar — match.IA">
-<meta property="og:description" content="Entre na sua conta match.IA para acompanhar seus matches e projetos.">
+<meta property="og:title" content="Recuperar senha — match.IA">
+<meta property="og:description" content="Esqueceu sua senha do match.IA? Peça um link de redefinição pelo seu e-mail cadastrado.">
 <meta property="og:image" content="assets/img/mark.png">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Entrar — match.IA">
-<meta name="twitter:description" content="Entre na sua conta match.IA para acompanhar seus matches e projetos.">
+<meta name="twitter:title" content="Recuperar senha — match.IA">
+<meta name="twitter:description" content="Esqueceu sua senha do match.IA? Peça um link de redefinição pelo seu e-mail cadastrado.">
 <meta name="twitter:image" content="assets/img/mark.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="manifest" href="manifest.json">
@@ -54,9 +54,9 @@
     <div class="auth-card" style="max-width:440px;">
       <div class="center" style="margin-bottom:28px;">
         <div class="auth-badge"><img src="assets/img/mark.png" alt=""></div>
-        <span class="eyebrow">Bem-vindo de volta</span>
-        <h1 style="font-size:1.7rem; margin-bottom:6px;">Entrar no match.IA</h1>
-        <p style="margin:0;">Acesse seu painel de compatibilidade e projetos.</p>
+        <span class="eyebrow">Recuperar acesso</span>
+        <h1 style="font-size:1.7rem; margin-bottom:6px;">Esqueceu sua senha?</h1>
+        <p style="margin:0;">Informe seu e-mail cadastrado e enviaremos um link para escolher uma nova senha.</p>
       </div>
 
       <div id="apiBanner" class="api-banner" role="alert" aria-live="polite">
@@ -64,19 +64,15 @@
       </div>
 
       <div id="formError" class="form-error" role="alert" aria-live="assertive"></div>
+      <div id="formSuccess" class="form-note" style="display:none; text-align:center; padding:16px; background:var(--bg-alt); border-radius:var(--radius-sm);"></div>
 
-      <form id="loginForm" novalidate>
+      <form id="forgotForm" novalidate>
         <div class="form-field full">
           <label for="email">E-mail</label>
           <input type="email" id="email" required autocomplete="email">
         </div>
-        <div class="form-field full">
-          <label for="password">Senha</label>
-          <input type="password" id="password" required autocomplete="current-password">
-        </div>
-        <p style="margin:-8px 0 16px; text-align:right;"><a href="recuperar-senha.html" style="font-size:0.84rem;">Esqueci minha senha</a></p>
-        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Entrar</button>
-        <p class="form-note">Ainda não tem conta? <a href="cadastro.html">Cadastre-se</a></p>
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Enviar link de redefinição</button>
+        <p class="form-note"><a href="login.html">← Voltar para o login</a></p>
       </form>
     </div>
   </div>
@@ -85,6 +81,6 @@
 <script src="assets/js/api.js"></script>
 <script src="assets/js/theme.js"></script>
 <script src="assets/js/site.js"></script>
-<script src="assets/js/login.js"></script>
+<script src="assets/js/recuperar-senha.js"></script>
 </body>
 </html>

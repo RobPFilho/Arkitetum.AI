@@ -65,6 +65,8 @@ const MatchAPI = (() => {
     registerClient: (payload) => request('/auth/register/client', { method: 'POST', body: payload }),
     registerArchitect: (payload) => request('/auth/register/architect', { method: 'POST', body: payload }),
     login: (payload) => request('/auth/login', { method: 'POST', body: payload }),
+    forgotPassword: (email) => request('/auth/forgot-password', { method: 'POST', body: { email } }),
+    resetPassword: (token, password, confirmPassword) => request('/auth/reset-password', { method: 'POST', body: { token, password, confirmPassword } }),
     me: () => request('/dashboard/me', { auth: true }),
     updateMe: (payload) => request('/dashboard/me', { method: 'PATCH', auth: true, body: payload }),
     exportMyData: () => request('/dashboard/me/export', { auth: true }),

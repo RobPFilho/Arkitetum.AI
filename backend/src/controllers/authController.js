@@ -1,7 +1,10 @@
 import jwt from "jsonwebtoken";
+import crypto from "node:crypto";
 import User from "../models/User.js";
-import { welcomeEmail } from "../services/emailService.js";
+import { welcomeEmail, passwordResetEmail } from "../services/emailService.js";
 import { notify } from "../services/notificationService.js";
+
+const hashToken = (raw) => crypto.createHash("sha256").update(raw).digest("hex");
 
 const tokenFor = (user) =>
   jwt.sign({ sub: user.id, role: user.role }, process.env.JWT_SECRET, {
@@ -117,4 +120,42 @@ export async function login(req, res) {
     token: tokenFor(user),
     user: { id: user.id, name: user.name, role: user.role },
   });
+}
+
+/**
+ * Pedido de redefinição de senha. Sempre responde a mesma mensagem de
+ * sucesso, exista ou não a conta — senão dá pra descobrir quais e-mails
+ * estão cadastrados só tentando "esqueci minha senha" com cada um.
+ */
+export async function forgotPassword(req, res) {
+  const email = String(req.body.email || "").toLowerCase();
+  const user = await User.findOne({ email });
+  if (user) {
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    user.passwordResetTokenHash = hashToken(rawToken);
+    user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
+    await user.save();
+    const resetUrl = `${req.protocol}://${req.get("host")}/redefinir-senha.html?token=${rawToken}`;
+    passwordResetEmail(user, resetUrl).catch((err) => console.error("Falha ao enviar e-mail de redefinição:", err.message));
+  }
+  res.json({ ok: true, message: "Se esse e-mail estiver cadastrado, enviamos um link de redefinição." });
+}
+
+export async function resetPassword(req, res) {
+  const { token, password, confirmPassword } = req.body;
+  if (!token || !password || password !== confirmPassword)
+    return res.status(400).json({ error: "Preencha a nova senha corretamente nos dois campos." });
+
+  const user = await User.findOne({
+    passwordResetTokenHash: hashToken(token),
+    passwordResetExpires: { $gt: new Date() },
+  });
+  if (!user)
+    return res.status(400).json({ error: "Link de redefinição inválido ou expirado. Peça um novo." });
+
+  user.passwordHash = password;
+  user.passwordResetTokenHash = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+  res.json({ ok: true });
 }
