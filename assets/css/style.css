@@ -103,6 +103,14 @@ ul { list-style: none; margin: 0; padding: 0; }
 button { font-family: inherit; cursor: pointer; }
 input, select, textarea { font-family: inherit; font-size: 1rem; }
 
+/* Anel de foco único para todo elemento interativo — evita o azul padrão
+   do navegador (que destoa da paleta) sem nunca remover o indicador. */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [tabindex]:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+}
+
 h1, h2, h3, h4 {
   font-family: var(--font-display);
   font-weight: 600;
@@ -599,6 +607,13 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 }
 .dash-meta-row { display: flex; justify-content: space-between; gap: 12px; font-size: 0.86rem; padding: 8px 0; border-bottom: 1px dashed var(--line); }
 .dash-meta-row:last-child { border-bottom: none; }
+/* Sub-seção dentro de um dash-card — junta blocos de fatos relacionados
+   (contato, estilos, especialidades...) sem empilhar uma caixa pra cada um. */
+.dash-subhead {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--ink-faint); margin: 20px 0 10px;
+}
+.dash-subhead:first-child { margin-top: 0; }
 .dash-meta-row span:first-child { color: var(--ink-faint); flex-shrink: 0; white-space: nowrap; }
 .dash-meta-row span:last-child { text-align: right; overflow-wrap: anywhere; min-width: 0; }
 /* ---- Abas de categoria de match ---- */
