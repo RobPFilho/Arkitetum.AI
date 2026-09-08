@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user) {
       authSlot.innerHTML = `
         <div class="notif-bell-wrap">
-          <button type="button" class="notif-bell" id="notifBellBtn" aria-label="Notificações">🔔<span class="unread-badge" id="notifBellBadge" style="display:none;"></span></button>
+          <button type="button" class="notif-bell" id="notifBellBtn" aria-label="Notificações"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 3.4 1 5.2 1.8 6.2a.9.9 0 0 1-.7 1.5H4.9a.9.9 0 0 1-.7-1.5C5 14.2 6 12.4 6 9Z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg><span class="unread-badge" id="notifBellBadge" style="display:none;"></span></button>
           <div class="notif-dropdown" id="notifDropdown" style="display:none;"></div>
         </div>
         <a href="dashboard.html" class="login-link">${user.name.split(' ')[0]}</a>

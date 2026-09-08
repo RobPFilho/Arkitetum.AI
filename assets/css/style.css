@@ -224,7 +224,8 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .nav-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .nav-actions a.login-link { font-size: 0.85rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
 .notif-bell-wrap { position: relative; }
-.notif-bell { position: relative; background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 4px; line-height: 1; }
+.notif-bell { position: relative; background: none; border: none; cursor: pointer; padding: 4px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; color: var(--ink-soft); }
+.notif-bell:hover { color: var(--terracotta); }
 .notif-bell .unread-badge { position: absolute; top: -4px; right: -6px; min-width: 16px; height: 16px; font-size: 0.62rem; padding: 0 4px; }
 .notif-dropdown {
   position: absolute; top: calc(100% + 10px); right: 0; width: 300px; max-height: 360px; overflow-y: auto;
@@ -373,12 +374,14 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 }
 .feature-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); border-color: transparent; }
 .feature-card:hover::before { opacity: 1; }
-.feature-card .icon {
-  width: 44px; height: 44px; border-radius: 12px;
-  background: linear-gradient(135deg, rgba(176,117,90,0.14), rgba(123,142,126,0.14));
-  display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: var(--terracotta);
-  font-size: 1.1rem;
+/* Numeração discreta no lugar de um ícone decorativo — mesma função de
+   "marcador visual" sem depender de um pictograma aleatório por card. */
+.feature-card .index {
+  display: block; font-family: var(--font-display); font-weight: 700;
+  font-size: 0.92rem; color: var(--ink-faint); margin-bottom: 14px;
+  letter-spacing: 0.02em; transition: color .22s ease;
 }
+.feature-card:hover .index { color: var(--terracotta); }
 .feature-card h3 { font-size: 1.02rem; margin-bottom: 6px; }
 .feature-card p { font-size: 0.88rem; margin: 0; }
 @media (max-width: 900px) { .split-head { grid-template-columns: 1fr; } .feature-grid { grid-template-columns: 1fr 1fr; } }
@@ -629,9 +632,9 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-faint); }
 /* Versão compacta pra dentro de um card (portfólio vazio, sem mensagens, sem
    histórico) — o .empty-state grande é pensado pra ocupar a página toda. */
-.empty-state-inline { text-align: center; padding: 36px 16px; color: var(--ink-faint); }
-.empty-state-inline .empty-icon { font-size: 1.9rem; display: block; margin-bottom: 10px; opacity: 0.75; }
-.empty-state-inline p { margin: 0 0 14px; font-size: 0.88rem; }
+.empty-state-inline { text-align: center; padding: 40px 16px; color: var(--ink-faint); }
+.empty-state-inline .empty-rule { display: inline-block; width: 26px; height: 2px; border-radius: 2px; background: var(--brand-gradient); margin-bottom: 16px; }
+.empty-state-inline p { margin: 0 0 14px; font-size: 0.88rem; max-width: 320px; margin-left: auto; margin-right: auto; }
 .empty-state-inline:has(.btn):last-child, .empty-state-inline .btn:last-child { margin-bottom: 0; }
 .favorite-item {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
@@ -748,11 +751,13 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .mock-refs .ref-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .mock-refs .ref-thumb.add { display: flex; align-items: center; justify-content: center; border: 1px dashed var(--line); font-size: 0.76rem; color: var(--ink-faint); }
 
+/* Nota de restrição (ex.: "só materiais que o arquiteto tem") — um risco
+   discreto na borda em vez de um ícone decorativo do lado do texto. */
 .constraint-note {
-  display: flex; gap: 10px; background: var(--bg-alt); border-radius: var(--radius-sm);
-  padding: 12px 14px; font-size: 0.78rem; color: var(--ink-soft); margin-bottom: 18px;
+  border-left: 2px solid var(--ink-faint); background: var(--bg-alt);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 10px 14px; font-size: 0.78rem; color: var(--ink-soft); margin-bottom: 18px;
 }
-.constraint-note .dot-ic { flex-shrink: 0; }
 
 .combo-card { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; }
 .combo-card .swatches { display: flex; gap: 4px; flex-shrink: 0; }
@@ -963,7 +968,11 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--white); font-size: 0.82rem;
 }
 .file-preview img { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
-.file-preview .doc-ic { width: 36px; height: 36px; border-radius: 8px; background: var(--bg-alt); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+.file-preview .doc-ic {
+  height: 36px; padding: 0 8px; border-radius: 8px; background: var(--bg-alt); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em; color: var(--terracotta); text-transform: uppercase;
+}
 .file-preview span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-soft); }
 .file-preview .remove-file { width: 24px; height: 24px; border-radius: 50%; border: none; background: var(--bg-alt); color: var(--ink-faint); flex-shrink: 0; font-size: 13px; }
 .file-preview .remove-file:hover { background: #fbe9e5; color: #9c3b23; }
@@ -1027,7 +1036,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 10px; background: rgba(250,249,246,0.55); text-align: center; padding: 20px; border-radius: var(--radius-md);
 }
-.locked-result .lock-overlay .lock-icon { font-size: 1.4rem; }
+.locked-result .lock-overlay .lock-icon { color: var(--ink-faint); display: flex; }
 .locked-result .lock-overlay p { margin: 0; font-size: 0.86rem; font-weight: 600; color: var(--ink); max-width: 220px; }
 
 .usage-limit-card {

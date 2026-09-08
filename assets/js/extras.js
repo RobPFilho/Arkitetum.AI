@@ -98,7 +98,7 @@ const MatchExtras = (() => {
         onChange(reader.result);
         preview.style.display = 'flex';
         preview.innerHTML = `
-          ${isImage ? `<img src="${reader.result}" alt="">` : '<span class="doc-ic">📄</span>'}
+          ${isImage ? `<img src="${reader.result}" alt="">` : `<span class="doc-ic">${(file.name.split('.').pop() || 'arq').slice(0, 4)}</span>`}
           <span>${file.name} (${Math.round(file.size / 1024)} KB)</span>
           <button type="button" class="remove-file">×</button>
         `;

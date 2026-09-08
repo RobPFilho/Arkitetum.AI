@@ -43,7 +43,7 @@
     <div class="nav-actions">
       <a href="#" id="logoutBtn" class="login-link">Sair</a>
     </div>
-    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema" type="button">🌓</button>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema" type="button"></button>
     <button class="nav-toggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
   </nav>
 </header>
@@ -72,7 +72,7 @@
           <span class="eyebrow" id="roleLabel">Painel</span>
           <h1 id="profileName">—</h1>
           <p class="profile-handle" id="profileEmail">—</p>
-          <p class="profile-location">📍 <span id="profileCity">—</span>, <span id="profileState">—</span></p>
+          <p class="profile-location"><span id="profileCity">—</span>, <span id="profileState">—</span></p>
         </div>
         <div class="profile-header-actions">
           <div id="clientActions" style="display:none;">
@@ -99,11 +99,11 @@
       <!-- CLIENTE -->
       <div id="clientPanel" style="display:none;">
         <div class="profile-tabs" id="clientProfileTabs" role="tablist" aria-label="Seções do painel">
-          <button type="button" class="profile-tab active" data-profile-panel="projeto" role="tab" aria-selected="true">📁 Seu projeto</button>
-          <button type="button" class="profile-tab" data-profile-panel="match" role="tab" aria-selected="false">🤝 Compatibilidade</button>
-          <button type="button" class="profile-tab" data-profile-panel="favoritos" role="tab" aria-selected="false">⭐ Favoritos</button>
-          <button type="button" class="profile-tab" data-profile-panel="mensagens" role="tab" aria-selected="false">💬 Mensagens <span class="unread-badge" id="clientUnreadBadge" style="display:none;"></span></button>
-          <button type="button" class="profile-tab" data-profile-panel="conta" role="tab" aria-selected="false">⚙️ Conta</button>
+          <button type="button" class="profile-tab active" data-profile-panel="projeto" role="tab" aria-selected="true">Seu projeto</button>
+          <button type="button" class="profile-tab" data-profile-panel="match" role="tab" aria-selected="false">Compatibilidade</button>
+          <button type="button" class="profile-tab" data-profile-panel="favoritos" role="tab" aria-selected="false">Favoritos</button>
+          <button type="button" class="profile-tab" data-profile-panel="mensagens" role="tab" aria-selected="false">Mensagens <span class="unread-badge" id="clientUnreadBadge" style="display:none;"></span></button>
+          <button type="button" class="profile-tab" data-profile-panel="conta" role="tab" aria-selected="false">Conta</button>
         </div>
 
         <div class="profile-panel" data-profile-panel-content="projeto">
@@ -118,9 +118,9 @@
             </div>
             <div class="card-actions">
               <button id="validateSummaryBtn" class="btn btn-sage btn-sm">Validar resumo do projeto</button>
-              <button id="exportPdfBtn" class="btn btn-secondary btn-sm">📄 Exportar PDF</button>
-              <button id="moodboardBtn" class="btn btn-secondary btn-sm">✨ Gerar moodboard com IA</button>
-              <button id="referenceImageBtn" class="btn btn-secondary btn-sm">🖼 Ver referência visual</button>
+              <button id="exportPdfBtn" class="btn btn-secondary btn-sm">Exportar PDF</button>
+              <button id="moodboardBtn" class="btn btn-secondary btn-sm">Gerar moodboard com IA</button>
+              <button id="referenceImageBtn" class="btn btn-secondary btn-sm">Ver referência visual</button>
             </div>
           </div>
 
@@ -206,11 +206,11 @@
               <p>Nenhum match rodado ainda. Clique em "Rodar match com IA" acima.</p>
             </div>
             <button id="compareBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">⇄ Comparar arquitetos lado a lado</button>
-            <button id="exportMatchPdfBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">📄 Exportar resultados em PDF</button>
+            <button id="exportMatchPdfBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">Exportar resultados em PDF</button>
             <div id="compareSection" class="dash-card" style="display:none; margin-top:16px;">
               <h3>Comparativo</h3>
               <div id="compareContent" class="compare-table-wrap"></div>
-              <button id="exportCompareBtn" class="btn btn-secondary btn-sm" style="margin-top:14px;">📊 Exportar comparativo em PDF</button>
+              <button id="exportCompareBtn" class="btn btn-secondary btn-sm" style="margin-top:14px;">Exportar comparativo em PDF</button>
             </div>
           </div>
           <div id="matchExtraPanels"></div>
@@ -231,7 +231,7 @@
           <p class="card-lead">Converse direto com os arquitetos do seu match.</p>
           <div class="chat-layout" id="mensagens">
             <div class="conversation-list" id="clientConversationList"></div>
-            <div class="chat-shell" id="clientChatShell"><div class="chat-empty">💬 Selecione uma conversa ou envie uma mensagem a partir do perfil de um arquiteto.</div></div>
+            <div class="chat-shell" id="clientChatShell"><div class="chat-empty">Selecione uma conversa ou envie uma mensagem a partir do perfil de um arquiteto.</div></div>
           </div>
         </div>
       </div>
@@ -239,11 +239,11 @@
       <!-- ARQUITETO -->
       <div id="architectPanel" style="display:none;">
         <div class="profile-tabs" id="architectProfileTabs" role="tablist" aria-label="Seções do painel">
-          <button type="button" class="profile-tab active" data-profile-panel="perfil" role="tab" aria-selected="true">✅ Perfil</button>
-          <button type="button" class="profile-tab" data-profile-panel="portfolio" role="tab" aria-selected="false">📁 Portfólio</button>
-          <button type="button" class="profile-tab" data-profile-panel="avaliacoes" role="tab" aria-selected="false">⭐ Avaliações</button>
-          <button type="button" class="profile-tab" data-profile-panel="mensagens" role="tab" aria-selected="false">💬 Mensagens <span class="unread-badge" id="architectUnreadBadge" style="display:none;"></span></button>
-          <button type="button" class="profile-tab" data-profile-panel="conta" role="tab" aria-selected="false">⚙️ Conta</button>
+          <button type="button" class="profile-tab active" data-profile-panel="perfil" role="tab" aria-selected="true">Perfil</button>
+          <button type="button" class="profile-tab" data-profile-panel="portfolio" role="tab" aria-selected="false">Portfólio</button>
+          <button type="button" class="profile-tab" data-profile-panel="avaliacoes" role="tab" aria-selected="false">Avaliações</button>
+          <button type="button" class="profile-tab" data-profile-panel="mensagens" role="tab" aria-selected="false">Mensagens <span class="unread-badge" id="architectUnreadBadge" style="display:none;"></span></button>
+          <button type="button" class="profile-tab" data-profile-panel="conta" role="tab" aria-selected="false">Conta</button>
         </div>
 
         <div class="profile-panel" data-profile-panel-content="perfil">
@@ -322,7 +322,7 @@
                 <div class="form-field full">
                   <label>Imagem do projeto <span class="hint">(anexe um arquivo ou cole um link abaixo)</span></label>
                   <div class="file-input-row">
-                    <label class="file-btn" for="pImageFile">📎 Anexar imagem</label>
+                    <label class="file-btn" for="pImageFile">Anexar imagem</label>
                     <input type="file" id="pImageFile" accept="image/*" style="display:none;">
                     <span class="file-hint">JPG/PNG, até 2MB</span>
                   </div>
@@ -332,7 +332,7 @@
                 <div class="form-field full">
                   <label>Arquivo do projeto <span class="hint">(plantas, PDF, portfólio completo...)</span></label>
                   <div class="file-input-row">
-                    <label class="file-btn" for="pProjectFile">📎 Anexar arquivo</label>
+                    <label class="file-btn" for="pProjectFile">Anexar arquivo</label>
                     <input type="file" id="pProjectFile" accept=".pdf,image/*,.zip,.dwg" style="display:none;">
                     <span class="file-hint">PDF, imagem ou ZIP, até 2MB</span>
                   </div>
@@ -363,7 +363,7 @@
           <p class="card-lead">Converse com clientes que te encontraram pelo match.</p>
           <div class="chat-layout">
             <div class="conversation-list" id="architectConversationList"></div>
-            <div class="chat-shell" id="architectChatShell"><div class="chat-empty">💬 Selecione uma conversa à esquerda.</div></div>
+            <div class="chat-shell" id="architectChatShell"><div class="chat-empty">Selecione uma conversa à esquerda.</div></div>
           </div>
         </div>
       </div>
@@ -402,8 +402,8 @@
           <h3 style="font-size:1rem;">Privacidade (LGPD)</h3>
           <p class="card-lead">Seus dados são seus. Baixe tudo que a plataforma guarda sobre você ou apague sua conta permanentemente.</p>
           <div style="display:flex; flex-direction:column; gap:8px; max-width:320px;">
-            <button type="button" id="exportDataBtn" class="btn btn-secondary btn-sm btn-block">⬇ Baixar meus dados</button>
-            <button type="button" id="deleteAccountBtn" class="btn btn-secondary btn-sm btn-block" style="color:var(--terracotta-dark); border-color:var(--terracotta-dark);">🗑 Excluir minha conta</button>
+            <button type="button" id="exportDataBtn" class="btn btn-secondary btn-sm btn-block">Baixar meus dados</button>
+            <button type="button" id="deleteAccountBtn" class="btn btn-secondary btn-sm btn-block" style="color:var(--terracotta-dark); border-color:var(--terracotta-dark);">Excluir minha conta</button>
           </div>
         </div>
       </div>

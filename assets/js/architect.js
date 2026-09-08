@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const combos = MatchExtras.generateMaterialCombos(p.favoriteMaterials);
     document.getElementById('archCombos').innerHTML = combos.length
-      ? `<div class="constraint-note"><span class="dot-ic">🔒</span><span>Só usa materiais que ${arch.name} cadastrou como favoritos — nada inexequível.</span></div>` +
+      ? `<div class="constraint-note">Só usa materiais que ${arch.name} cadastrou como favoritos — nada inexequível.</div>` +
         combos.map(c => `<div class="combo-card"><div class="combo-name">${c.name}</div></div>`).join('')
       : '<p style="font-size:0.86rem; color:var(--ink-faint);">Cadastre ao menos 2 materiais favoritos para gerar sugestões.</p>';
 

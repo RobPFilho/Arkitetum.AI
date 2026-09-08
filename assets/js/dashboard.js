@@ -2,10 +2,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Quem pede menos animação no sistema também não quer rolagem suave.
   const SCROLL_BEHAVIOR = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
   // Estado vazio compacto e consistente pra dentro de um card (portfólio,
-  // histórico, mensagens...) — ícone + texto + ação opcional, em vez de um
-  // parágrafo cinza solto sem nenhum apelo visual.
-  const emptyStateHtml = (icon, text, actionHtml = '') =>
-    `<div class="empty-state-inline"><span class="empty-icon">${icon}</span><p>${text}</p>${actionHtml}</div>`;
+  // histórico, mensagens...) — traço + texto + ação opcional, no mesmo
+  // idioma visual do resto do site (ver .eyebrow), em vez de um ícone
+  // decorativo ou um parágrafo cinza solto sem nenhum apelo visual.
+  const emptyStateHtml = (text, actionHtml = '') =>
+    `<div class="empty-state-inline"><span class="empty-rule"></span><p>${text}</p>${actionHtml}</div>`;
   // Ids de arquitetos salvos "pra depois" (qualquer categoria, não só o match
   // principal) — carregado uma vez ao abrir o painel (loadFavoriteIds roda
   // logo no início, antes de qualquer match), atualizado localmente a cada
@@ -521,7 +522,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const favorites = await MatchAPI.favorites();
       document.getElementById('statFavCount').textContent = favorites.length;
       if (!favorites.length) {
-        list.innerHTML = emptyStateHtml('⭐', 'Nenhum arquiteto salvo ainda. Use o botão "Salvar para depois" nos resultados do match.');
+        list.innerHTML = emptyStateHtml('Nenhum arquiteto salvo ainda. Use o botão "Salvar para depois" nos resultados do match.');
         return;
       }
       list.innerHTML = favorites.map(a => `
@@ -624,7 +625,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const box = document.getElementById(`breakdown-${archId}`);
       const isOpen = box.style.display !== 'none';
       box.style.display = isOpen ? 'none' : 'block';
-      breakdownBtn.textContent = isOpen ? '📊 Ver detalhes da pontuação' : '📊 Ocultar detalhes da pontuação';
+      breakdownBtn.textContent = isOpen ? 'Ver detalhes da pontuação' : 'Ocultar detalhes da pontuação';
       return;
     }
 
@@ -637,7 +638,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const result = allResultsById.get(archId);
       const combos = MatchExtras.generateMaterialCombos(result?.architect.profile?.favoriteMaterials);
       box.innerHTML = combos.length
-        ? `<div class="constraint-note"><span class="dot-ic">🔒</span><span>Combinações geradas só com os materiais que ${result.architect.name} cadastrou como favoritos.</span></div>` +
+        ? `<div class="constraint-note">Combinações geradas só com os materiais que ${result.architect.name} cadastrou como favoritos.</div>` +
           combos.map(c => `<div class="combo-card"><div class="combo-name">${c.name}</div></div>`).join('')
         : `<p style="font-size:0.84rem; color:var(--ink-faint); margin:0;">Este arquiteto ainda não cadastrou materiais favoritos suficientes para gerar combinações.</p>`;
       box.style.display = 'block';
@@ -740,14 +741,14 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <p class="explanation">${r.explanation}</p>
           <div class="tag-row">
-            ${r.architect.sameCity ? '<span class="tag tag-samecity">📍 Mesma cidade</span>' : ''}
+            ${r.architect.sameCity ? '<span class="tag tag-samecity">Mesma cidade</span>' : ''}
             ${(r.architect.profile?.styles || []).slice(0, 4).map(s => `<span class="tag">${s}</span>`).join('')}
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
-            <button type="button" class="btn btn-secondary btn-sm" data-toggle-breakdown="${r.architect.id}">📊 Ver detalhes da pontuação</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-toggle-breakdown="${r.architect.id}">Ver detalhes da pontuação</button>
             <button type="button" class="btn btn-secondary btn-sm" data-toggle-combos="${r.architect.id}">Ver sugestões de materiais</button>
             <button type="button" class="btn btn-secondary btn-sm" data-toggle-review="${r.architect.id}">★ Avaliar arquiteto</button>
-            <button type="button" class="btn btn-secondary btn-sm" data-open-chat="${r.architect.id}" data-open-chat-name="${r.architect.name}">💬 Mensagem</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-open-chat="${r.architect.id}" data-open-chat-name="${r.architect.name}">Mensagem</button>
             <button type="button" class="btn btn-secondary btn-sm" data-toggle-favorite="${r.architect.id}" aria-pressed="${favoriteIds.has(r.architect.id)}">${favoriteIds.has(r.architect.id) ? '★ Salvo' : '☆ Salvar para depois'}</button>
           </div>
           ${breakdownBlock(r.architect.id, r.breakdown)}
@@ -780,7 +781,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    const tabs = [{ key: 'main', label: '🏆 Melhor compatibilidade', count: mainCount }, ...categories.map(c => ({ key: c.key, label: `${c.icon} ${c.label}`, count: c.results.length }))];
+    const tabs = [{ key: 'main', label: 'Melhor compatibilidade', count: mainCount }, ...categories.map(c => ({ key: c.key, label: c.label, count: c.results.length }))];
     tabsBar.style.display = 'flex';
     tabsBar.innerHTML = tabs.map((t, i) => `
       <button type="button" class="match-tab${i === 0 ? ' active' : ''}" id="matchTab-${t.key}" role="tab"
@@ -930,7 +931,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div class="result-card locked-result" style="grid-template-columns:1fr;">
             <div class="result-blur" style="display:grid; grid-template-columns:auto 1fr auto; gap:20px; align-items:start;">${resultCardHtml(r, i, user)}</div>
             <div class="lock-overlay">
-              <span class="lock-icon">🔒</span>
+              <span class="lock-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg></span>
               <p>Assine o Premium para ver este arquiteto</p>
               <button type="button" class="btn btn-primary btn-sm" data-unlock-plan>Assinar Premium</button>
             </div>
@@ -991,7 +992,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('portfolioLimitCard').style.display = atLimit ? 'block' : 'none';
 
     if (!items.length) {
-      list.innerHTML = emptyStateHtml('🗂️', 'Você ainda não adicionou projetos ao portfólio.',
+      list.innerHTML = emptyStateHtml('Você ainda não adicionou projetos ao portfólio.',
         '<button type="button" class="btn btn-secondary btn-sm" data-empty-add-portfolio>+ Adicionar o primeiro projeto</button>');
       list.querySelector('[data-empty-add-portfolio]')?.addEventListener('click', () => document.getElementById('togglePortfolioForm').click());
       return;
@@ -1198,7 +1199,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const history = await MatchAPI.matchHistory();
       document.getElementById('statMatchCount').textContent = history.length;
       if (!history.length) {
-        container.innerHTML = emptyStateHtml('🔍', 'Nenhuma busca registrada ainda — clique em "Rodar match com IA" no topo da página.');
+        container.innerHTML = emptyStateHtml('Nenhuma busca registrada ainda — clique em "Rodar match com IA" no topo da página.');
         return;
       }
       container.innerHTML = history.map(h => `
@@ -1297,7 +1298,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('statRatingValue').textContent = count ? `★ ${average}` : '—';
       document.getElementById('statReviewCount').textContent = count ? `${count} avaliaç${count > 1 ? 'ões' : 'ão'}` : 'sem avaliações';
       if (!count) {
-        container.innerHTML = emptyStateHtml('⭐', 'Você ainda não recebeu avaliações.');
+        container.innerHTML = emptyStateHtml('Você ainda não recebeu avaliações.');
         return;
       }
       container.innerHTML = `
@@ -1329,7 +1330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const conversations = await MatchAPI.conversations();
       if (!conversations.length) {
-        listEl.innerHTML = emptyStateHtml('💬', 'Nenhuma conversa ainda.');
+        listEl.innerHTML = emptyStateHtml('Nenhuma conversa ainda.');
         return;
       }
       listEl.innerHTML = conversations.map(c => `
