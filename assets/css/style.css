@@ -1178,18 +1178,28 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 }
 
 /* =========================================================
-   Estimador de orçamento
+   Estimador de orçamento — um painel só, sem par de cards lado a lado:
+   os campos alimentam um resultado editorial (número grande em gradiente)
+   que já nasce preenchido e se atualiza sozinho a cada mudança.
    ========================================================= */
-.budget-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
-.budget-result { position: sticky; top: 90px; }
-.budget-range { font-family: var(--font-display); font-size: 1.7rem; font-weight: 700; color: var(--terracotta); margin: 8px 0 4px; }
-.budget-per-m2 { font-size: 0.82rem; color: var(--ink-faint); margin: 0 0 18px; }
-.budget-breakdown { margin-bottom: 18px; }
-.budget-disclaimer { font-size: 0.76rem; color: var(--ink-faint); margin-bottom: 18px; }
-@media (max-width: 860px) {
-  .budget-layout { grid-template-columns: 1fr; }
-  .budget-result { position: static; }
+.budget-tool { max-width: 640px; margin: 0 auto; }
+.budget-inputs { margin-bottom: 8px; }
+.budget-divider {
+  width: 64px; height: 2px; border-radius: 2px; background: var(--brand-gradient);
+  margin: 40px auto; opacity: 0.8;
 }
+.budget-result { text-align: center; }
+.budget-result .eyebrow { justify-content: center; }
+.budget-range {
+  font-family: var(--font-display); font-weight: 700; font-size: clamp(2.3rem, 6vw, 3.4rem);
+  line-height: 1.1; margin: 14px 0 8px;
+  background: var(--brand-gradient); -webkit-background-clip: text; background-clip: text; color: transparent;
+  transition: opacity .15s ease;
+}
+.budget-per-m2 { font-size: 0.86rem; color: var(--ink-faint); margin: 0 0 22px; }
+.budget-facts { font-size: 0.82rem; color: var(--ink-soft); margin: 0 0 22px; }
+.budget-facts span:not(:last-child)::after { content: '·'; margin: 0 10px; color: var(--ink-faint); }
+.budget-disclaimer { font-size: 0.76rem; color: var(--ink-faint); max-width: 460px; margin: 0 auto 26px; }
 
 /* =========================================================
    Mensagens (chat)

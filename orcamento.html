@@ -59,71 +59,69 @@
     </div>
   </section>
 
-  <section class="section" style="padding-top:20px;">
-    <div class="container" style="max-width:880px;">
-      <div class="budget-layout reveal">
-        <form id="budgetForm" class="dash-card">
-          <h3>Sobre o seu projeto</h3>
-          <div class="form-grid">
-            <div class="form-field">
-              <label for="bTipo">Tipo de projeto</label>
-              <select id="bTipo">
-                <option value="unifamiliar">Residencial unifamiliar (construção nova)</option>
-                <option value="apartamento">Apartamento (reforma)</option>
-                <option value="reforma">Reforma geral</option>
-                <option value="interiores">Só interiores / marcenaria</option>
-                <option value="comercial">Comercial</option>
-                <option value="paisagismo">Paisagismo / área externa</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label for="bArea">Área (m²)</label>
-              <input type="number" id="bArea" min="1" step="1" placeholder="Ex.: 120" required>
-            </div>
-            <div class="form-field">
-              <label for="bRegiao">Região</label>
-              <select id="bRegiao">
-                <option value="capital">Capital / região metropolitana</option>
-                <option value="media">Cidade média</option>
-                <option value="pequena">Interior / cidade pequena</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label for="bAcabamento">Padrão de acabamento</label>
-              <select id="bAcabamento">
-                <option value="economico">Econômico</option>
-                <option value="medio" selected>Médio</option>
-                <option value="alto">Alto padrão</option>
-              </select>
-            </div>
-            <div class="form-field full">
-              <label for="bEstilo">Estilo desejado <span class="hint">(influencia um pouco o custo)</span></label>
-              <select id="bEstilo">
-                <option value="Moderno">Moderno</option>
-                <option value="Contemporâneo">Contemporâneo</option>
-                <option value="Minimalista">Minimalista</option>
-                <option value="Industrial">Industrial</option>
-                <option value="Clássico">Clássico</option>
-                <option value="Rústico">Rústico</option>
-                <option value="Escandinavo">Escandinavo</option>
-                <option value="Biofílico">Biofílico</option>
-                <option value="Brutalista">Brutalista</option>
-                <option value="Alto padrão">Alto padrão</option>
-              </select>
-            </div>
+  <section class="section" style="padding-top:10px;">
+    <div class="container" style="max-width:700px;">
+      <form id="budgetForm" class="budget-tool reveal" novalidate>
+        <div class="form-grid budget-inputs">
+          <div class="form-field">
+            <label for="bTipo">Tipo de projeto</label>
+            <select id="bTipo">
+              <option value="unifamiliar">Residencial unifamiliar (construção nova)</option>
+              <option value="apartamento">Apartamento (reforma)</option>
+              <option value="reforma">Reforma geral</option>
+              <option value="interiores">Só interiores / marcenaria</option>
+              <option value="comercial">Comercial</option>
+              <option value="paisagismo">Paisagismo / área externa</option>
+            </select>
           </div>
-          <button type="submit" class="btn btn-primary btn-block">Calcular estimativa</button>
-        </form>
+          <div class="form-field">
+            <label for="bArea">Área (m²)</label>
+            <input type="number" id="bArea" min="1" step="1" value="100" required>
+          </div>
+          <div class="form-field">
+            <label for="bRegiao">Região</label>
+            <select id="bRegiao">
+              <option value="capital">Capital / região metropolitana</option>
+              <option value="media">Cidade média</option>
+              <option value="pequena">Interior / cidade pequena</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="bAcabamento">Padrão de acabamento</label>
+            <select id="bAcabamento">
+              <option value="economico">Econômico</option>
+              <option value="medio" selected>Médio</option>
+              <option value="alto">Alto padrão</option>
+            </select>
+          </div>
+          <div class="form-field full">
+            <label for="bEstilo">Estilo desejado <span class="hint">(influencia um pouco o custo)</span></label>
+            <select id="bEstilo">
+              <option value="Moderno">Moderno</option>
+              <option value="Contemporâneo">Contemporâneo</option>
+              <option value="Minimalista">Minimalista</option>
+              <option value="Industrial">Industrial</option>
+              <option value="Clássico">Clássico</option>
+              <option value="Rústico">Rústico</option>
+              <option value="Escandinavo">Escandinavo</option>
+              <option value="Biofílico">Biofílico</option>
+              <option value="Brutalista">Brutalista</option>
+              <option value="Alto padrão">Alto padrão</option>
+            </select>
+          </div>
+        </div>
 
-        <div id="budgetResult" class="dash-card budget-result" style="display:none;">
-          <span class="mock-label">Faixa estimada</span>
+        <div class="budget-divider" aria-hidden="true"></div>
+
+        <div class="budget-result">
+          <span class="eyebrow">Faixa estimada pro seu projeto</span>
           <div class="budget-range" id="budgetRangeValue">—</div>
           <p class="budget-per-m2" id="budgetPerM2"></p>
-          <div class="budget-breakdown" id="budgetBreakdown"></div>
+          <p class="budget-facts" id="budgetBreakdown"></p>
           <p class="budget-disclaimer">Estimativa educativa a partir de faixas aproximadas de mercado — varia por projeto, terreno e fornecedores. Não substitui um orçamento profissional; use como ponto de partida pra conversar com seus arquitetos compatíveis.</p>
-          <a href="cadastro.html?tipo=cliente" class="btn btn-secondary btn-block">Já sei minha faixa — encontrar arquiteto compatível</a>
+          <a href="cadastro.html?tipo=cliente" class="btn btn-primary">Encontrar meu arquiteto</a>
         </div>
-      </div>
+      </form>
     </div>
   </section>
 </main>

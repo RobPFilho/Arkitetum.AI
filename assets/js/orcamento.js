@@ -3,6 +3,8 @@
  * back-end. Os valores de R$/m² são faixas aproximadas ilustrativas (não uma
  * fonte de dados de mercado em tempo real), por isso o resultado sempre
  * aparece como faixa + aviso, nunca como um número único e definitivo.
+ * Recalcula ao vivo a cada mudança de campo, sem precisar de um botão
+ * "calcular" — o resultado já nasce preenchido com os valores padrão.
  */
 document.addEventListener('DOMContentLoaded', () => {
   const REGION_BASE = { capital: 2200, media: 1700, pequena: 1300 };
@@ -18,9 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const money = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+  const form = document.getElementById('budgetForm');
+  const rangeEl = document.getElementById('budgetRangeValue');
 
-  document.getElementById('budgetForm').addEventListener('submit', (e) => {
-    e.preventDefault();
+  function calculate() {
     const area = Number(document.getElementById('bArea').value);
     if (!area || area <= 0) return;
     const tipo = document.getElementById('bTipo').value;
@@ -32,16 +35,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const low = perM2 * area * 0.85;
     const high = perM2 * area * 1.15;
 
-    const result = document.getElementById('budgetResult');
-    document.getElementById('budgetRangeValue').textContent = `${money(low)} – ${money(high)}`;
+    rangeEl.style.opacity = '0';
+    requestAnimationFrame(() => {
+      rangeEl.textContent = `${money(low)} – ${money(high)}`;
+      rangeEl.style.opacity = '1';
+    });
     document.getElementById('budgetPerM2').textContent = `≈ ${money(perM2)} por m² · ${area} m²`;
     document.getElementById('budgetBreakdown').innerHTML = `
-      <div class="dash-meta-row"><span>Tipo de projeto</span><span>${TYPE_LABEL[tipo]}</span></div>
-      <div class="dash-meta-row"><span>Região</span><span>${REGION_LABEL[regiao]}</span></div>
-      <div class="dash-meta-row"><span>Padrão de acabamento</span><span>${FINISH_LABEL[acabamento]}</span></div>
-      <div class="dash-meta-row"><span>Estilo</span><span>${estilo}</span></div>
+      <span>${TYPE_LABEL[tipo]}</span>
+      <span>${REGION_LABEL[regiao]}</span>
+      <span>${FINISH_LABEL[acabamento]}</span>
+      <span>${estilo}</span>
     `;
-    result.style.display = 'block';
-    result.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
-  });
+  }
+
+  form.addEventListener('input', calculate);
+  form.addEventListener('change', calculate);
+  form.addEventListener('submit', (e) => { e.preventDefault(); calculate(); });
+  calculate();
 });
