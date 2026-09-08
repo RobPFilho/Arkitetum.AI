@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<script>try{var t=localStorage.getItem('matchia_theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estimador de orçamento — match.IA</title>
+<meta name="description" content="Estime uma faixa de orçamento para o seu projeto de arquitetura antes de procurar um arquiteto — por metragem, região, tipo de imóvel e padrão de acabamento.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="match.IA">
+<meta property="og:title" content="Estimador de orçamento — match.IA">
+<meta property="og:description" content="Estime uma faixa de orçamento para o seu projeto de arquitetura antes de procurar um arquiteto.">
+<meta property="og:image" content="assets/img/mark.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Estimador de orçamento — match.IA">
+<meta name="twitter:description" content="Estime uma faixa de orçamento para o seu projeto de arquitetura antes de procurar um arquiteto.">
+<meta name="twitter:image" content="assets/img/mark.png">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#B0755A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="logo">
+      <img src="assets/img/mark.png" alt="" width="32" height="32">
+      <span class="logo-word">match<span class="ia">.IA</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#como-funciona">Como funciona</a></li>
+      <li><a href="projetos.html" data-page="projetos.html">Projetos</a></li>
+      <li><a href="orcamento.html" data-page="orcamento.html" class="active">Orçamento</a></li>
+      <li><a href="destaques.html" data-page="destaques.html">Arquitetos</a></li>
+      <li><a href="planos.html" data-page="planos.html">Planos</a></li>
+      <li><a href="blog.html" data-page="blog.html">Blog</a></li>
+      <li><a href="sobre.html" data-page="sobre.html">Sobre</a></li>
+    </ul>
+    <div class="nav-actions" data-auth-slot>
+      <a href="login.html" class="login-link">Entrar</a>
+      <a href="cadastro.html" class="btn btn-primary btn-sm">Cadastrar</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema" type="button"></button>
+    <button class="nav-toggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<main id="main-content">
+  <section class="hero" style="padding-bottom:20px;">
+    <div class="container center" style="max-width:720px;">
+      <span class="eyebrow">Antes de procurar um arquiteto</span>
+      <h1>Quanto custa, mais ou menos, o seu projeto?</h1>
+      <p class="lead" style="margin:0 auto;">Uma faixa aproximada de orçamento, pra você chegar no match já com uma expectativa realista — a mesma conversa que costuma gerar atrito quando fica só pro fim do processo.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:20px;">
+    <div class="container" style="max-width:880px;">
+      <div class="budget-layout reveal">
+        <form id="budgetForm" class="dash-card">
+          <h3>Sobre o seu projeto</h3>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="bTipo">Tipo de projeto</label>
+              <select id="bTipo">
+                <option value="unifamiliar">Residencial unifamiliar (construção nova)</option>
+                <option value="apartamento">Apartamento (reforma)</option>
+                <option value="reforma">Reforma geral</option>
+                <option value="interiores">Só interiores / marcenaria</option>
+                <option value="comercial">Comercial</option>
+                <option value="paisagismo">Paisagismo / área externa</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="bArea">Área (m²)</label>
+              <input type="number" id="bArea" min="1" step="1" placeholder="Ex.: 120" required>
+            </div>
+            <div class="form-field">
+              <label for="bRegiao">Região</label>
+              <select id="bRegiao">
+                <option value="capital">Capital / região metropolitana</option>
+                <option value="media">Cidade média</option>
+                <option value="pequena">Interior / cidade pequena</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="bAcabamento">Padrão de acabamento</label>
+              <select id="bAcabamento">
+                <option value="economico">Econômico</option>
+                <option value="medio" selected>Médio</option>
+                <option value="alto">Alto padrão</option>
+              </select>
+            </div>
+            <div class="form-field full">
+              <label for="bEstilo">Estilo desejado <span class="hint">(influencia um pouco o custo)</span></label>
+              <select id="bEstilo">
+                <option value="Moderno">Moderno</option>
+                <option value="Contemporâneo">Contemporâneo</option>
+                <option value="Minimalista">Minimalista</option>
+                <option value="Industrial">Industrial</option>
+                <option value="Clássico">Clássico</option>
+                <option value="Rústico">Rústico</option>
+                <option value="Escandinavo">Escandinavo</option>
+                <option value="Biofílico">Biofílico</option>
+                <option value="Brutalista">Brutalista</option>
+                <option value="Alto padrão">Alto padrão</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Calcular estimativa</button>
+        </form>
+
+        <div id="budgetResult" class="dash-card budget-result" style="display:none;">
+          <span class="mock-label">Faixa estimada</span>
+          <div class="budget-range" id="budgetRangeValue">—</div>
+          <p class="budget-per-m2" id="budgetPerM2"></p>
+          <div class="budget-breakdown" id="budgetBreakdown"></div>
+          <p class="budget-disclaimer">Estimativa educativa a partir de faixas aproximadas de mercado — varia por projeto, terreno e fornecedores. Não substitui um orçamento profissional; use como ponto de partida pra conversar com seus arquitetos compatíveis.</p>
+          <a href="cadastro.html?tipo=cliente" class="btn btn-secondary btn-block">Já sei minha faixa — encontrar arquiteto compatível</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© <span data-year></span> match.IA — Projeto acadêmico (TCC), FIAP School.</span>
+      <a href="sobre.html" style="color:rgba(250,249,246,0.7);">Sobre o projeto</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/orcamento.js"></script>
+</body>
+</html>

@@ -4,6 +4,9 @@ import Review from "../models/Review.js";
 import MatchHistory from "../models/MatchHistory.js";
 import Validation from "../models/Validation.js";
 import Favorite from "../models/Favorite.js";
+import Timeline from "../models/Timeline.js";
+import CaseStudy from "../models/CaseStudy.js";
+import ProfileView from "../models/ProfileView.js";
 import { notify } from "../services/notificationService.js";
 
 export function getMe(req, res) {
@@ -16,7 +19,7 @@ export function getMe(req, res) {
  */
 export async function exportMyData(req, res) {
   const userId = req.user.id;
-  const [messages, matchHistory, validations, projects, reviewsGiven, reviewsReceived, favorites] =
+  const [messages, matchHistory, validations, projects, reviewsGiven, reviewsReceived, favorites, timelines, caseStudies] =
     await Promise.all([
       Message.find({ $or: [{ from: userId }, { to: userId }] }).sort("createdAt"),
       req.user.role === "client" ? MatchHistory.find({ client: userId }).sort("createdAt") : [],
@@ -25,6 +28,8 @@ export async function exportMyData(req, res) {
       req.user.role === "client" ? Review.find({ client: userId }) : [],
       req.user.role === "architect" ? Review.find({ architect: userId }) : [],
       req.user.role === "client" ? Favorite.find({ client: userId }) : [],
+      Timeline.find({ $or: [{ client: userId }, { architect: userId }] }),
+      CaseStudy.find({ $or: [{ client: userId }, { architect: userId }] }),
     ]);
 
   res.setHeader("Content-Disposition", "attachment; filename=matchia-meus-dados.json");
@@ -38,6 +43,8 @@ export async function exportMyData(req, res) {
     avaliacoesEnviadas: reviewsGiven,
     avaliacoesRecebidas: reviewsReceived,
     arquitetosFavoritados: favorites,
+    timelinesDeProjeto: timelines,
+    casesDeSucesso: caseStudies,
   });
 }
 
@@ -54,6 +61,9 @@ export async function deleteMyAccount(req, res) {
     MatchHistory.deleteMany({ client: userId }),
     Validation.deleteMany({ $or: [{ client: userId }, { architect: userId }] }),
     Favorite.deleteMany({ $or: [{ client: userId }, { architect: userId }] }),
+    Timeline.deleteMany({ $or: [{ client: userId }, { architect: userId }] }),
+    CaseStudy.deleteMany({ $or: [{ client: userId }, { architect: userId }] }),
+    ProfileView.deleteMany({ architect: userId }),
   ]);
   await req.user.deleteOne();
   res.json({ ok: true });
@@ -150,4 +160,38 @@ export async function deletePortfolio(req, res) {
 
   await req.user.save();
   res.status(200).json({ ok: true });
+}
+
+/**
+ * Métricas do arquiteto (visualizações, taxa de resposta, aparições em
+ * match, projetos validados) — hoje exibidas no painel como recurso Pro,
+ * mas a checagem de plano é só visual no front-end (mesmo modelo dos outros
+ * limites de plano do projeto, ver assets/js/extras.js).
+ */
+export async function getMyStats(req, res) {
+  if (req.user.role !== "architect")
+    return res.status(403).json({ error: "Métricas disponíveis só para arquitetos" });
+
+  const architectId = req.user.id;
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const [views30d, matchAppearances, validationsConfirmed, receivedFrom, repliedTo] = await Promise.all([
+    ProfileView.countDocuments({ architect: architectId, createdAt: { $gte: thirtyDaysAgo } }),
+    MatchHistory.countDocuments({ "results.architect": architectId }),
+    Validation.countDocuments({ architect: architectId, clientConfirmed: true, architectConfirmed: true }),
+    Message.distinct("from", { to: architectId }),
+    Message.distinct("to", { from: architectId }),
+  ]);
+
+  const repliedSet = new Set(repliedTo.map(String));
+  const respondedCount = receivedFrom.filter((id) => repliedSet.has(String(id))).length;
+  const responseRate = receivedFrom.length ? Math.round((respondedCount / receivedFrom.length) * 100) : null;
+
+  res.json({
+    views30d,
+    matchAppearances,
+    validationsConfirmed,
+    conversationsReceived: receivedFrom.length,
+    responseRate,
+  });
 }

@@ -7,6 +7,7 @@ import {
   deleteMyAccount,
   exportMyData,
   getMe,
+  getMyStats,
   updateMe,
 } from "../controllers/dashboardController.js";
 
@@ -15,6 +16,7 @@ router.use(requireAuth);
 router.get("/me", getMe);
 router.patch("/me", asyncHandler(updateMe));
 router.get("/me/export", asyncHandler(exportMyData));
+router.get("/me/stats", asyncHandler(getMyStats));
 router.delete("/me", asyncHandler(deleteMyAccount));
 router.post("/portfolio", requireRole("architect"), asyncHandler(addPortfolio));
 router.delete("/portfolio/:id", requireRole("architect"), asyncHandler(deletePortfolio));

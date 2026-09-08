@@ -59,3 +59,14 @@ export async function listPendingForArchitect(req, res) {
   }).populate("client", "name");
   res.json(pending.map((v) => ({ client: { id: v.client.id, name: v.client.name } })));
 }
+
+// Pares onde os dois lados já confirmaram o resumo — pré-requisito pro
+// arquiteto propor um case de sucesso (ver caseStudyController.requireValidated).
+export async function listConfirmedForArchitect(req, res) {
+  const confirmed = await Validation.find({
+    architect: req.user.id,
+    clientConfirmed: true,
+    architectConfirmed: true,
+  }).populate("client", "name");
+  res.json(confirmed.map((v) => ({ client: { id: v.client.id, name: v.client.name } })));
+}

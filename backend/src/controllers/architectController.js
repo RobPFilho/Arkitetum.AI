@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import ProfileView from "../models/ProfileView.js";
 import { buildSearchQuery, searchReferenceImage } from "../services/imageSearchService.js";
 
 export async function listArchitects(req, res) {
@@ -92,6 +93,18 @@ export async function getArchitectReferenceImage(req, res) {
   };
   await architect.save();
   res.json(architect.architectProfile.referenceImage);
+}
+
+/**
+ * Registra uma visualização de perfil pras métricas do arquiteto. Sem auth
+ * de propósito (visitante anônimo também conta) — a deduplicação por sessão
+ * fica a cargo do front-end (sessionStorage), então isto só grava.
+ */
+export async function recordProfileView(req, res) {
+  const exists = await User.exists({ _id: req.params.id, role: "architect" });
+  if (!exists) return res.status(404).json({ error: "Arquiteto não encontrado" });
+  await ProfileView.create({ architect: req.params.id });
+  res.status(204).end();
 }
 
 export async function getArchitectProfile(req, res) {

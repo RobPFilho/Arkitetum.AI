@@ -35,6 +35,7 @@
     <ul class="nav-links">
       <li><a href="index.html#como-funciona">Como funciona</a></li>
       <li><a href="projetos.html" data-page="projetos.html">Projetos</a></li>
+      <li><a href="orcamento.html" data-page="orcamento.html">Orçamento</a></li>
       <li><a href="destaques.html" data-page="destaques.html">Arquitetos</a></li>
       <li><a href="planos.html" data-page="planos.html">Planos</a></li>
       <li><a href="blog.html" data-page="blog.html">Blog</a></li>
@@ -121,6 +122,7 @@
               <button id="exportPdfBtn" class="btn btn-secondary btn-sm">Exportar PDF</button>
               <button id="moodboardBtn" class="btn btn-secondary btn-sm">Gerar moodboard com IA</button>
               <button id="referenceImageBtn" class="btn btn-secondary btn-sm">Ver referência visual</button>
+              <button id="styleShareBtn" class="btn btn-secondary btn-sm">Compartilhar meu perfil de estilo</button>
             </div>
           </div>
 
@@ -242,6 +244,7 @@
           <button type="button" class="profile-tab active" data-profile-panel="perfil" role="tab" aria-selected="true">Perfil</button>
           <button type="button" class="profile-tab" data-profile-panel="portfolio" role="tab" aria-selected="false">Portfólio</button>
           <button type="button" class="profile-tab" data-profile-panel="avaliacoes" role="tab" aria-selected="false">Avaliações</button>
+          <button type="button" class="profile-tab" data-profile-panel="metricas" role="tab" aria-selected="false">Métricas</button>
           <button type="button" class="profile-tab" data-profile-panel="mensagens" role="tab" aria-selected="false">Mensagens <span class="unread-badge" id="architectUnreadBadge" style="display:none;"></span></button>
           <button type="button" class="profile-tab" data-profile-panel="conta" role="tab" aria-selected="false">Conta</button>
         </div>
@@ -350,12 +353,32 @@
               <button type="submit" class="btn btn-primary">Salvar projeto</button>
             </form>
           </div>
+
+          <div class="dash-card" id="caseStudiesCard" style="display:none;">
+            <h3>Cases de sucesso</h3>
+            <p class="card-lead">Depois que o resumo do projeto é confirmado pelos dois lados, proponha um case pra exibir no seu perfil público — imagens, descrição e o testemunho do cliente.</p>
+            <div id="caseStudiesList"></div>
+          </div>
         </div>
 
         <div class="profile-panel" data-profile-panel-content="avaliacoes" hidden>
           <div class="dash-card">
             <h3>Minhas avaliações</h3>
             <div id="architectReviews"></div>
+          </div>
+        </div>
+
+        <div class="profile-panel" data-profile-panel-content="metricas" hidden>
+          <div id="metricsUpsell" class="usage-limit-card" style="display:none;">
+            <p>Métricas de perfil (visualizações, taxa de resposta e conversão) são um recurso do plano Pro.</p>
+            <button type="button" id="upgradeFromMetricsBtn" class="btn btn-primary btn-sm">Assinar Pro e ver minhas métricas</button>
+          </div>
+          <div id="metricsContent" style="display:none;">
+            <div class="dash-card">
+              <h3>Métricas do seu perfil</h3>
+              <p class="card-lead">Como seu perfil está performando na plataforma nos últimos 30 dias.</p>
+              <div class="profile-stats" id="metricsStats" style="border-top:none; padding-top:0;"></div>
+            </div>
           </div>
         </div>
 
@@ -434,6 +457,7 @@
 <script src="assets/js/extras.js"></script>
 <script src="assets/js/color-wheel.js"></script>
 <script src="assets/js/checkout.js"></script>
+<script src="assets/js/style-share.js"></script>
 <script src="assets/js/theme.js"></script>
 <script src="assets/js/site.js"></script>
 <script src="assets/js/dashboard.js"></script>

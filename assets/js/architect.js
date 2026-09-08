@@ -6,6 +6,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const arch = await MatchAPI.architect(id);
     const p = arch.profile || {};
+
+    // Conta uma visualização pras métricas do arquiteto — no máximo uma vez
+    // por sessão do navegador, e nunca quando o próprio arquiteto abre o
+    // perfil dele (senão ele inflava a própria métrica só de conferir o perfil).
+    const viewerIsSelf = MatchAPI.currentUser()?.id === id;
+    const viewedKey = `matchia_viewed_${id}`;
+    if (!viewerIsSelf && !sessionStorage.getItem(viewedKey)) {
+      MatchAPI.recordProfileView(id).catch(() => {});
+      sessionStorage.setItem(viewedKey, '1');
+    }
     document.getElementById('profileState').style.display = 'block';
     document.getElementById('avatar').textContent = arch.name.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
     document.getElementById('archName').textContent = arch.name;
@@ -63,6 +73,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
           </div>`).join('')}</div>`
       : '<p style="font-size:0.86rem; color:var(--ink-faint);">Nenhum projeto no portfólio ainda.</p>';
+
+    MatchAPI.publishedCaseStudies(id).then(cases => {
+      if (!cases.length) return;
+      const card = document.getElementById('archCaseStudiesCard');
+      card.style.display = 'block';
+      document.getElementById('archCaseStudiesContent').innerHTML = cases.map(c => `
+        <div class="case-study-card">
+          ${c.images?.length ? `<div class="case-study-images">${c.images.map(url => `<img src="${url}" alt="${c.title}">`).join('')}</div>` : ''}
+          <h4>${c.title}</h4>
+          ${c.description ? `<p>${c.description}</p>` : ''}
+          ${c.testimonial ? `<blockquote>"${c.testimonial}"<cite>— ${c.clientName || 'Cliente'}</cite></blockquote>` : ''}
+        </div>`).join('');
+    }).catch(() => {});
 
     // Avaliações (reais, vêm do back-end)
     try {

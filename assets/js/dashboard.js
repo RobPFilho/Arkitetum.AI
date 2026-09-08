@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupExportMatchPdf(me);
     setupMoodboard(me);
     setupReferenceImage(me);
+    setupStyleShare(me);
     setupCompare(me);
     setupChat(me, 'clientConversationList', 'clientChatShell');
     renderProjects(me);
@@ -113,6 +114,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupChat(me, 'architectConversationList', 'architectChatShell');
     refreshUnreadBadge('architectUnreadBadge');
     renderPendingValidations();
+    setupMetrics(me);
+    setupCaseStudies(me);
+    renderCaseStudies(me);
   }
 
   setupProfileEdit(me);
@@ -605,6 +609,61 @@ document.addEventListener('DOMContentLoaded', async () => {
     return `<div id="combos-${architectId}" style="display:none; margin-top:14px; padding-top:14px; border-top:1px dashed var(--line);"></div>`;
   }
 
+  function timelineBlock(architectId) {
+    return `<div id="timeline-${architectId}" style="display:none; margin-top:14px; padding-top:14px; border-top:1px dashed var(--line);"></div>`;
+  }
+
+  function briefBlock(architectId) {
+    return `<div id="brief-${architectId}" style="display:none; margin-top:14px; padding-top:14px; border-top:1px dashed var(--line);"></div>`;
+  }
+
+  const TIMELINE_PHASES = ['Contato inicial', 'Briefing', 'Conceito', 'Desenvolvimento', 'Entrega'];
+  function timelineHtml(architectId, phase) {
+    const steps = TIMELINE_PHASES.map((label, i) => `
+      <div class="mini-step${i <= phase ? ' done' : ''}${i === phase ? ' current' : ''}">
+        <span class="mini-step-dot"></span>
+        <span class="mini-step-label">${label}</span>
+      </div>`).join('');
+    const nextBtn = phase < TIMELINE_PHASES.length - 1
+      ? `<button type="button" class="btn btn-sage btn-sm" data-advance-timeline="${architectId}" style="margin-top:12px;">Avançar para "${TIMELINE_PHASES[phase + 1]}"</button>`
+      : `<p style="font-size:0.82rem; color:var(--sage-dark); margin:10px 0 0;">✓ Projeto entregue</p>`;
+    return `<span class="mock-label">Linha do tempo do projeto</span><div class="mini-stepper">${steps}</div>${nextBtn}`;
+  }
+
+  function caseStudyBlock(architectId) {
+    return `<div id="casestudy-${architectId}" style="display:none; margin-top:14px; padding-top:14px; border-top:1px dashed var(--line);"></div>`;
+  }
+
+  function caseStudyClientHtml(architectId, cs) {
+    if (!cs) return `<p style="font-size:0.84rem; color:var(--ink-faint); margin:0;">O arquiteto ainda não propôs um case de sucesso pra este projeto — isso fica disponível depois que o resumo é confirmado pelos dois lados.</p>`;
+    const published = cs.clientApproved && cs.architectApproved;
+    return `
+      <span class="mock-label">${cs.title}</span>
+      ${cs.description ? `<p style="font-size:0.88rem;">${cs.description}</p>` : ''}
+      ${(cs.images || []).length ? `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">${cs.images.map(url => `<img src="${url}" alt="" style="width:90px; height:90px; object-fit:cover; border-radius:8px;">`).join('')}</div>` : ''}
+      <div class="form-field full">
+        <label>Seu testemunho <span class="hint">(opcional, aparece junto do case)</span></label>
+        <textarea data-testimonial-input="${architectId}">${cs.testimonial || ''}</textarea>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <button type="button" class="btn btn-secondary btn-sm" data-save-testimonial="${architectId}">Salvar testemunho</button>
+        ${published
+          ? '<span class="status-pill badge-validated">✓ Publicado no perfil do arquiteto</span>'
+          : `<button type="button" class="btn btn-sage btn-sm" data-approve-case="${architectId}" ${cs.clientApproved ? 'disabled' : ''}>${cs.clientApproved ? '✓ Você aprovou' : 'Aprovar publicação'}</button>`}
+      </div>`;
+  }
+
+  function briefHtml(brief) {
+    return `
+      ${summaryLineHtml('Resumo', brief.resumo)}
+      ${summaryLineHtml('Objetivos', brief.objetivos)}
+      ${summaryLineHtml('Estilo e materiais', brief.estiloEMateriais)}
+      ${summaryLineHtml('Orçamento', brief.orcamento)}
+      ${summaryLineHtml('Restrições', brief.restricoes)}
+      ${summaryLineHtml('Próximo passo sugerido', brief.proximosPassos)}
+      <button type="button" class="btn btn-secondary btn-sm" data-export-brief style="margin-top:8px;">Exportar brief em PDF</button>`;
+  }
+
   function breakdownBlock(architectId, breakdown) {
     const rows = (breakdown || []).map(b => `
       <div class="score-bar-row">
@@ -643,6 +702,96 @@ document.addEventListener('DOMContentLoaded', async () => {
         : `<p style="font-size:0.84rem; color:var(--ink-faint); margin:0;">Este arquiteto ainda não cadastrou materiais favoritos suficientes para gerar combinações.</p>`;
       box.style.display = 'block';
       comboBtn.textContent = 'Ocultar sugestões de materiais';
+      return;
+    }
+
+    const timelineBtn = e.target.closest('[data-toggle-timeline]');
+    if (timelineBtn) {
+      const archId = timelineBtn.dataset.toggleTimeline;
+      const box = document.getElementById(`timeline-${archId}`);
+      const isOpen = box.style.display !== 'none';
+      if (isOpen) { box.style.display = 'none'; timelineBtn.textContent = 'Linha do tempo do projeto'; return; }
+      box.innerHTML = '<p style="font-size:0.84rem; color:var(--ink-faint);"><span class="spinner"></span> Carregando linha do tempo...</p>';
+      box.style.display = 'block';
+      timelineBtn.textContent = 'Ocultar linha do tempo';
+      MatchAPI.getTimeline(archId)
+        .then(({ phase }) => { box.innerHTML = timelineHtml(archId, phase); })
+        .catch(err => { box.innerHTML = `<p style="font-size:0.84rem; color:var(--ink-faint);">${err.message || 'Não foi possível carregar a linha do tempo.'}</p>`; });
+      return;
+    }
+
+    const advanceBtn = e.target.closest('[data-advance-timeline]');
+    if (advanceBtn) {
+      const archId = advanceBtn.dataset.advanceTimeline;
+      advanceBtn.disabled = true;
+      MatchAPI.advanceTimeline(archId)
+        .then(({ phase }) => { document.getElementById(`timeline-${archId}`).innerHTML = timelineHtml(archId, phase); })
+        .catch(err => { alert(err.message || 'Não foi possível avançar a etapa agora.'); advanceBtn.disabled = false; });
+      return;
+    }
+
+    const briefBtn = e.target.closest('[data-toggle-brief]');
+    if (briefBtn) {
+      const archId = briefBtn.dataset.toggleBrief;
+      const box = document.getElementById(`brief-${archId}`);
+      const isOpen = box.style.display !== 'none';
+      if (isOpen) { box.style.display = 'none'; briefBtn.textContent = 'Gerar brief com IA'; return; }
+      box.innerHTML = '<p style="font-size:0.84rem; color:var(--ink-faint);"><span class="spinner"></span> Gerando brief do projeto...</p>';
+      box.style.display = 'block';
+      briefBtn.textContent = 'Ocultar brief do projeto';
+      MatchAPI.getBrief(archId)
+        .then(brief => {
+          box.dataset.brief = JSON.stringify(brief);
+          box.innerHTML = briefHtml(brief);
+        })
+        .catch(err => { box.innerHTML = `<p style="font-size:0.84rem; color:var(--ink-faint);">${err.message || 'Não foi possível gerar o brief agora.'}</p>`; });
+      return;
+    }
+
+    const exportBriefBtn = e.target.closest('[data-export-brief]');
+    if (exportBriefBtn) {
+      const box = exportBriefBtn.closest('[id^="brief-"]');
+      const brief = JSON.parse(box.dataset.brief || '{}');
+      document.getElementById('printTitle').textContent = 'Brief do projeto';
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('pt-BR');
+      document.getElementById('printableContent').innerHTML = briefHtml(brief).replace(/<button[\s\S]*?<\/button>/, '');
+      window.print();
+      return;
+    }
+
+    const caseToggleBtn = e.target.closest('[data-toggle-casestudy]');
+    if (caseToggleBtn) {
+      const archId = caseToggleBtn.dataset.toggleCasestudy;
+      const box = document.getElementById(`casestudy-${archId}`);
+      const isOpen = box.style.display !== 'none';
+      if (isOpen) { box.style.display = 'none'; caseToggleBtn.textContent = 'Case de sucesso'; return; }
+      box.innerHTML = '<p style="font-size:0.84rem; color:var(--ink-faint);"><span class="spinner"></span> Carregando...</p>';
+      box.style.display = 'block';
+      caseToggleBtn.textContent = 'Ocultar case de sucesso';
+      MatchAPI.getCaseStudy(archId)
+        .then(cs => { box.innerHTML = caseStudyClientHtml(archId, cs); })
+        .catch(err => { box.innerHTML = `<p style="font-size:0.84rem; color:var(--ink-faint);">${err.message || 'Não foi possível carregar o case agora.'}</p>`; });
+      return;
+    }
+
+    const saveTestimonialBtn = e.target.closest('[data-save-testimonial]');
+    if (saveTestimonialBtn) {
+      const archId = saveTestimonialBtn.dataset.saveTestimonial;
+      const textarea = document.querySelector(`[data-testimonial-input="${archId}"]`);
+      saveTestimonialBtn.disabled = true;
+      MatchAPI.submitTestimonial(archId, textarea.value.trim())
+        .then(cs => { document.getElementById(`casestudy-${archId}`).innerHTML = caseStudyClientHtml(archId, cs); })
+        .catch(err => { alert(err.message || 'Não foi possível salvar o testemunho agora.'); saveTestimonialBtn.disabled = false; });
+      return;
+    }
+
+    const approveCaseBtn = e.target.closest('[data-approve-case]');
+    if (approveCaseBtn) {
+      const archId = approveCaseBtn.dataset.approveCase;
+      approveCaseBtn.disabled = true;
+      MatchAPI.approveCaseStudy(archId)
+        .then(cs => { document.getElementById(`casestudy-${archId}`).innerHTML = caseStudyClientHtml(archId, cs); })
+        .catch(err => { alert(err.message || 'Não foi possível aprovar agora.'); approveCaseBtn.disabled = false; });
       return;
     }
 
@@ -747,12 +896,18 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
             <button type="button" class="btn btn-secondary btn-sm" data-toggle-breakdown="${r.architect.id}">Ver detalhes da pontuação</button>
             <button type="button" class="btn btn-secondary btn-sm" data-toggle-combos="${r.architect.id}">Ver sugestões de materiais</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-toggle-timeline="${r.architect.id}">Linha do tempo do projeto</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-toggle-brief="${r.architect.id}">Gerar brief com IA</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-toggle-casestudy="${r.architect.id}">Case de sucesso</button>
             <button type="button" class="btn btn-secondary btn-sm" data-toggle-review="${r.architect.id}">★ Avaliar arquiteto</button>
             <button type="button" class="btn btn-secondary btn-sm" data-open-chat="${r.architect.id}" data-open-chat-name="${r.architect.name}">Mensagem</button>
             <button type="button" class="btn btn-secondary btn-sm" data-toggle-favorite="${r.architect.id}" aria-pressed="${favoriteIds.has(r.architect.id)}">${favoriteIds.has(r.architect.id) ? '★ Salvo' : '☆ Salvar para depois'}</button>
           </div>
           ${breakdownBlock(r.architect.id, r.breakdown)}
           ${combosBlock(r.architect.id)}
+          ${timelineBlock(r.architect.id)}
+          ${briefBlock(r.architect.id)}
+          ${caseStudyBlock(r.architect.id)}
           <div id="review-${r.architect.id}" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed var(--line);">
             <div class="star-rating" data-stars="${r.architect.id}" role="radiogroup" aria-label="Sua avaliação, de 1 a 5 estrelas">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-star="${n}" role="radio" aria-checked="false" aria-label="${n} estrela${n > 1 ? 's' : ''}">★</button>`).join('')}</div>
             <textarea data-review-comment="${r.architect.id}" placeholder="Comentário (opcional)" style="width:100%; margin-top:8px; padding:8px; border:1px solid var(--line); border-radius:8px; font-family:inherit;"></textarea>
@@ -1152,6 +1307,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // ---------------- Compartilhar perfil de estilo ----------------
+  function setupStyleShare(user) {
+    document.getElementById('styleShareBtn').addEventListener('click', () => StyleShare.open(user));
+  }
+
   // ---------------- Comparador lado a lado ----------------
   function compareTableHtml(user) {
     const plan = MatchExtras.getPlan(uid(user), 'client');
@@ -1290,6 +1450,107 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // ---------------- Métricas do perfil (arquiteto Pro) ----------------
+  function setupMetrics(user) {
+    document.getElementById('upgradeFromMetricsBtn').addEventListener('click', () =>
+      openUpgrade(user, () => { renderPlanCard(user); renderMetrics(user); }));
+    renderMetrics(user);
+  }
+
+  async function renderMetrics(user) {
+    const plan = MatchExtras.getPlan(uid(user), 'architect');
+    const upsell = document.getElementById('metricsUpsell');
+    const content = document.getElementById('metricsContent');
+    if (plan.id !== 'pro') { upsell.style.display = 'block'; content.style.display = 'none'; return; }
+    upsell.style.display = 'none';
+    content.style.display = 'block';
+    const statsEl = document.getElementById('metricsStats');
+    statsEl.innerHTML = '<p style="font-size:0.86rem; color:var(--ink-faint);"><span class="spinner"></span> Carregando métricas...</p>';
+    try {
+      const s = await MatchAPI.myStats();
+      statsEl.innerHTML = `
+        <div class="stat"><strong>${s.views30d}</strong><span>visualizações do perfil (30 dias)</span></div>
+        <div class="stat"><strong>${s.matchAppearances}</strong><span>aparições em resultados de match</span></div>
+        <div class="stat"><strong>${s.responseRate === null ? '—' : s.responseRate + '%'}</strong><span>taxa de resposta a mensagens</span></div>
+        <div class="stat"><strong>${s.validationsConfirmed}</strong><span>projetos com resumo validado</span></div>
+      `;
+    } catch (err) {
+      statsEl.innerHTML = `<p style="font-size:0.86rem; color:var(--ink-faint);">${err.message || 'Não foi possível carregar as métricas agora.'}</p>`;
+    }
+  }
+
+  // ---------------- Cases de sucesso (arquiteto propõe, cliente aprova) ----------------
+  function setupCaseStudies(user) {
+    document.getElementById('caseStudiesList').addEventListener('submit', async (e) => {
+      const form = e.target.closest('.case-study-form');
+      if (!form) return;
+      e.preventDefault();
+      const clientId = form.dataset.caseClient;
+      const payload = {
+        title: form.querySelector('[name="title"]').value.trim(),
+        description: form.querySelector('[name="description"]').value.trim(),
+        images: form.querySelector('[name="images"]').value.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 4),
+      };
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      try {
+        await MatchAPI.proposeCaseStudy(clientId, payload);
+        renderCaseStudies(user);
+      } catch (err) {
+        alert(err.message || 'Não foi possível salvar o case agora.');
+        btn.disabled = false;
+      }
+    });
+  }
+
+  async function renderCaseStudies(user) {
+    const card = document.getElementById('caseStudiesCard');
+    const list = document.getElementById('caseStudiesList');
+    try {
+      const confirmed = await MatchAPI.confirmedValidations();
+      if (!confirmed.length) { card.style.display = 'none'; return; }
+      card.style.display = 'block';
+      const items = await Promise.all(confirmed.map(async (c) => {
+        let cs = null;
+        try { cs = await MatchAPI.getCaseStudy(c.client.id); } catch { /* ainda sem case proposto */ }
+        return { client: c.client, cs };
+      }));
+      list.innerHTML = items.map(({ client, cs }) => caseStudyRowHtml(client, cs)).join('');
+    } catch {
+      card.style.display = 'none';
+    }
+  }
+
+  function caseStudyRowHtml(client, cs) {
+    const published = Boolean(cs && cs.clientApproved && cs.architectApproved && cs.title);
+    const statusText = !cs ? '' : published ? '✓ Publicado no seu perfil' : (cs.testimonial ? 'Aguardando aprovação do cliente' : 'Aguardando testemunho do cliente');
+    return `
+      <div class="dash-card" style="background:var(--bg); margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <strong style="font-size:0.92rem;">${client.name}</strong>
+          ${statusText ? `<span class="status-pill ${published ? 'badge-validated' : 'badge-pending'}">${statusText}</span>` : ''}
+        </div>
+        <form class="case-study-form" data-case-client="${client.id}" style="margin-top:12px;">
+          <div class="form-grid">
+            <div class="form-field full">
+              <label>Título do case</label>
+              <input type="text" name="title" value="${cs?.title || ''}" required>
+            </div>
+            <div class="form-field full">
+              <label>Descrição</label>
+              <textarea name="description">${cs?.description || ''}</textarea>
+            </div>
+            <div class="form-field full">
+              <label>Imagens <span class="hint">(URLs, uma por linha, até 4)</span></label>
+              <textarea name="images" placeholder="https://...">${(cs?.images || []).join('\n')}</textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-secondary btn-sm">${cs ? 'Atualizar case' : 'Propor case'}</button>
+        </form>
+        ${cs?.testimonial ? `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);"><span class="mock-label">Testemunho do cliente</span><p style="margin:0; font-style:italic;">"${cs.testimonial}"</p></div>` : ''}
+      </div>`;
+  }
+
   // ---------------- Avaliações recebidas (arquiteto) ----------------
   async function renderArchitectReviews(user) {
     const container = document.getElementById('architectReviews');
@@ -1322,7 +1583,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ---------------- Mensagens (chat) ----------------
   function setupChat(user, listId, shellId) {
+    document.getElementById(shellId).addEventListener('click', (e) => {
+      const advanceBtn = e.target.closest('[data-advance-timeline]');
+      if (!advanceBtn) return;
+      const otherId = advanceBtn.dataset.advanceTimeline;
+      advanceBtn.disabled = true;
+      MatchAPI.advanceTimeline(otherId)
+        .then(({ phase }) => { document.getElementById(`chatTimeline-${shellId}`).innerHTML = timelineHtml(otherId, phase); })
+        .catch(err => { alert(err.message || 'Não foi possível avançar a etapa agora.'); advanceBtn.disabled = false; });
+    });
     loadConversations(user, listId, shellId);
+  }
+
+  async function loadChatTimeline(containerId, otherId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    try {
+      const { phase } = await MatchAPI.getTimeline(otherId);
+      el.innerHTML = timelineHtml(otherId, phase);
+    } catch { el.innerHTML = ''; }
   }
 
   async function loadConversations(user, listId, shellId) {
@@ -1356,12 +1635,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function openConversation(otherId, otherName, shellId, user) {
     const shell = document.getElementById(shellId);
     const msgId = `chatMessages-${shellId}`;
+    const timelineId = `chatTimeline-${shellId}`;
     shell.innerHTML = `
+      <div class="chat-timeline" id="${timelineId}"></div>
       <div class="chat-messages" id="${msgId}"><p style="text-align:center; color:var(--ink-faint); font-size:0.84rem;">Carregando...</p></div>
       <div class="chat-input-row">
         <input type="text" id="chatInput-${shellId}" placeholder="Mensagem para ${otherName}...">
         <button type="button" id="chatSend-${shellId}" aria-label="Enviar">➤</button>
       </div>`;
+    loadChatTimeline(timelineId, otherId);
     const messagesEl = document.getElementById(msgId);
     try {
       const messages = await MatchAPI.conversation(otherId);
