@@ -12,19 +12,19 @@ const FOUNDERS = {
     initials: 'NM',
     photo: 'assets/img/team/natanael.png',
     eyebrow: 'Fundador · Produto & Tecnologia',
-    tagline: 'Arquitetou o match.IA de ponta a ponta — do banco de dados à última curva de borda da interface.',
+    tagline: 'Levou o match.IA da ideia ao produto — moldando a experiência, a IA e cada detalhe da interface.',
     bio: [
-      'Responsável pela concepção técnica e de produto do match.IA: back-end em Node.js e MongoDB, o motor de compatibilidade entre clientes e arquitetos, e a integração com IA generativa (Gemini) que explica cada match em linguagem natural.',
+      'Responsável pelo produto e pela experiência do match.IA: desenhou o fluxo de match, integrou a IA generativa (Gemini) que explica cada compatibilidade em linguagem natural, e adaptou o back-end — construído pelo Roberto — para sustentar essas funcionalidades.',
       'Também desenhou o design system da plataforma — tipografia, cores, componentes e o modo escuro — com atenção a acessibilidade (contraste WCAG, navegação por teclado) e conformidade com a LGPD.',
       'Gosta de levar um projeto até o detalhe que ninguém pediu: o foco de teclado certo, a transição que não atrasa, o estado vazio que não parece um erro.'
     ],
     factsLeft: [
-      { label: 'Stack', value: 'Node.js · MongoDB · Express' },
-      { label: 'IA aplicada', value: 'Gemini · motor de compatibilidade' },
+      { label: 'Frente', value: 'Produto & front-end' },
+      { label: 'IA aplicada', value: 'Gemini · integração & explicações' },
       { label: 'Formação', value: 'Técnico em Informática, FIAP School' }
     ],
     factsRight: [
-      { label: 'No projeto', value: 'Produto, back-end & design system' },
+      { label: 'No projeto', value: 'Produto, IA & design system' },
       { label: 'Também cuida de', value: 'Acessibilidade & LGPD' },
       { label: 'Turma', value: '3EMIB — FIAP School' }
     ],
