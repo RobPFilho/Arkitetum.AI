@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const matchLimitFor = (user, plan) => plan.matchesPerMonth + (user.clientProfile?.bonusMatches || 0);
   const portfolioLimitFor = (user, plan) => plan.maxPortfolio + (user.architectProfile?.bonusPortfolioSlots || 0);
   const PROJECT_STYLES = ['Moderno', 'Contemporâneo', 'Minimalista', 'Industrial', 'Clássico', 'Rústico', 'Escandinavo', 'Biofílico', 'Brutalista', 'Alto padrão'];
+  const INTERVENTION_TYPES = ['Construção', 'Reforma'];
 
   async function refreshUnreadBadge(badgeId) {
     const badge = document.getElementById(badgeId);
@@ -199,21 +200,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   function setupProfileEdit(user) {
     const editBtn = document.getElementById('editProfileBtn');
     const editCard = document.getElementById('editCard');
+    const workingAreasField = document.getElementById('editWorkingAreasField');
     editBtn.addEventListener('click', () => {
       goToAccountTab(user);
       editCard.style.display = 'block';
       document.getElementById('editName').value = user.name;
       document.getElementById('editCity').value = user.city || '';
       document.getElementById('editState').value = user.state || '';
+      workingAreasField.style.display = user.role === 'architect' ? '' : 'none';
+      if (user.role === 'architect') document.getElementById('editWorkingAreas').value = (user.architectProfile?.workingAreas || []).join(', ');
       editCard.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'start' });
     });
     document.getElementById('saveProfileBtn').addEventListener('click', async () => {
       try {
-        const updated = await MatchAPI.updateMe({
+        const payload = {
           name: document.getElementById('editName').value.trim(),
           city: document.getElementById('editCity').value.trim(),
           state: document.getElementById('editState').value.trim().toUpperCase(),
-        });
+        };
+        if (user.role === 'architect') {
+          payload.architectProfile = {
+            workingAreas: document.getElementById('editWorkingAreas').value.split(',').map(s => s.trim()).filter(Boolean),
+          };
+        }
+        const updated = await MatchAPI.updateMe(payload);
         MatchAPI.setSession(MatchAPI.token(), { id: updated.id || updated._id, name: updated.name, role: updated.role });
         renderProfile(updated);
         editCard.style.display = 'none';
@@ -319,12 +329,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  function buildInterventionChips(selected) {
+    const container = document.getElementById('projInterventionChips');
+    container.innerHTML = INTERVENTION_TYPES.map(type =>
+      `<button type="button" class="chip${selected === type ? ' active' : ''}" data-intervention="${type}">${type}</button>`
+    ).join('');
+    container.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
+  }
+  function selectedIntervention() {
+    return document.getElementById('projInterventionChips').querySelector('.chip.active')?.dataset.intervention || '';
+  }
+
   function projectCardHtml(p) {
     const budget = formatBudget(p.budget);
+    const metaBits = [p.interventionType, p.propertyType, p.areaM2 ? `${p.areaM2} m²` : ''].filter(Boolean).join(' · ');
     return `
       <div class="material-card" style="position:relative; padding:16px;">
         <div class="info" style="padding:0;">
-          <span class="cat">${p.propertyType || 'Projeto'}</span>
+          <span class="cat">${metaBits || 'Projeto'}</span>
           <h4>${p.name}</h4>
           <div class="tag-row" style="margin:8px 0;">${(p.preferredStyles || []).map(s => `<span class="tag">${s}</span>`).join('') || '<span style="font-size:0.8rem; color:var(--ink-faint);">Nenhum estilo definido</span>'}</div>
           ${budget !== '—' ? `<p style="font-size:0.82rem; color:var(--ink-faint); margin:4px 0;">Orçamento: ${budget}</p>` : ''}
@@ -395,16 +422,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('projEditId').value = project?._id || '';
     document.getElementById('projName').value = project?.name || '';
     document.getElementById('projPropertyType').value = project?.propertyType || 'Residencial unifamiliar';
+    document.getElementById('projAreaM2').value = project?.areaM2 || '';
     document.getElementById('projBudgetMin').value = project?.budget?.min || '';
     document.getElementById('projBudgetMax').value = project?.budget?.max || '';
     document.getElementById('projMaterials').value = (project?.preferredMaterials || []).join(', ');
     document.getElementById('projGoals').value = project?.projectGoals || '';
     buildProjectStyleChips(project?.preferredStyles || []);
+    buildInterventionChips(project?.interventionType || '');
     document.getElementById('projSaveBtn').textContent = project ? 'Salvar alterações' : 'Salvar projeto';
   }
 
   function setupProjects(user) {
     buildProjectStyleChips();
+    buildInterventionChips();
     document.getElementById('toggleProjectForm').addEventListener('click', () => openProjectForm(null));
     document.getElementById('cancelProjectForm').addEventListener('click', () => {
       document.getElementById('projectForm').style.display = 'none';
@@ -414,16 +444,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('projectForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const editId = document.getElementById('projEditId').value;
+      const interventionType = selectedIntervention();
+      const propertyType = document.getElementById('projPropertyType').value;
       const payload = {
-        name: document.getElementById('projName').value.trim(),
-        propertyType: document.getElementById('projPropertyType').value,
+        name: document.getElementById('projName').value.trim() || `${interventionType || 'Projeto'} · ${propertyType}`,
+        propertyType,
+        interventionType,
+        areaM2: document.getElementById('projAreaM2').value,
         budgetMin: document.getElementById('projBudgetMin').value,
         budgetMax: document.getElementById('projBudgetMax').value,
         preferredStyles: Array.from(document.querySelectorAll('#projStylesChips .chip.active')).map(c => c.dataset.style),
         preferredMaterials: document.getElementById('projMaterials').value,
         projectGoals: document.getElementById('projGoals').value.trim(),
       };
-      if (!payload.name) { alert('Dê um nome para o projeto.'); return; }
       try {
         if (editId) await MatchAPI.updateProject(editId, payload);
         else await MatchAPI.createProject(payload);
@@ -434,6 +467,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert(err.message || 'Não foi possível salvar o projeto.');
       }
     });
+
+    // Quem acabou de se cadastrar cai direto no formulário de primeiro
+    // projeto — não faz sentido mostrar o painel vazio esperando o cliente
+    // achar o botão "+ Novo projeto" sozinho.
+    if (sessionStorage.getItem('matchia_just_registered') === '1') {
+      sessionStorage.removeItem('matchia_just_registered');
+      openProjectForm(null);
+    }
   }
 
   // ---------------- Perfil de estilo (arquiteto) ----------------
@@ -1178,9 +1219,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  function buildPortfolioStyleChips() {
+    const container = document.getElementById('pStyleChips');
+    container.innerHTML = PROJECT_STYLES.map(style =>
+      `<button type="button" class="chip" data-style="${style}">${style}</button>`
+    ).join('');
+    container.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
+  }
+
   function setupPortfolioForm(user) {
     const toggle = document.getElementById('togglePortfolioForm');
     const form = document.getElementById('portfolioForm');
+    buildPortfolioStyleChips();
     toggle.addEventListener('click', () => { form.style.display = form.style.display === 'none' ? 'block' : 'none'; });
 
     let pImageDataUri = '';
@@ -1193,6 +1248,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         await MatchAPI.addPortfolio({
           title: document.getElementById('pTitle').value.trim(),
+          style: document.getElementById('pStyleChips').querySelector('.chip.active')?.dataset.style || undefined,
+          propertyType: document.getElementById('pPropertyType').value || undefined,
+          materialsUsed: document.getElementById('pMaterials').value.split(',').map(s => s.trim()).filter(Boolean),
+          areaM2: document.getElementById('pAreaM2').value || undefined,
           description: document.getElementById('pDescription').value.trim(),
           imageUrl: pImageDataUri || document.getElementById('pImageUrl').value.trim(),
           projectUrl: pProjectDataUri || document.getElementById('pProjectUrl').value.trim(),
@@ -1204,12 +1263,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderOnboardingChecklist(refreshed);
         form.reset();
         form.style.display = 'none';
+        buildPortfolioStyleChips();
         pImageDataUri = ''; pProjectDataUri = '';
         pImageFileCtl?.clear(); pProjectFileCtl?.clear();
       } catch (err) {
         alert(err.message || 'Não foi possível adicionar o projeto.');
       }
     });
+
+    // Quem acabou de se cadastrar como arquiteto cai direto no formulário de
+    // primeiro projeto — é dali que o perfil de match dele nasce agora.
+    if (sessionStorage.getItem('matchia_just_registered') === '1') {
+      sessionStorage.removeItem('matchia_just_registered');
+      activateProfileTab(document.getElementById('architectProfileTabs'), document.getElementById('architectPanel'), 'portfolio');
+      toggle.click();
+      form.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'start' });
+    }
   }
 
   // ---------------- Exportar PDF (impressão do resumo) ----------------

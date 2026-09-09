@@ -140,52 +140,68 @@
 
           <div class="dash-card" id="projectsCard">
             <h3>Meus projetos</h3>
-            <p class="card-lead">Tem mais de uma obra em mente? Cada projeto guarda seu próprio estilo, orçamento e prioridades — rode um match separado para cada um, sem misturar critérios.</p>
+            <p class="card-lead">Nossa tecnologia encontra os arquitetos que mais combinam com o seu projeto — quanto mais projetos você descrever, mais buscas diferentes você pode fazer.</p>
             <div id="projectsList" style="margin:16px 0;"></div>
-            <button type="button" id="toggleProjectForm" class="btn btn-secondary btn-sm">+ Adicionar outro projeto</button>
+            <button type="button" id="toggleProjectForm" class="btn btn-primary btn-sm">+ Novo projeto</button>
             <div id="projectLimitCard" class="usage-limit-card" style="display:none;">
-              <p>Seu plano Gratuito permite até 1 projeto extra além do seu perfil principal.</p>
+              <p>Seu plano Gratuito permite até 1 projeto extra.</p>
               <button type="button" id="upgradeFromProjectBtn" class="btn btn-primary btn-sm">Assinar Premium e ter projetos ilimitados</button>
             </div>
             <form id="projectForm" style="display:none; margin-top:20px;">
               <input type="hidden" id="projEditId">
-              <div class="form-grid">
-                <div class="form-field full">
-                  <label for="projName">Nome do projeto</label>
-                  <input type="text" id="projName" placeholder="Ex.: Reforma do apartamento da praia" required>
-                </div>
-                <div class="form-field">
-                  <label for="projPropertyType">Tipo de imóvel</label>
-                  <select id="projPropertyType">
-                    <option value="Residencial unifamiliar">Residencial unifamiliar</option>
-                    <option value="Apartamento">Apartamento</option>
-                    <option value="Reforma">Reforma</option>
-                    <option value="Interiores">Interiores</option>
-                    <option value="Comercial">Comercial</option>
-                    <option value="Paisagismo">Paisagismo</option>
-                  </select>
-                </div>
-                <div class="form-field">
-                  <label for="projBudgetMin">Orçamento mínimo (R$)</label>
-                  <input type="number" id="projBudgetMin" min="0">
-                </div>
-                <div class="form-field">
-                  <label for="projBudgetMax">Orçamento máximo (R$)</label>
-                  <input type="number" id="projBudgetMax" min="0">
-                </div>
-                <div class="form-field full">
-                  <label>Estilos desejados</label>
-                  <div class="chip-select" id="projStylesChips"></div>
-                </div>
-                <div class="form-field full">
-                  <label for="projMaterials">Materiais preferidos <span class="hint">(separados por vírgula)</span></label>
-                  <input type="text" id="projMaterials" placeholder="Concreto aparente, madeira de demolição">
-                </div>
-                <div class="form-field full">
-                  <label for="projGoals">Objetivos do projeto</label>
-                  <textarea id="projGoals"></textarea>
-                </div>
+
+              <div class="field-subgroup">
+                <span class="field-subgroup-label">1. O que você quer construir ou reformar?</span>
+                <div class="chip-select" id="projInterventionChips"></div>
               </div>
+              <div class="form-field full">
+                <label for="projPropertyType">Tipo de imóvel</label>
+                <select id="projPropertyType">
+                  <option value="Residencial unifamiliar">Casa</option>
+                  <option value="Apartamento">Apartamento</option>
+                  <option value="Interiores">Só interiores</option>
+                  <option value="Comercial">Espaço comercial</option>
+                  <option value="Paisagismo">Área externa / paisagismo</option>
+                </select>
+              </div>
+
+              <div class="field-subgroup">
+                <span class="field-subgroup-label">2. Qual estilo combina mais com você?</span>
+                <div class="chip-select" id="projStylesChips"></div>
+              </div>
+
+              <div class="form-field">
+                <label for="projAreaM2">3. Quantos m² terá o espaço?</label>
+                <input type="number" id="projAreaM2" min="0" step="1" placeholder="Ex.: 90">
+              </div>
+
+              <div class="form-field full">
+                <label for="projGoals">4. O que é mais importante para você nesse projeto?</label>
+                <textarea id="projGoals" placeholder="Ex.: mais luz natural, integrar cozinha e sala, um home office..."></textarea>
+              </div>
+
+              <details style="margin:6px 0 16px;">
+                <summary style="cursor:pointer; font-size:0.86rem; color:var(--ink-soft);">Mais detalhes (opcional)</summary>
+                <div class="form-grid" style="margin-top:14px;">
+                  <div class="form-field full">
+                    <label for="projName">Nome do projeto <span class="hint">(se não preencher, geramos um pra você)</span></label>
+                    <input type="text" id="projName" placeholder="Ex.: Reforma do apartamento da praia">
+                  </div>
+                  <div class="form-field">
+                    <label for="projBudgetMin">Orçamento mínimo (R$)</label>
+                    <input type="number" id="projBudgetMin" min="0">
+                  </div>
+                  <div class="form-field">
+                    <label for="projBudgetMax">Orçamento máximo (R$)</label>
+                    <input type="number" id="projBudgetMax" min="0">
+                  </div>
+                  <div class="form-field full">
+                    <label for="projMaterials">Materiais preferidos <span class="hint">(separados por vírgula)</span></label>
+                    <input type="text" id="projMaterials" placeholder="Concreto aparente, madeira de demolição">
+                  </div>
+                </div>
+              </details>
+
               <div style="display:flex; gap:10px;">
                 <button type="submit" class="btn btn-primary" id="projSaveBtn">Salvar projeto</button>
                 <button type="button" class="btn btn-secondary" id="cancelProjectForm">Cancelar</button>
@@ -305,9 +321,9 @@
 
           <div class="dash-card">
             <h3>Meu portfólio</h3>
-            <p class="card-lead">Projetos anteriores aumentam sua compatibilidade e visibilidade nos resultados de match.</p>
+            <p class="card-lead">É daqui que sua compatibilidade é calculada: o estilo e os materiais de cada projeto que você adiciona formam o seu perfil de match — não é preciso preencher nenhum questionário à parte.</p>
             <div id="portfolioList" style="margin:18px 0;"></div>
-            <button id="togglePortfolioForm" class="btn btn-secondary btn-sm">+ Adicionar projeto</button>
+            <button id="togglePortfolioForm" class="btn btn-primary btn-sm">+ Adicionar projeto</button>
             <div id="portfolioLimitCard" class="usage-limit-card" style="display:none;">
               <p>Seu plano Gratuito permite até 3 projetos no portfólio.</p>
               <button id="upgradeFromPortfolioBtn" class="btn btn-primary btn-sm">Assinar Pro e ter portfólio ilimitado</button>
@@ -317,6 +333,29 @@
                 <div class="form-field full">
                   <label for="pTitle">Título do projeto</label>
                   <input type="text" id="pTitle" required>
+                </div>
+                <div class="form-field full">
+                  <label>Estilo deste projeto</label>
+                  <div class="chip-select" id="pStyleChips"></div>
+                </div>
+                <div class="form-field">
+                  <label for="pPropertyType">Tipo de imóvel</label>
+                  <select id="pPropertyType">
+                    <option value="">Não informar</option>
+                    <option value="Residencial unifamiliar">Casa</option>
+                    <option value="Apartamento">Apartamento</option>
+                    <option value="Interiores">Só interiores</option>
+                    <option value="Comercial">Espaço comercial</option>
+                    <option value="Paisagismo">Área externa / paisagismo</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label for="pAreaM2">Área do projeto (m²)</label>
+                  <input type="number" id="pAreaM2" min="0" step="1" placeholder="Ex.: 120">
+                </div>
+                <div class="form-field full">
+                  <label for="pMaterials">Materiais usados <span class="hint">(separados por vírgula)</span></label>
+                  <input type="text" id="pMaterials" placeholder="Concreto aparente, madeira de demolição">
                 </div>
                 <div class="form-field full">
                   <label for="pDescription">Descrição</label>
@@ -407,6 +446,10 @@
           <div class="form-field">
             <label for="editState">Estado (UF)</label>
             <input type="text" id="editState" maxlength="2">
+          </div>
+          <div class="form-field full" id="editWorkingAreasField" style="display:none;">
+            <label for="editWorkingAreas">Onde você atende <span class="hint">(cidades, separadas por vírgula)</span></label>
+            <input type="text" id="editWorkingAreas" placeholder="São Paulo, Campinas">
           </div>
           <button id="saveProfileBtn" class="btn btn-primary btn-sm btn-block">Salvar alterações</button>
         </div>

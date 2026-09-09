@@ -64,6 +64,7 @@ export async function runMatch(req, res) {
           preferredMaterials: project.preferredMaterials,
           budget: project.budget,
           propertyType: project.propertyType,
+          areaM2: project.areaM2,
           familySize: project.familySize,
           projectGoals: project.projectGoals,
           preferences: project.preferences,

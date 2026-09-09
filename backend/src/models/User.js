@@ -12,6 +12,14 @@ const projectSchema = new mongoose.Schema(
       enum: ["ongoing", "completed"],
       default: "completed",
     },
+    // Cada item de portfólio carrega seu próprio estilo/materiais/metragem —
+    // o perfil de match do arquiteto (architectProfile.styles/favoriteMaterials)
+    // é recalculado a partir da união desses valores (ver recomputeProfileFromPortfolio
+    // em dashboardController.js), em vez de vir de um questionário único no cadastro.
+    style: String,
+    materialsUsed: [String],
+    areaM2: Number,
+    propertyType: String,
   },
   { timestamps: true },
 );
@@ -26,7 +34,9 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    phone: { type: String, required: true },
+    // Não é mais pedido no cadastro (o cadastro agora só coleta o essencial
+    // pra criar a conta) — quem quiser pode preencher depois no painel.
+    phone: String,
     passwordHash: { type: String, required: true, select: false },
     // Guarda o hash do token de redefinição, nunca o token cru (o mesmo
     // princípio do passwordHash) — mesmo com o banco vazado, ninguém
@@ -48,6 +58,7 @@ const userSchema = new mongoose.Schema(
       familySize: Number,
       projectGoals: String,
       preferences: String,
+      areaM2: Number,
       bonusMatches: { type: Number, default: 0 },
     },
     architectProfile: {
@@ -64,6 +75,13 @@ const userSchema = new mongoose.Schema(
       website: String,
       instagram: String,
       bonusPortfolioSlots: { type: Number, default: 0 },
+      // Campo real de plano — antes só existia no localStorage do navegador,
+      // então nenhuma listagem podia de fato dar prioridade a quem assina.
+      subscriptionTier: {
+        type: String,
+        enum: ["free", "pro"],
+        default: "free",
+      },
       availability: {
         type: String,
         enum: ["available", "limited", "unavailable"],

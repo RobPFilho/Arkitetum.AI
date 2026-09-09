@@ -131,8 +131,30 @@ async function notifyClientsArchitectAvailableAgain(architect) {
   );
 }
 
+/**
+ * O perfil de match do arquiteto (styles/favoriteMaterials) não vem mais de
+ * um questionário único no cadastro — é a união do que ele tageou em cada
+ * projeto do portfólio. Chamado sempre que o portfólio muda (adicionar ou
+ * remover um projeto).
+ */
+function recomputeProfileFromPortfolio(user) {
+  const portfolio = user.architectProfile?.portfolio || [];
+  const styles = new Set(user.architectProfile.styles || []);
+  const materials = new Set(user.architectProfile.favoriteMaterials || []);
+  const specialties = new Set(user.architectProfile.specialties || []);
+  portfolio.forEach((project) => {
+    if (project.style) styles.add(project.style);
+    if (project.propertyType) specialties.add(project.propertyType);
+    (project.materialsUsed || []).forEach((m) => materials.add(m));
+  });
+  user.architectProfile.styles = Array.from(styles);
+  user.architectProfile.favoriteMaterials = Array.from(materials).slice(0, 12);
+  user.architectProfile.specialties = Array.from(specialties);
+}
+
 export async function addPortfolio(req, res) {
   req.user.architectProfile.portfolio.push(req.body);
+  recomputeProfileFromPortfolio(req.user);
   await req.user.save();
   res.status(201).json(req.user.architectProfile.portfolio.at(-1));
 }
