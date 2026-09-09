@@ -121,5 +121,6 @@ const MatchAPI = (() => {
     submitTestimonial: (otherId, testimonial) => request(`/case-studies/${encodeURIComponent(otherId)}/testimonial`, { method: 'POST', auth: true, body: { testimonial } }),
     approveCaseStudy: (otherId) => request(`/case-studies/${encodeURIComponent(otherId)}/approve`, { method: 'POST', auth: true }),
     publishedCaseStudies: (architectId) => request(`/case-studies/architect/${encodeURIComponent(architectId)}`),
+    allPublishedCaseStudies: (limit) => request(`/case-studies${limit ? `?limit=${limit}` : ''}`),
   };
 })();

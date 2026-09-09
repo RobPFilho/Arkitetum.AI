@@ -7,9 +7,11 @@ import {
   submitTestimonial,
   approveCaseStudy,
   listPublished,
+  listAllPublished,
 } from "../controllers/caseStudyController.js";
 
 const router = Router();
+router.get("/", asyncHandler(listAllPublished));
 router.get("/architect/:architectId", asyncHandler(listPublished));
 router.use(requireAuth);
 router.get("/:otherId", asyncHandler(getCaseStudy));

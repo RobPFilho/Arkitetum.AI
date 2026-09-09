@@ -57,8 +57,8 @@
     <div class="container hero-grid">
       <div class="hero-copy">
         <span class="eyebrow">Match entre clientes &amp; arquitetos</span>
-        <h1>Encontre o arquiteto ideal com <span class="accent">Inteligência Artificial</span></h1>
-        <p class="lead">Conectamos você ao arquiteto perfeito para o seu projeto. Nossa IA analisa estilo, orçamento e necessidades para potencializar cada etapa do processo — do primeiro match ao projeto final.</p>
+        <h1>Encontre o arquiteto certo para o seu projeto, <span class="accent">sem perder horas procurando</span></h1>
+        <p class="lead">Menos tempo procurando. Mais tempo desenvolvendo o seu projeto. Nossa tecnologia encontra os arquitetos que mais combinam com o seu estilo, sua metragem e o que você precisa.</p>
         <div class="hero-actions">
           <a href="cadastro.html?tipo=cliente" class="btn btn-primary">Encontrar meu arquiteto</a>
           <a href="cadastro.html?tipo=arquiteto" class="btn btn-secondary">Sou arquiteto</a>
@@ -77,8 +77,8 @@
           <div class="fc-label">Seu perfil</div>
           <ul>
             <li>Estilo Contemporâneo</li>
-            <li>Família com 2 filhos</li>
-            <li>R$250k – R$350k</li>
+            <li>Reforma de apartamento</li>
+            <li>90 m²</li>
             <li>Integração &amp; sustentabilidade</li>
           </ul>
         </div>
@@ -102,12 +102,12 @@
         <div class="step">
           <div class="step-num">1</div>
           <h3>Conte sua ideia</h3>
-          <p>Responda um questionário inteligente sobre estilo, necessidade e orçamento.</p>
+          <p>O que você quer construir ou reformar, qual estilo combina com você e quantos m² terá o espaço.</p>
         </div>
         <div class="step">
           <div class="step-num">2</div>
-          <h3>IA analisa seu perfil</h3>
-          <p>Nosso algoritmo cruza seus dados com o portfólio de arquitetos cadastrados.</p>
+          <h3>Encontramos os arquitetos certos</h3>
+          <p>Nossa tecnologia encontra os arquitetos que mais combinam com o seu projeto.</p>
         </div>
         <div class="step">
           <div class="step-num">3</div>
@@ -116,8 +116,8 @@
         </div>
         <div class="step">
           <div class="step-num">4</div>
-          <h3>Desenvolva com IA</h3>
-          <p>Após a contratação, a IA sugere conceitos, materiais e referências visuais.</p>
+          <h3>Desenvolva o projeto</h3>
+          <p>Depois da contratação, a tecnologia continua ajudando com conceitos, materiais e referências visuais.</p>
         </div>
       </div>
     </div>
@@ -128,18 +128,18 @@
     <div class="container">
       <div class="section-head reveal">
         <span class="eyebrow">Match inteligente</span>
-        <h2>A IA compara seu perfil com o portfólio de arquitetos cadastrados</h2>
-        <p>O mesmo motor de compatibilidade usado no back-end da plataforma — pontuação por estilo, materiais, localização, especialidade e disponibilidade.</p>
+        <h2>Nossa tecnologia encontra os arquitetos que mais combinam com o seu projeto</h2>
+        <p>Comparamos estilo, materiais, localização, especialidade e disponibilidade — a mesma lógica usada em cada busca da plataforma.</p>
       </div>
       <div class="match-demo reveal">
         <div class="match-card">
           <h4>Seu perfil</h4>
           <ul>
             <li>Contemporâneo</li>
-            <li>Família com 2 filhos</li>
+            <li>Reforma de apartamento</li>
+            <li>90 m²</li>
             <li>Integração de ambientes</li>
             <li>Sustentabilidade</li>
-            <li>Orçamento médio-alto</li>
           </ul>
         </div>
         <div class="match-score">
@@ -199,13 +199,13 @@
         </div>
         <div class="feature-card">
           <span class="index">05</span>
-          <h3>Economia de tempo e dinheiro</h3>
-          <p>Menos reuniões de alinhamento, mais tempo dedicado ao que importa.</p>
+          <h3>Menos tempo procurando</h3>
+          <p>Mais tempo desenvolvendo o seu projeto — menos reuniões de alinhamento, mais foco no que importa.</p>
         </div>
         <div class="feature-card">
           <span class="index">06</span>
           <h3>Experiência personalizada do início ao fim</h3>
-          <p>Do questionário ao acompanhamento do projeto, tudo pensado para você.</p>
+          <p>Do primeiro projeto ao acompanhamento da obra, tudo pensado para você.</p>
         </div>
       </div>
       <div class="feature-grid reveal">
@@ -243,19 +243,19 @@
     </div>
   </section>
 
-  <!-- 3D SHOWCASE -->
+  <!-- VITRINE DE PROJETOS COM MATCH VERIFICADO -->
   <section class="section section-alt" id="ia-projeto">
     <div class="container">
       <div class="section-head reveal">
-        <span class="eyebrow">IA auxiliando no desenvolvimento do projeto</span>
-        <h2>Do match ao volume construído</h2>
-        <p>Depois da contratação, a IA apoia o arquiteto sugerindo conceitos, materiais e referências. Explore abaixo um estudo volumétrico 3D interativo — gire, dê zoom e veja o projeto de todos os ângulos.</p>
+        <span class="eyebrow">Prova real, não ilustração</span>
+        <h2>Projetos que já viraram match</h2>
+        <p>Cliente e arquiteto confirmam juntos quando um projeto acontece de verdade — é isso que aparece aqui embaixo.</p>
       </div>
-      <div class="showcase-3d reveal">
-        <span class="badge-3d">Interativo · arraste para girar</span>
-        <iframe src="assets/3d/mansion-3d.html" title="Estudo volumétrico 3D — Residência Cantiléver" loading="lazy"></iframe>
+      <div id="showcaseGallery" class="showcase-gallery reveal"></div>
+      <div id="showcaseEmpty" class="empty-state" style="display:none;">
+        <p>Ainda não temos projetos publicados aqui — assim que o primeiro match virar projeto confirmado pelos dois lados, ele aparece nesta vitrine.</p>
       </div>
-      <p class="showcase-hint">Modelo gerado com IA a partir do briefing de estilo do cliente · <a href="projetos.html#ia-sob-medida" style="color:var(--terracotta); font-weight:600;">ver como a IA respeita o estilo de cada arquiteto →</a></p>
+      <p class="showcase-hint">Cada card exige aprovação dos dois lados · <a href="projetos.html#ia-sob-medida" style="color:var(--terracotta); font-weight:600;">ver como a tecnologia respeita o estilo de cada arquiteto →</a></p>
     </div>
   </section>
 
@@ -316,5 +316,6 @@
 <script src="assets/js/api.js"></script>
 <script src="assets/js/theme.js"></script>
 <script src="assets/js/site.js"></script>
+<script src="assets/js/case-studies.js"></script>
 </body>
 </html>

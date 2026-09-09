@@ -687,6 +687,25 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .material-card .info .cat { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--terracotta); font-weight: 700; }
 .material-card .info h4 { font-size: 0.95rem; margin: 4px 0 0; }
 
+/* ---------- Vitrine de projetos com match verificado ---------- */
+.showcase-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.showcase-card { background: var(--white); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--line); transition: transform .22s ease, box-shadow .22s ease; position: relative; }
+.showcase-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+.showcase-card .thumb { aspect-ratio: 4/3; overflow: hidden; background: var(--bg-alt); }
+.showcase-card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.showcase-card .verified-badge {
+  position: absolute; top: 12px; left: 12px; display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(51,51,51,0.72); backdrop-filter: blur(3px); color: var(--white);
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 5px 10px; border-radius: 999px;
+}
+.showcase-card .info { padding: 18px; }
+.showcase-card h3 { font-size: 1.02rem; margin-bottom: 6px; }
+.showcase-card .showcase-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.8rem; color: var(--ink-soft); margin-top: 8px; }
+.showcase-card .showcase-meta strong { color: var(--ink); font-weight: 600; }
+@media (max-width: 900px) { .showcase-gallery { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .showcase-gallery { grid-template-columns: 1fr; } }
+
 /* ---------- Blog / Sobre ---------- */
 .article-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
 .article-card { background: var(--white); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--line); transition: transform .22s ease, box-shadow .22s ease; }

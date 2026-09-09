@@ -1,6 +1,7 @@
 import CaseStudy from "../models/CaseStudy.js";
 import Validation from "../models/Validation.js";
 import User from "../models/User.js";
+import Review from "../models/Review.js";
 import { notify } from "../services/notificationService.js";
 
 const pairFor = (req) => {
@@ -34,7 +35,7 @@ export async function proposeCaseStudy(req, res) {
   const pair = pairFor(req);
   if (!(await requireValidated(pair, res))) return;
 
-  const { title, description, images } = req.body || {};
+  const { title, description, images, style, areaM2 } = req.body || {};
   if (!title || !title.trim()) return res.status(400).json({ error: "Título é obrigatório." });
 
   const caseStudy = await CaseStudy.findOneAndUpdate(
@@ -44,6 +45,8 @@ export async function proposeCaseStudy(req, res) {
         title: title.trim(),
         description: (description || "").trim(),
         images: Array.isArray(images) ? images.filter(Boolean).slice(0, 4) : [],
+        style: style || undefined,
+        areaM2: areaM2 ? Number(areaM2) : undefined,
         architectApproved: true,
         clientApproved: false,
       },
@@ -103,4 +106,50 @@ export async function listPublished(req, res) {
         clientName: c.client?.name,
       })),
   );
+}
+
+/**
+ * Vitrine pública site-wide de "projetos que já viraram match" — usada no
+ * lugar do showcase 3D em index.html/projetos.html. Arquitetos com plano Pro
+ * aparecem primeiro, depois por nota média, depois mais recentes (mesma
+ * régua de prioridade paga das outras listagens — nunca substitui o motor
+ * de compatibilidade em si, só a ordem de exibição da vitrine).
+ */
+export async function listAllPublished(req, res) {
+  const limit = Math.min(Number(req.query.limit) || 12, 24);
+  const caseStudies = await CaseStudy.find({ architectApproved: true, clientApproved: true, title: { $ne: null } })
+    .populate("architect", "name city state architectProfile.subscriptionTier")
+    .sort("-updatedAt")
+    .limit(60);
+
+  const architectIds = [...new Map(caseStudies.filter((c) => c.architect).map((c) => [String(c.architect._id), c.architect._id])).values()];
+  const ratings = await Review.aggregate([
+    { $match: { architect: { $in: architectIds } } },
+    { $group: { _id: "$architect", avg: { $avg: "$rating" } } },
+  ]);
+  const ratingMap = new Map(ratings.map((r) => [String(r._id), r.avg]));
+
+  const shaped = caseStudies
+    .filter((c) => c.architect)
+    .map((c) => ({
+      id: c.id,
+      title: c.title,
+      description: c.description,
+      image: c.images?.[0] || null,
+      style: c.style,
+      areaM2: c.areaM2,
+      architectName: c.architect.name,
+      architectCity: [c.architect.city, c.architect.state].filter(Boolean).join(" · "),
+      isPro: c.architect.architectProfile?.subscriptionTier === "pro",
+      rating: ratingMap.get(String(c.architect._id)) || 0,
+      updatedAt: c.updatedAt,
+    }))
+    .sort((a, b) => {
+      if (a.isPro !== b.isPro) return a.isPro ? -1 : 1;
+      if (b.rating !== a.rating) return b.rating - a.rating;
+      return new Date(b.updatedAt) - new Date(a.updatedAt);
+    })
+    .slice(0, limit);
+
+  res.json(shaped);
 }

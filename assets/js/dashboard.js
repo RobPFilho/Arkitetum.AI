@@ -1557,6 +1557,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const clientId = form.dataset.caseClient;
       const payload = {
         title: form.querySelector('[name="title"]').value.trim(),
+        style: form.querySelector('[name="style"]').value || undefined,
+        areaM2: form.querySelector('[name="areaM2"]').value || undefined,
         description: form.querySelector('[name="description"]').value.trim(),
         images: form.querySelector('[name="images"]').value.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 4),
       };
@@ -1604,6 +1606,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="form-field full">
               <label>Título do case</label>
               <input type="text" name="title" value="${cs?.title || ''}" required>
+            </div>
+            <div class="form-field">
+              <label>Estilo do projeto</label>
+              <select name="style">
+                <option value="">Não informar</option>
+                ${PROJECT_STYLES.map(s => `<option value="${s}" ${cs?.style === s ? 'selected' : ''}>${s}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Área (m²)</label>
+              <input type="number" name="areaM2" min="0" step="1" value="${cs?.areaM2 || ''}">
             </div>
             <div class="form-field full">
               <label>Descrição</label>

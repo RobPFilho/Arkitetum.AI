@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const p = a.profile || {};
     const initials = a.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
     const verified = p.cauVerification?.status === 'verified' ? '<span class="status-pill badge-validated" style="margin-left:6px;">✓ Verificado</span>' : '';
+    const proBadge = a.isPro ? '<span class="badge-pro" style="margin-left:6px;">Pro</span>' : '';
     const checked = compareSelection.has(a.id) ? 'checked' : '';
     return `
       <div class="material-card" style="position:relative;">
@@ -39,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <div class="info">
             <span class="cat">${[a.city, a.state].filter(Boolean).join(' · ') || 'Localização não informada'}</span>
-            <h4>${a.name}${verified}</h4>
+            <h4>${a.name}${proBadge}${verified}</h4>
             <div class="tag-row" style="margin:6px 0;">${(p.styles || []).slice(0, 3).map(s => `<span class="tag">${s}</span>`).join('') || ''}</div>
             <p style="font-size:0.8rem; color:var(--ink-faint); margin:4px 0;">${p.yearsExperience ? `${p.yearsExperience} anos de experiência` : 'Experiência não informada'}</p>
             ${ratingHtml(a)}
