@@ -53,4 +53,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('apiBanner').classList.add('show');
     render(FALLBACK);
   }
+
+  const glossary = document.getElementById('styleGlossary');
+  if (glossary) {
+    const styleImages = await StyleData.load();
+    glossary.innerHTML = StyleData.names().map(style => {
+      const data = styleImages[style] || {};
+      return `
+        <div class="material-card">
+          <div class="thumb">${data.imageUrl ? `<img src="${data.imageUrl}" alt="${style}" loading="lazy">` : ''}</div>
+          <div class="info">
+            <h4>${style}</h4>
+            <p style="font-size:0.84rem; color:var(--ink-soft); margin:4px 0 0;">${data.description || ''}</p>
+          </div>
+        </div>`;
+    }).join('');
+  }
 });

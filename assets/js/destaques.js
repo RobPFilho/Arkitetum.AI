@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', async () => {
   // Quem pede menos animação no sistema também não quer rolagem suave.
   const SCROLL_BEHAVIOR = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-  const STYLES = ['Moderno', 'Contemporâneo', 'Minimalista', 'Industrial', 'Clássico', 'Rústico', 'Escandinavo', 'Biofílico', 'Brutalista', 'Alto padrão'];
+  const STYLES = StyleData.names();
+  const styleImages = await StyleData.load();
   const grid = document.getElementById('archGrid');
   const empty = document.getElementById('archEmpty');
   const filters = document.getElementById('styleFilters');
@@ -51,7 +52,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function buildFilters() {
     filters.innerHTML = `<button type="button" class="chip active" data-style="">Todos</button>` +
-      STYLES.map(s => `<button type="button" class="chip" data-style="${s}">${s}</button>`).join('');
+      STYLES.map(s => {
+        const thumb = styleImages[s]?.imageUrl;
+        return thumb
+          ? `<button type="button" class="chip has-thumb" data-style="${s}" title="${styleImages[s].description || ''}"><img class="chip-thumb" src="${thumb}" alt="" loading="lazy">${s}</button>`
+          : `<button type="button" class="chip" data-style="${s}">${s}</button>`;
+      }).join('');
     filters.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => {
         filters.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));

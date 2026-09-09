@@ -23,8 +23,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Infinity + N continua Infinity, então não muda nada pra quem já é Premium/Pro.
   const matchLimitFor = (user, plan) => plan.matchesPerMonth + (user.clientProfile?.bonusMatches || 0);
   const portfolioLimitFor = (user, plan) => plan.maxPortfolio + (user.architectProfile?.bonusPortfolioSlots || 0);
-  const PROJECT_STYLES = ['Moderno', 'Contemporâneo', 'Minimalista', 'Industrial', 'Clássico', 'Rústico', 'Escandinavo', 'Biofílico', 'Brutalista', 'Alto padrão'];
+  const PROJECT_STYLES = StyleData.names();
   const INTERVENTION_TYPES = ['Construção', 'Reforma'];
+  const styleImages = await StyleData.load();
+  const styleChipHtml = (style, active) =>
+    styleImages[style]?.imageUrl
+      ? `<button type="button" class="chip has-thumb${active ? ' active' : ''}" data-style="${style}" title="${styleImages[style].description || ''}"><img class="chip-thumb" src="${styleImages[style].imageUrl}" alt="" loading="lazy">${style}</button>`
+      : `<button type="button" class="chip${active ? ' active' : ''}" data-style="${style}">${style}</button>`;
 
   async function refreshUnreadBadge(badgeId) {
     const badge = document.getElementById(badgeId);
@@ -321,9 +326,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function buildProjectStyleChips(selected = []) {
     const container = document.getElementById('projStylesChips');
-    container.innerHTML = PROJECT_STYLES.map(style =>
-      `<button type="button" class="chip${selected.includes(style) ? ' active' : ''}" data-style="${style}">${style}</button>`
-    ).join('');
+    container.innerHTML = PROJECT_STYLES.map(style => styleChipHtml(style, selected.includes(style))).join('');
     container.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => chip.classList.toggle('active'));
     });
@@ -1221,9 +1224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function buildPortfolioStyleChips() {
     const container = document.getElementById('pStyleChips');
-    container.innerHTML = PROJECT_STYLES.map(style =>
-      `<button type="button" class="chip" data-style="${style}">${style}</button>`
-    ).join('');
+    container.innerHTML = PROJECT_STYLES.map(style => styleChipHtml(style, false)).join('');
     container.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => {
         container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
