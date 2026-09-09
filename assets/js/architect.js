@@ -55,10 +55,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         <p style="font-size:0.76rem; color:var(--ink-faint); margin-top:8px;">Foto: <a href="${photo.photographerUrl}" target="_blank" rel="noopener" style="color:inherit;">${photo.photographerName}</a> via <a href="https://unsplash.com/?utm_source=matchia&utm_medium=referral" target="_blank" rel="noopener" style="color:inherit;">Unsplash</a></p>`;
     }).catch(() => { /* sem estilo/materiais suficientes, ou API fora do ar — card fica oculto */ });
 
-    const combos = MatchExtras.generateMaterialCombos(p.favoriteMaterials);
+    const materialCatalog = await MatchAPI.materials().catch(() => []);
+    const combos = MatchExtras.generateMaterialCombos(p.favoriteMaterials, materialCatalog);
     document.getElementById('archCombos').innerHTML = combos.length
       ? `<div class="constraint-note">Só usa materiais que ${arch.name} cadastrou como favoritos — nada inexequível.</div>` +
-        combos.map(c => `<div class="combo-card"><div class="combo-name">${c.name}</div></div>`).join('')
+        combos.map(c => `<div class="combo-card"><div class="combo-name">${c.name}</div>${c.stores?.length ? `<p style="font-size:0.78rem; color:var(--ink-faint); margin:4px 0 0;">Disponível na loja parceira ${c.stores.map(s => `<a href="${s.url}" target="_blank" rel="noopener sponsored" style="color:var(--terracotta); font-weight:600;">${s.name}</a>`).join(', ')}</p>` : ''}</div>`).join('')
       : '<p style="font-size:0.86rem; color:var(--ink-faint);">Cadastre ao menos 2 materiais favoritos para gerar sugestões.</p>';
 
     const portfolio = p.portfolio || [];

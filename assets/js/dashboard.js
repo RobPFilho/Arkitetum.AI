@@ -26,6 +26,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const PROJECT_STYLES = StyleData.names();
   const INTERVENTION_TYPES = ['Construção', 'Reforma'];
   const styleImages = await StyleData.load();
+  let materialCatalogCache = null;
+  async function materialCatalog() {
+    if (materialCatalogCache) return materialCatalogCache;
+    try { materialCatalogCache = await MatchAPI.materials(); } catch { materialCatalogCache = []; }
+    return materialCatalogCache;
+  }
+  function storeLineHtml(stores) {
+    if (!stores || !stores.length) return '';
+    return `<p style="font-size:0.78rem; color:var(--ink-faint); margin:4px 0 0;">Disponível na loja parceira ${stores.map(s => `<a href="${s.url}" target="_blank" rel="noopener sponsored" style="color:var(--terracotta); font-weight:600;">${s.name}</a>`).join(', ')}</p>`;
+  }
   const styleChipHtml = (style, active) =>
     styleImages[style]?.imageUrl
       ? `<button type="button" class="chip has-thumb${active ? ' active' : ''}" data-style="${style}" title="${styleImages[style].description || ''}"><img class="chip-thumb" src="${styleImages[style].imageUrl}" alt="" loading="lazy">${style}</button>`
@@ -181,14 +191,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function openUpgrade(user, onDone) {
-    const targetId = user.role === 'client' ? 'premium' : 'pro';
+    const targetId = user.role === 'client' ? 'free' : 'pro';
     const plan = MatchExtras.PLANS[user.role][targetId];
     CheckoutModal.open({
       name: `Plano ${plan.label}`,
-      desc: user.role === 'client' ? 'Buscas de match ilimitadas e todos os arquitetos do resultado.' : 'Portfólio ilimitado e selo Pro no seu painel.',
+      desc: 'Portfólio ilimitado e prioridade de exibição no diretório e na vitrine de projetos.',
       price: plan.price,
-    }, () => {
+    }, async () => {
       MatchExtras.setPlan(uid(user), targetId);
+      if (user.role === 'architect') await MatchAPI.updateMe({ architectProfile: { subscriptionTier: targetId === 'pro' ? 'pro' : 'free' } }).catch(() => {});
       onDone();
     });
   }
@@ -721,7 +732,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     </div>`;
   }
 
-  function handleResultClick(e, user) {
+  async function handleResultClick(e, user) {
     const breakdownBtn = e.target.closest('[data-toggle-breakdown]');
     if (breakdownBtn) {
       const archId = breakdownBtn.dataset.toggleBreakdown;
@@ -739,10 +750,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const isOpen = box.style.display !== 'none';
       if (isOpen) { box.style.display = 'none'; comboBtn.textContent = 'Ver sugestões de materiais'; return; }
       const result = allResultsById.get(archId);
-      const combos = MatchExtras.generateMaterialCombos(result?.architect.profile?.favoriteMaterials);
+      const catalog = await materialCatalog();
+      const combos = MatchExtras.generateMaterialCombos(result?.architect.profile?.favoriteMaterials, catalog);
       box.innerHTML = combos.length
         ? `<div class="constraint-note">Combinações geradas só com os materiais que ${result.architect.name} cadastrou como favoritos.</div>` +
-          combos.map(c => `<div class="combo-card"><div class="combo-name">${c.name}</div></div>`).join('')
+          combos.map(c => `<div class="combo-card"><div class="combo-name">${c.name}</div>${storeLineHtml(c.stores)}</div>`).join('')
         : `<p style="font-size:0.84rem; color:var(--ink-faint); margin:0;">Este arquiteto ainda não cadastrou materiais favoritos suficientes para gerar combinações.</p>`;
       box.style.display = 'block';
       comboBtn.textContent = 'Ocultar sugestões de materiais';

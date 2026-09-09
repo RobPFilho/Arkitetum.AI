@@ -62,16 +62,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (planId === 'free') {
         MatchExtras.setPlan(user.id, 'free');
+        if (role === 'architect') MatchAPI.updateMe({ architectProfile: { subscriptionTier: 'free' } }).catch(() => {});
         refreshButtons();
         return;
       }
 
       CheckoutModal.open({
         name: `Plano ${plan.label}`,
-        desc: role === 'client' ? 'Buscas de match ilimitadas e todos os arquitetos do resultado.' : 'Portfólio ilimitado e selo Pro no seu painel.',
+        desc: 'Portfólio ilimitado e prioridade de exibição no diretório e na vitrine de projetos.',
         price: plan.price,
-      }, () => {
+      }, async () => {
         MatchExtras.setPlan(user.id, planId);
+        // subscriptionTier é o campo real no back-end que dá prioridade de
+        // verdade nas listagens (destaques.html, vitrine de projetos) — sem
+        // isso, assinar Pro aqui só mudava o texto do painel, não o resultado.
+        if (role === 'architect') await MatchAPI.updateMe({ architectProfile: { subscriptionTier: planId === 'pro' ? 'pro' : 'free' } }).catch(() => {});
         refreshButtons();
         alert(`Plano ${plan.label} ativado! Veja no seu painel.`);
       });

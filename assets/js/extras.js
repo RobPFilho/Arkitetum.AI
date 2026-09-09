@@ -47,17 +47,23 @@ const MatchExtras = (() => {
   /**
    * Gera combinações de materiais SOMENTE a partir da lista que o próprio arquiteto
    * cadastrou como favorita — resolve o medo de "sugestão bonita mas inexequível".
+   * `catalog` (opcional, o retorno de GET /api/materials) permite mostrar em qual
+   * loja parceira cada combinação está disponível — segunda linha de monetização
+   * sugerida na mentoria final (comissão sobre venda indicada pela IA).
    */
-  function generateMaterialCombos(materials) {
+  function generateMaterialCombos(materials, catalog = []) {
     if (!materials || materials.length < 2) return [];
     const names = materials.map(m => typeof m === 'string' ? m : m.name);
+    const storeByName = new Map(catalog.filter(m => m.storeName).map(m => [m.name, { name: m.storeName, url: m.storeUrl }]));
     const combos = [];
     for (let i = 0; i < names.length && combos.length < 3; i += 2) {
       const pair = names.slice(i, i + 2);
       if (pair.length < 2) pair.push(names[0]);
+      const stores = [...new Map(pair.map(n => storeByName.get(n)).filter(Boolean).map(s => [s.name, s])).values()];
       combos.push({
         name: `Combinação ${combos.length + 1} — ${pair.join(' + ')}`,
         materials: pair,
+        stores,
       });
     }
     return combos;
@@ -118,14 +124,18 @@ const MatchExtras = (() => {
    * no schema do User + integração com um gateway (Stripe, Mercado Pago...) e a
    * checagem de limite tem que ser validada no back-end, não só no navegador.
    */
+  // Cliente é sempre grátis e sem limite (mentoria final: a receita vem de
+  // comissão de sucesso + parceria de material, não de assinatura de quem
+  // busca). O "free" do cliente é igual ao antigo "premium" de propósito —
+  // não existe mais paywall nesse lado; a estrutura de plano fica só porque
+  // várias telas leem plan.matchesPerMonth/visibleResults/etc.
   const PLANS = {
     client: {
-      free: { label: 'Gratuito', price: 0, matchesPerMonth: 3, visibleResults: 2, maxExtraProjects: 1, maxVisibleMessages: 5 },
-      premium: { label: 'Premium', price: 29, matchesPerMonth: Infinity, visibleResults: 4, maxExtraProjects: Infinity, maxVisibleMessages: Infinity },
+      free: { label: 'Gratuito', price: 0, matchesPerMonth: Infinity, visibleResults: 4, maxExtraProjects: Infinity, maxVisibleMessages: Infinity },
     },
     architect: {
       free: { label: 'Gratuito', price: 0, maxPortfolio: 3, maxVisibleMessages: 5 },
-      pro: { label: 'Pro', price: 49, maxPortfolio: Infinity, badge: true, maxVisibleMessages: Infinity },
+      pro: { label: 'Pro', price: 29, maxPortfolio: Infinity, badge: true, maxVisibleMessages: Infinity },
     },
   };
 
@@ -134,9 +144,11 @@ const MatchExtras = (() => {
 
   function getPlan(userId, role) {
     const stored = localStorage.getItem(planKey(userId));
-    const fallback = role === 'architect' ? 'free' : 'free';
-    const id = stored || fallback;
-    return { id, ...(PLANS[role] || PLANS.client)[id] };
+    const tiers = PLANS[role] || PLANS.client;
+    // Cai pra "free" se o id salvo não existir mais nesse papel (ex.: cliente
+    // com "premium" salvo de antes do plano do cliente virar sempre grátis).
+    const id = stored && tiers[stored] ? stored : 'free';
+    return { id, ...tiers[id] };
   }
   function setPlan(userId, planId) {
     localStorage.setItem(planKey(userId), planId);
