@@ -19,10 +19,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const apiBanner = document.getElementById('apiBanner');
   document.getElementById('apiBaseLabel').textContent = MatchAPI.base();
   const uid = (u) => u.id || u._id;
-  // Bônus de indicação (real, guardado no back-end) somado ao limite do plano —
-  // Infinity + N continua Infinity, então não muda nada pra quem já é Premium/Pro.
-  const matchLimitFor = (user, plan) => plan.matchesPerMonth + (user.clientProfile?.bonusMatches || 0);
-  const portfolioLimitFor = (user, plan) => plan.maxPortfolio + (user.architectProfile?.bonusPortfolioSlots || 0);
   const PROJECT_STYLES = StyleData.names();
   const INTERVENTION_TYPES = ['Construção', 'Reforma'];
   const styleImages = await StyleData.load();
@@ -78,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('dashState').style.display = 'block';
   renderProfile(me);
-  renderPlanCard(me);
+  renderPlanStat(me);
 
   if (me.role === 'client') {
     document.getElementById('clientPanel').style.display = 'block';
@@ -96,7 +92,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('clientStatFav').style.display = '';
     await loadFavoriteIds(me);
     renderFavorites(me);
-    document.getElementById('upgradeFromLimitBtn').addEventListener('click', () => openUpgrade(me, () => { renderPlanCard(me); document.getElementById('usageLimitCard').style.display = 'none'; }));
     renderProjectSummary(me);
     setupProjectSummary(me);
     setupExportPdf(me);
@@ -123,7 +118,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupPortfolioForm(me);
     await renderStyleProfile(me);
     setupStyleProfile(me);
-    document.getElementById('upgradeFromPortfolioBtn').addEventListener('click', () => openUpgrade(me, () => { renderPlanCard(me); renderPortfolio(me); }));
     setupCauVerification(me);
     setupShareProfile(me);
     renderArchitectReviews(me);
@@ -133,6 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupMetrics(me);
     setupCaseStudies(me);
     renderCaseStudies(me);
+    renderCommissions(me);
   }
 
   setupProfileEdit(me);
@@ -161,47 +156,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ---------------- Plano (freemium) ----------------
-  function renderPlanCard(user) {
-    const plan = MatchExtras.getPlan(uid(user), user.role);
-    document.getElementById('planName').innerHTML = plan.id === 'free' ? plan.label : `${plan.label} <span class="badge-pro">★ ${user.role === 'architect' ? 'Pro' : 'Premium'}</span>`;
-
-    const usageEl = document.getElementById('planUsage');
-    if (user.role === 'client') {
-      const usage = MatchExtras.getMatchUsage(uid(user));
-      const limit = matchLimitFor(user, plan);
-      usageEl.textContent = limit === Infinity
-        ? 'Buscas ilimitadas'
-        : `${usage.count}/${limit} buscas usadas este mês`;
-    } else {
-      const count = (user.architectProfile?.portfolio || []).length;
-      const limit = portfolioLimitFor(user, plan);
-      usageEl.textContent = limit === Infinity
-        ? 'Portfólio ilimitado'
-        : `${count}/${limit} projetos no portfólio`;
-    }
-
-    const upgradeBtn = document.getElementById('upgradePlanBtn');
-    if (plan.id === 'free') {
-      upgradeBtn.style.display = '';
-      upgradeBtn.onclick = () => openUpgrade(user, () => { renderPlanCard(user); if (user.role === 'architect') renderPortfolio(user); });
-    } else {
-      upgradeBtn.style.display = 'none';
-    }
+  // ---------------- Sem assinatura: grátis pro cliente, comissão pro arquiteto ----------------
+  function renderPlanStat(user) {
+    document.getElementById(user.role === 'client' ? 'clientPlanStat' : 'architectCommissionStat').style.display = '';
   }
 
-  function openUpgrade(user, onDone) {
-    const targetId = user.role === 'client' ? 'free' : 'pro';
-    const plan = MatchExtras.PLANS[user.role][targetId];
-    CheckoutModal.open({
-      name: `Plano ${plan.label}`,
-      desc: 'Portfólio ilimitado e prioridade de exibição no diretório e na vitrine de projetos.',
-      price: plan.price,
-    }, async () => {
-      MatchExtras.setPlan(uid(user), targetId);
-      if (user.role === 'architect') await MatchAPI.updateMe({ architectProfile: { subscriptionTier: targetId === 'pro' ? 'pro' : 'free' } }).catch(() => {});
-      onDone();
-    });
+  async function renderCommissions(user) {
+    const card = document.getElementById('commissionsCard');
+    const list = document.getElementById('commissionsList');
+    try {
+      const { total, commissions } = await MatchAPI.myCommissions();
+      document.getElementById('commissionTotal').textContent = 'R$ ' + total.toLocaleString('pt-BR');
+      if (!commissions.length) {
+        card.style.display = 'block';
+        list.innerHTML = emptyStateHtml('Nenhum projeto fechado pela plataforma ainda — assim que cliente e arquiteto confirmarem juntos um resumo de projeto, ele aparece aqui.');
+        return;
+      }
+      card.style.display = 'block';
+      list.innerHTML = `<table class="timeline-table"><thead><tr><th>Cliente</th><th>Data</th><th>Comissão (${(commissions[0].rate * 100).toFixed(0)}%)</th></tr></thead><tbody>${
+        commissions.map(c => `<tr><td>${c.clientName || '—'}</td><td>${new Date(c.createdAt).toLocaleDateString('pt-BR')}</td><td>${c.amount ? 'R$ ' + c.amount.toLocaleString('pt-BR') : 'sem orçamento pra estimar'}</td></tr>`).join('')
+      }</tbody></table>`;
+    } catch {
+      card.style.display = 'none';
+    }
   }
 
   function formatBudget(budget) {
@@ -378,13 +355,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>`;
   }
 
-  function renderProjectLimit(user) {
-    const plan = MatchExtras.getPlan(uid(user), 'client');
-    const atLimit = myProjects.length >= plan.maxExtraProjects;
-    document.getElementById('toggleProjectForm').style.display = atLimit ? 'none' : '';
-    document.getElementById('projectLimitCard').style.display = atLimit ? 'block' : 'none';
-  }
-
   async function renderProjects(user) {
     const list = document.getElementById('projectsList');
     try {
@@ -404,7 +374,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       </div>
       ${myProjects.map(projectCardHtml).join('')}`;
-    renderProjectLimit(user);
 
     list.querySelectorAll('[data-run-project]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -453,7 +422,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('cancelProjectForm').addEventListener('click', () => {
       document.getElementById('projectForm').style.display = 'none';
     });
-    document.getElementById('upgradeFromProjectBtn').addEventListener('click', () => openUpgrade(user, () => renderProjects(user)));
 
     document.getElementById('projectForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1097,20 +1065,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btn = document.getElementById('runMatchBtn');
     const list = document.getElementById('matchResults');
     const empty = document.getElementById('matchEmpty');
-    const limitCard = document.getElementById('usageLimitCard');
     const contextLabel = document.getElementById('matchContextLabel');
-
-    const plan = MatchExtras.getPlan(uid(user), 'client');
-    const usage = MatchExtras.getMatchUsage(uid(user));
-    if (usage.count >= matchLimitFor(user, plan)) {
-      limitCard.style.display = 'block';
-      list.innerHTML = '';
-      empty.style.display = 'none';
-      document.getElementById('matchTabs').style.display = 'none';
-      document.getElementById('matchExtraPanels').innerHTML = '';
-      return;
-    }
-    limitCard.style.display = 'none';
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Analisando compatibilidade...';
@@ -1129,32 +1084,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       allResultsById.clear();
       results.forEach(r => allResultsById.set(r.architect.id, r));
       contextLabel.textContent = project ? `Resultados para o projeto "${project.name}".` : 'Resultados para o seu perfil principal (dados do cadastro).';
-      MatchExtras.recordMatchRun(uid(user));
-      renderPlanCard(user);
       empty.style.display = results.length ? 'none' : 'block';
       if (!results.length) {
         empty.innerHTML = '<p>Nenhum arquiteto compatível encontrado ainda. Complete seu perfil com mais estilos e materiais preferidos.</p>';
       }
-      list.innerHTML = results.map((r, i) => {
-        const locked = i >= plan.visibleResults;
-        if (!locked) return `<div class="result-card" style="grid-template-columns:auto 1fr auto; align-items:start;">${resultCardHtml(r, i, user)}</div>`;
-        return `
-          <div class="result-card locked-result" style="grid-template-columns:1fr;">
-            <div class="result-blur" style="display:grid; grid-template-columns:auto 1fr auto; gap:20px; align-items:start;">${resultCardHtml(r, i, user)}</div>
-            <div class="lock-overlay">
-              <span class="lock-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg></span>
-              <p>Assine o Premium para ver este arquiteto</p>
-              <button type="button" class="btn btn-primary btn-sm" data-unlock-plan>Assinar Premium</button>
-            </div>
-          </div>`;
-      }).join('');
-      list.querySelectorAll('[data-unlock-plan]').forEach(b => {
-        b.addEventListener('click', () => openUpgrade(user, () => runMatch(user)));
-      });
+      list.innerHTML = results.map((r, i) => `<div class="result-card" style="grid-template-columns:auto 1fr auto; align-items:start;">${resultCardHtml(r, i, user)}</div>`).join('');
       document.getElementById('compareBtn').style.display = results.length > 1 ? '' : 'none';
       document.getElementById('exportMatchPdfBtn').style.display = results.length ? '' : 'none';
-      loadValidationStatuses(results.slice(0, plan.visibleResults));
-      loadResultThumbnails(results.slice(0, plan.visibleResults));
+      loadValidationStatuses(results);
+      loadResultThumbnails(results);
       renderMatchTabs(results.length, extra || [], user);
       renderMatchHistory(user);
     } catch (err) {
@@ -1197,11 +1135,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const items = (user.architectProfile && user.architectProfile.portfolio) || [];
     document.getElementById('statPortfolioCount').textContent = items.length;
 
-    const plan = MatchExtras.getPlan(uid(user), 'architect');
-    const atLimit = items.length >= portfolioLimitFor(user, plan);
-    document.getElementById('togglePortfolioForm').style.display = atLimit ? 'none' : '';
-    document.getElementById('portfolioLimitCard').style.display = atLimit ? 'block' : 'none';
-
     if (!items.length) {
       list.innerHTML = emptyStateHtml('Você ainda não adicionou projetos ao portfólio.',
         '<button type="button" class="btn btn-secondary btn-sm" data-empty-add-portfolio>+ Adicionar o primeiro projeto</button>');
@@ -1226,7 +1159,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           await MatchAPI.deletePortfolio(btn.dataset.portfolioId);
           const refreshed = await MatchAPI.me();
           renderPortfolio(refreshed);
-          renderPlanCard(refreshed);
         } catch (err) {
           alert(err.message || 'Não foi possível remover o projeto.');
         }
@@ -1272,7 +1204,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         const refreshed = await MatchAPI.me();
         renderPortfolio(refreshed);
-        renderPlanCard(refreshed);
         renderOnboardingChecklist(refreshed);
         form.reset();
         form.style.display = 'none';
@@ -1396,8 +1327,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ---------------- Comparador lado a lado ----------------
   function compareTableHtml(user) {
-    const plan = MatchExtras.getPlan(uid(user), 'client');
-    const visible = lastResults.slice(0, plan.visibleResults);
+    const visible = lastResults;
     return `
         <table class="compare-table">
           <thead><tr><th>Arquiteto</th>${visible.map(r => `<th>${r.architect.name}</th>`).join('')}</tr></thead>
@@ -1412,7 +1342,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               return `<td>${v?.clientConfirmed && v?.architectConfirmed ? '✓ Sim' : '—'}</td>`;
             }).join('')}</tr>
           </tbody>
-        </table>${lastResults.length > plan.visibleResults ? '<p style="font-size:0.8rem; color:var(--ink-faint); padding:12px 16px;">Alguns arquitetos do seu match estão bloqueados no plano Gratuito e não entram no comparativo.</p>' : ''}`;
+        </table>`;
   }
   function setupCompare(user) {
     document.getElementById('compareBtn').addEventListener('click', () => {
@@ -1532,20 +1462,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ---------------- Métricas do perfil (arquiteto Pro) ----------------
+  // ---------------- Métricas do perfil ----------------
   function setupMetrics(user) {
-    document.getElementById('upgradeFromMetricsBtn').addEventListener('click', () =>
-      openUpgrade(user, () => { renderPlanCard(user); renderMetrics(user); }));
     renderMetrics(user);
   }
 
   async function renderMetrics(user) {
-    const plan = MatchExtras.getPlan(uid(user), 'architect');
-    const upsell = document.getElementById('metricsUpsell');
-    const content = document.getElementById('metricsContent');
-    if (plan.id !== 'pro') { upsell.style.display = 'block'; content.style.display = 'none'; return; }
-    upsell.style.display = 'none';
-    content.style.display = 'block';
+    document.getElementById('metricsUpsell').style.display = 'none';
+    document.getElementById('metricsContent').style.display = 'block';
     const statsEl = document.getElementById('metricsStats');
     statsEl.innerHTML = '<p style="font-size:0.86rem; color:var(--ink-faint);"><span class="spinner"></span> Carregando métricas...</p>';
     try {
@@ -1764,19 +1688,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function renderMessages(container, messages, user) {
     const myId = uid(user);
-    const plan = MatchExtras.getPlan(myId, user.role);
-    const limit = plan.maxVisibleMessages;
-    const visible = messages.length > limit ? messages.slice(-limit) : messages;
-    const hiddenCount = messages.length - visible.length;
-    const limitNote = hiddenCount > 0
-      ? `<div class="chat-limit-note">Plano Gratuito mostra só as últimas ${limit} mensagens desta conversa (${hiddenCount} mais antiga${hiddenCount > 1 ? 's' : ''} oculta${hiddenCount > 1 ? 's' : ''}). <button type="button" class="btn btn-sage btn-sm" id="chatUpgradeBtn">Assinar ${user.role === 'architect' ? 'Pro' : 'Premium'}</button></div>`
-      : '';
-    container.innerHTML = limitNote + (visible.length ? visible.map(m => `
+    container.innerHTML = messages.length ? messages.map(m => `
       <div class="chat-bubble ${String(m.from) === String(myId) ? 'mine' : 'theirs'}">
         ${m.text}
         <span class="chat-time">${new Date(m.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
-      </div>`).join('') : '<p style="text-align:center; color:var(--ink-faint); font-size:0.84rem;">Nenhuma mensagem ainda. Diga oi!</p>');
+      </div>`).join('') : '<p style="text-align:center; color:var(--ink-faint); font-size:0.84rem;">Nenhuma mensagem ainda. Diga oi!</p>';
     container.scrollTop = container.scrollHeight;
-    container.querySelector('#chatUpgradeBtn')?.addEventListener('click', () => openUpgrade(user, () => renderMessages(container, messages, user)));
   }
 });

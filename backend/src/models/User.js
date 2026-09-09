@@ -75,13 +75,6 @@ const userSchema = new mongoose.Schema(
       website: String,
       instagram: String,
       bonusPortfolioSlots: { type: Number, default: 0 },
-      // Campo real de plano — antes só existia no localStorage do navegador,
-      // então nenhuma listagem podia de fato dar prioridade a quem assina.
-      subscriptionTier: {
-        type: String,
-        enum: ["free", "pro"],
-        default: "free",
-      },
       availability: {
         type: String,
         enum: ["available", "limited", "unavailable"],

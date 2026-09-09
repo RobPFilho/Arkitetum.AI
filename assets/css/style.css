@@ -1140,7 +1140,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 #onboardingChecklistCard, #pendingValidationsCard { border-left: 3px solid var(--terracotta); }
 .plan-status-card .plan-usage { font-size: 0.82rem; color: var(--ink-faint); }
 
-.badge-pro {
+.badge-pro, .badge-featured {
   display: inline-flex; align-items: center; gap: 4px; background: var(--brand-gradient); color: var(--white);
   font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
   padding: 3px 10px; border-radius: 999px; vertical-align: middle;

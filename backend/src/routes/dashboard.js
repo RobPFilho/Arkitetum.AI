@@ -8,6 +8,7 @@ import {
   exportMyData,
   getMe,
   getMyStats,
+  listMyCommissions,
   updateMe,
 } from "../controllers/dashboardController.js";
 
@@ -17,6 +18,7 @@ router.get("/me", getMe);
 router.patch("/me", asyncHandler(updateMe));
 router.get("/me/export", asyncHandler(exportMyData));
 router.get("/me/stats", asyncHandler(getMyStats));
+router.get("/me/commissions", requireRole("architect"), asyncHandler(listMyCommissions));
 router.delete("/me", asyncHandler(deleteMyAccount));
 router.post("/portfolio", requireRole("architect"), asyncHandler(addPortfolio));
 router.delete("/portfolio/:id", requireRole("architect"), asyncHandler(deletePortfolio));

@@ -112,6 +112,7 @@ const MatchAPI = (() => {
     addFavorite: (architectId) => request(`/favorites/${encodeURIComponent(architectId)}`, { method: 'POST', auth: true }),
     removeFavorite: (architectId) => request(`/favorites/${encodeURIComponent(architectId)}`, { method: 'DELETE', auth: true }),
     myStats: () => request('/dashboard/me/stats', { auth: true }),
+    myCommissions: () => request('/dashboard/me/commissions', { auth: true }),
     recordProfileView: (architectId) => request(`/architects/${encodeURIComponent(architectId)}/view`, { method: 'POST' }),
     getTimeline: (otherId) => request(`/timeline/${encodeURIComponent(otherId)}`, { auth: true }),
     advanceTimeline: (otherId) => request(`/timeline/${encodeURIComponent(otherId)}/advance`, { method: 'POST', auth: true }),

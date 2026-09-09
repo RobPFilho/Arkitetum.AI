@@ -7,10 +7,34 @@ import Favorite from "../models/Favorite.js";
 import Timeline from "../models/Timeline.js";
 import CaseStudy from "../models/CaseStudy.js";
 import ProfileView from "../models/ProfileView.js";
+import Commission from "../models/Commission.js";
 import { notify } from "../services/notificationService.js";
 
 export function getMe(req, res) {
   res.json(req.user);
+}
+
+/**
+ * Histórico de comissão do arquiteto — o "sistema comissionado" precisa ser
+ * uma tela real que ele consulta, não só uma notificação avulsa que passa.
+ */
+export async function listMyCommissions(req, res) {
+  const commissions = await Commission.find({ architect: req.user.id })
+    .populate("client", "name")
+    .sort("-createdAt");
+  const total = commissions.reduce((sum, c) => sum + (c.amount || 0), 0);
+  res.json({
+    total,
+    count: commissions.length,
+    commissions: commissions.map((c) => ({
+      id: c.id,
+      clientName: c.client?.name,
+      amount: c.amount,
+      rate: c.rate,
+      estimated: c.estimated,
+      createdAt: c.createdAt,
+    })),
+  });
 }
 
 /**
