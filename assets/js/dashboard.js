@@ -398,10 +398,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  let projectDrawerLastFocused = null;
+  function projectDrawerFocusables() {
+    const drawer = document.querySelector('#projectDrawerOverlay .side-drawer');
+    return Array.from(drawer.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+      .filter(el => !el.disabled && el.offsetParent !== null);
+  }
+  function projectDrawerKeydown(e) {
+    if (e.key === 'Escape') { closeProjectDrawer(); return; }
+    if (e.key !== 'Tab') return;
+    const items = projectDrawerFocusables();
+    if (!items.length) return;
+    const first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  function closeProjectDrawer() {
+    document.getElementById('projectDrawerOverlay').classList.remove('open');
+    document.body.classList.remove('no-scroll');
+    document.removeEventListener('keydown', projectDrawerKeydown);
+    if (projectDrawerLastFocused) projectDrawerLastFocused.focus();
+  }
+
   function openProjectForm(project) {
-    const form = document.getElementById('projectForm');
-    form.style.display = 'block';
-    form.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'nearest' });
+    projectDrawerLastFocused = document.activeElement;
+    const overlay = document.getElementById('projectDrawerOverlay');
+    overlay.classList.add('open');
+    document.body.classList.add('no-scroll');
+    document.addEventListener('keydown', projectDrawerKeydown);
+    document.getElementById('projectDrawerTitle').textContent = project ? 'Editar projeto' : 'Novo projeto';
+    document.getElementById('closeProjectDrawer').focus();
     document.getElementById('projEditId').value = project?._id || '';
     document.getElementById('projName').value = project?.name || '';
     document.getElementById('projPropertyType').value = project?.propertyType || 'Residencial unifamiliar';
@@ -419,8 +445,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     buildProjectStyleChips();
     buildInterventionChips();
     document.getElementById('toggleProjectForm').addEventListener('click', () => openProjectForm(null));
-    document.getElementById('cancelProjectForm').addEventListener('click', () => {
-      document.getElementById('projectForm').style.display = 'none';
+    document.getElementById('cancelProjectForm').addEventListener('click', closeProjectDrawer);
+    document.getElementById('closeProjectDrawer').addEventListener('click', closeProjectDrawer);
+    document.getElementById('projectDrawerOverlay').addEventListener('click', (e) => {
+      if (e.target.id === 'projectDrawerOverlay') closeProjectDrawer();
     });
 
     document.getElementById('projectForm').addEventListener('submit', async (e) => {
@@ -442,7 +470,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         if (editId) await MatchAPI.updateProject(editId, payload);
         else await MatchAPI.createProject(payload);
-        document.getElementById('projectForm').style.display = 'none';
+        closeProjectDrawer();
         document.getElementById('projectForm').reset();
         renderProjects(user);
       } catch (err) {

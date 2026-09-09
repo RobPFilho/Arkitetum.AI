@@ -143,7 +143,22 @@
             <p class="card-lead">Nossa tecnologia encontra os arquitetos que mais combinam com o seu projeto — quanto mais projetos você descrever, mais buscas diferentes você pode fazer.</p>
             <div id="projectsList" style="margin:16px 0;"></div>
             <button type="button" id="toggleProjectForm" class="btn btn-primary btn-sm">+ Novo projeto</button>
-            <form id="projectForm" style="display:none; margin-top:20px;">
+          </div>
+        </div>
+
+        <!-- Menu lateral de criar/editar projeto — pedido explícito da
+             mentoria: a captura de dados de projeto vive num painel que
+             desliza da lateral, não numa etapa de cadastro nem escondida
+             dentro do fluxo principal do conteúdo. -->
+        <div class="side-drawer-overlay" id="projectDrawerOverlay">
+          <div class="side-drawer" role="dialog" aria-modal="true" aria-labelledby="projectDrawerTitle">
+            <div class="side-drawer-header">
+              <h3 id="projectDrawerTitle" style="margin:0;">Novo projeto</h3>
+              <button type="button" class="side-drawer-close" id="closeProjectDrawer" aria-label="Fechar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg>
+              </button>
+            </div>
+            <form id="projectForm">
               <input type="hidden" id="projEditId">
 
               <div class="field-subgroup">
