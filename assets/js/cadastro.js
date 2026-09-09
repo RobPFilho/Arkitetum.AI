@@ -41,8 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const payload = {
       name: val('name'),
       email: val('email'),
-      city: val('city'),
-      state: val('state').toUpperCase(),
       password,
       confirmPassword,
       referredBy: params.get('ref') || undefined,

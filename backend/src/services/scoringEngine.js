@@ -2,6 +2,14 @@ const overlap = (left = [], right = []) =>
   left.filter((value) => right.map(String).includes(String(value))).length;
 const capped = (value, cap) => Math.min(value, cap);
 
+// Soma dos tetos de cada fator (estilo 30 + materiais 15 + localização 20 +
+// especialidade 15 + metragem 15 + disponibilidade 10 + experiência 10).
+// Deixou de ser 100 quando o fator de metragem foi adicionado — qualquer
+// lugar que trate a pontuação como uma porcentagem precisa normalizar por
+// isto (ver scoreToPercent), senão um match muito bom mostra mais de 100%.
+export const MAX_SCORE = 115;
+export const scoreToPercent = (score) => Math.round((score / MAX_SCORE) * 100);
+
 /** Metragem "típica" do arquiteto: média das áreas dos projetos que ele
  * cadastrou no portfólio (cada item leva sua própria areaM2 — ver User.js).
  * Sem projeto com área informada, não dá pra comparar (retorna null em vez

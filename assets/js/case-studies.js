@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const meta = [
       c.style ? `<span><strong>${c.style}</strong></span>` : '',
       c.areaM2 ? `<span>${c.areaM2} m²</span>` : '',
+      c.compatibilityScore ? `<span>${c.compatibilityScore}% de compatibilidade</span>` : '',
     ].filter(Boolean).join('');
     return `
       <div class="showcase-card">

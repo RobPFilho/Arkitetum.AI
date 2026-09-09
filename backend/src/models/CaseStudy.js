@@ -13,6 +13,11 @@ const caseStudySchema = new mongoose.Schema(
     // amarrado a um Project específico.
     style: String,
     areaM2: Number,
+    // Puxado do MatchHistory no momento da proposta — o quinto campo que
+    // a vitrine precisa mostrar (Adriano: "projeto → arquiteto → estilo →
+    // m² → compatibilidade"), não é digitado, vem do match real que gerou
+    // essa parceria.
+    compatibilityScore: Number,
     architectApproved: { type: Boolean, default: false },
     clientApproved: { type: Boolean, default: false },
   },

@@ -3,7 +3,20 @@ import Validation from "../models/Validation.js";
 import User from "../models/User.js";
 import Review from "../models/Review.js";
 import Commission from "../models/Commission.js";
+import MatchHistory from "../models/MatchHistory.js";
+import { scoreToPercent } from "../services/scoringEngine.js";
 import { notify } from "../services/notificationService.js";
+
+/** % de compatibilidade do match mais recente entre esse cliente e
+ * arquiteto, se existir — é o quinto campo que a vitrine pública mostra,
+ * puxado do resultado real, não digitado por ninguém. Guardado já
+ * normalizado (0-100) pra quem exibe não precisar saber do teto do motor
+ * de scoring. */
+async function latestCompatibilityScore(clientId, architectId) {
+  const history = await MatchHistory.findOne({ client: clientId, "results.architect": architectId }).sort("-createdAt");
+  const result = history?.results.find((r) => String(r.architect) === String(architectId));
+  return typeof result?.score === "number" ? scoreToPercent(result.score) : null;
+}
 
 const pairFor = (req) => {
   const otherId = req.params.otherId;
@@ -39,6 +52,8 @@ export async function proposeCaseStudy(req, res) {
   const { title, description, images, style, areaM2 } = req.body || {};
   if (!title || !title.trim()) return res.status(400).json({ error: "Título é obrigatório." });
 
+  const compatibilityScore = await latestCompatibilityScore(pair.client, pair.architect);
+
   const caseStudy = await CaseStudy.findOneAndUpdate(
     pair,
     {
@@ -48,6 +63,7 @@ export async function proposeCaseStudy(req, res) {
         images: Array.isArray(images) ? images.filter(Boolean).slice(0, 4) : [],
         style: style || undefined,
         areaM2: areaM2 ? Number(areaM2) : undefined,
+        compatibilityScore: compatibilityScore ?? undefined,
         architectApproved: true,
         clientApproved: false,
       },
@@ -105,6 +121,9 @@ export async function listPublished(req, res) {
         images: c.images,
         testimonial: c.testimonial,
         clientName: c.client?.name,
+        style: c.style,
+        areaM2: c.areaM2,
+        compatibilityScore: c.compatibilityScore,
       })),
   );
 }
@@ -147,6 +166,7 @@ export async function listAllPublished(req, res) {
       image: c.images?.[0] || null,
       style: c.style,
       areaM2: c.areaM2,
+      compatibilityScore: c.compatibilityScore,
       architectName: c.architect.name,
       architectCity: [c.architect.city, c.architect.state].filter(Boolean).join(" · "),
       closedProjects: closedMap.get(String(c.architect._id)) || 0,

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { scoreArchitect, rankArchitects } from "../src/services/scoringEngine.js";
+import { scoreArchitect, rankArchitects, scoreToPercent, MAX_SCORE } from "../src/services/scoringEngine.js";
 import { deletePortfolio } from "../src/controllers/dashboardController.js";
 import User from "../src/models/User.js";
 
@@ -122,6 +122,23 @@ test("area proximity scores 0 when either side has no area data", () => {
   assert.equal(scoreArchitect(makeClient({ areaM2: 100 }), architect).score, 0);
   const architectWithArea = makeArchitect({ availability: "unavailable", portfolio: [{ title: "A", areaM2: 100 }] });
   assert.equal(scoreArchitect(makeClient(), architectWithArea).score, 0);
+});
+
+test("scoreToPercent never exceeds 100 even at the true max score (with metragem included)", () => {
+  assert.equal(scoreToPercent(MAX_SCORE), 100);
+});
+
+test("MAX_SCORE matches the real sum of every breakdown cap (regression: metragem pushed this past 100)", () => {
+  const client = { city: "São Paulo", clientProfile: { preferredStyles: ["Moderno"], preferredMaterials: ["Vidro"], propertyType: "Apartamento", areaM2: 100 } };
+  const architect = {
+    architectProfile: {
+      styles: ["Moderno", "Extra1", "Extra2", "Extra3"], favoriteMaterials: ["Vidro", "Extra1", "Extra2", "Extra3"],
+      workingAreas: ["São Paulo"], specialties: ["Apartamento"], availability: "available", yearsExperience: 99,
+      portfolio: [{ title: "A", areaM2: 100 }],
+    },
+  };
+  const { score } = scoreArchitect(client, architect);
+  assert.ok(score <= MAX_SCORE, `score ${score} exceeded MAX_SCORE ${MAX_SCORE} — update MAX_SCORE to match the engine`);
 });
 
 test("experience contributes 1 point per year, capped at 10", () => {
