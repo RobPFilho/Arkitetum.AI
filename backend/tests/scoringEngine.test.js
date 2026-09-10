@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { scoreArchitect, rankArchitects } from "../src/services/scoringEngine.js";
+import { scoreArchitect, rankArchitects, scoreProjectToArchitect, scoreToPercent } from "../src/services/scoringEngine.js";
+import { recomputeProfileFromPortfolio } from "../src/services/portfolioProfile.js";
 import { deletePortfolio } from "../src/controllers/dashboardController.js";
 import User from "../src/models/User.js";
 
@@ -121,6 +122,60 @@ test("rankArchitects filters out zero-score results, sorts descending, and caps 
   const scores = ranked.map((r) => r.score);
   assert.deepEqual(scores, [...scores].sort((a, b) => b - a));
   assert.equal(scores[0], 30);
+});
+
+test("scoreProjectToArchitect picks the best-matching portfolio item, not the aggregate profile", () => {
+  const project = { preferredStyles: ["Moderno"], preferredMaterials: ["Vidro"] };
+  const client = { city: "São Paulo", state: "SP" };
+  const architect = {
+    architectProfile: {
+      workingAreas: [], specialties: [], availability: "unavailable", yearsExperience: 0,
+      portfolio: [
+        { title: "Casa Rústica", styles: ["Rústico"], materials: ["Madeira"] },
+        { title: "Apê Moderno", styles: ["Moderno"], materials: ["Vidro"] },
+      ],
+    },
+  };
+  const { score, reasons, matchedPortfolioItem } = scoreProjectToArchitect(project, client, architect);
+  assert.equal(score, 15); // 10 (1 estilo em comum * 10) + 5 (1 material em comum * 5)
+  assert.equal(matchedPortfolioItem.title, "Apê Moderno");
+  assert.ok(reasons.some((r) => r.includes("Apê Moderno")));
+});
+
+test("scoreProjectToArchitect adds up to 5 points for areaM2 proximity to the winning item, 0 when either side lacks the field", () => {
+  const client = { city: "", state: "" };
+  const architectWithArea = {
+    architectProfile: {
+      workingAreas: [], specialties: [], availability: "unavailable", yearsExperience: 0,
+      portfolio: [{ title: "A", styles: ["Moderno"], materials: [], areaM2: 100 }],
+    },
+  };
+  const projectClose = { preferredStyles: ["Moderno"], preferredMaterials: [], areaM2: 110 };
+  const projectFar = { preferredStyles: ["Moderno"], preferredMaterials: [], areaM2: 500 };
+  const projectNoArea = { preferredStyles: ["Moderno"], preferredMaterials: [] };
+
+  assert.equal(scoreProjectToArchitect(projectClose, client, architectWithArea).score, 15); // 10 (estilo) + 5 (metragem, dentro de 30%)
+  assert.equal(scoreProjectToArchitect(projectFar, client, architectWithArea).score, 10); // 10 + 0 (muito longe)
+  assert.equal(scoreProjectToArchitect(projectNoArea, client, architectWithArea).score, 10); // 10 + 0 (projeto sem areaM2)
+});
+
+test("scoreToPercent never displays above 100 even with every bonus stacked", () => {
+  assert.equal(scoreToPercent(105), 100);
+  assert.equal(scoreToPercent(70), 70);
+});
+
+test("recomputeProfileFromPortfolio produces the deduplicated union of styles/materials across every piece", () => {
+  const user = {
+    architectProfile: {
+      portfolio: [
+        { title: "A", styles: ["Moderno", "Industrial"], materials: ["Vidro"] },
+        { title: "B", styles: ["Industrial"], materials: ["Vidro", "Aço"] },
+      ],
+    },
+  };
+  recomputeProfileFromPortfolio(user);
+  assert.deepEqual(user.architectProfile.styles.sort(), ["Industrial", "Moderno"]);
+  assert.deepEqual(user.architectProfile.favoriteMaterials.sort(), ["Aço", "Vidro"]);
 });
 
 test("portfolio subdocuments retain a generated object id that deletePortfolio can target", () => {

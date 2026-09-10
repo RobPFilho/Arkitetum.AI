@@ -2,7 +2,7 @@ import User from "../models/User.js";
 import Project from "../models/Project.js";
 import MatchHistory from "../models/MatchHistory.js";
 import Review from "../models/Review.js";
-import { categorizeMatches } from "../services/scoringEngine.js";
+import { categorizeProjectMatches } from "../services/scoringEngine.js";
 import { explainCompatibility } from "../services/geminiService.js";
 
 const CATEGORY_META = {
@@ -49,45 +49,45 @@ function shapeArchitect(architect, sameCity) {
 
 export async function runMatch(req, res) {
   const { projectId } = req.body || {};
-  let project = null;
-  if (projectId) {
-    project = await Project.findOne({ _id: projectId, client: req.user.id });
-    if (!project) return res.status(404).json({ error: "Projeto não encontrado" });
-  }
+  if (!projectId)
+    return res.status(400).json({ error: "Crie um projeto para rodar seu primeiro match." });
 
-  const clientForScoring = project
-    ? {
-        city: req.user.city,
-        state: req.user.state,
-        clientProfile: {
-          preferredStyles: project.preferredStyles,
-          preferredMaterials: project.preferredMaterials,
-          budget: project.budget,
-          propertyType: project.propertyType,
-          familySize: project.familySize,
-          projectGoals: project.projectGoals,
-          preferences: project.preferences,
-        },
-      }
-    : req.user;
+  const project = await Project.findOne({ _id: projectId, client: req.user.id });
+  if (!project) return res.status(404).json({ error: "Projeto não encontrado" });
 
   // Antes essa query já excluía quem estava indisponível — o que impedia
   // qualquer categoria de "indisponível, mas compatível" existir. Agora
   // busca todo mundo e deixa a categorização decidir o que fazer com cada um.
-  const architects = await User.find({ role: "architect" }).populate(
-    "architectProfile.favoriteMaterials",
-  );
+  const architects = await User.find({ role: "architect" });
   const { main, unavailable, outOfRegion, outOfBudget, uncategorized } =
-    categorizeMatches(clientForScoring, architects);
+    categorizeProjectMatches(project, req.user, architects);
 
   const wellRated = await buildWellRatedBonus(uncategorized);
+
+  // geminiService.explainCompatibility lê client.clientProfile pro contexto
+  // do prompt — como esse dado agora mora no Project, não no perfil do
+  // usuário, monta um shim só pra essa chamada (não afeta o score, só o
+  // texto explicativo gerado pela IA).
+  const clientContext = {
+    name: req.user.name,
+    city: req.user.city,
+    state: req.user.state,
+    clientProfile: {
+      preferredStyles: project.preferredStyles,
+      preferredMaterials: project.preferredMaterials,
+      budget: project.budget,
+      propertyType: project.propertyType,
+      projectGoals: project.projectGoals,
+      preferences: project.preferences,
+    },
+  };
 
   const mainResults = await Promise.all(
     main.map(async ({ architect, score, breakdown, reasons, sameCity }) => ({
       architect: shapeArchitect(architect, sameCity),
       score,
       breakdown,
-      explanation: await explainCompatibility(clientForScoring, architect, reasons),
+      explanation: await explainCompatibility(clientContext, architect, reasons),
     })),
   );
 
@@ -113,7 +113,7 @@ export async function runMatch(req, res) {
 
   await MatchHistory.create({
     client: req.user.id,
-    project: project?.id,
+    project: project.id,
     results: [
       ...mainResults.map((r) => ({ architect: r.architect.id, score: r.score, explanation: r.explanation, category: "main" })),
       ...extra.flatMap((cat) =>
@@ -122,7 +122,7 @@ export async function runMatch(req, res) {
     ],
   });
 
-  res.json({ results: mainResults, extra, project: project ? { id: project.id, name: project.name } : null });
+  res.json({ results: mainResults, extra, project: { id: project.id, name: project.name } });
 }
 
 async function buildWellRatedBonus(uncategorized) {

@@ -46,6 +46,133 @@ export function scoreArchitect(client, architect) {
   return { score, reasons, breakdown };
 }
 
+/** Nunca mostrar mais de 100% de compatibilidade — a soma dos fatores do
+ * match por projeto passa de 100 (o bônus de metragem soma até +5), então a
+ * exibição em % precisa clampar em vez de assumir que os tetos somam 100. */
+export function scoreToPercent(score) {
+  return Math.min(100, Math.round(score));
+}
+
+/** Peça de portfólio que melhor combina com o projeto, pelo total de
+ * pontos de estilo + material (a metragem é avaliada depois, só contra essa
+ * peça vencedora — ver scoreProjectToArchitect). */
+function bestPortfolioMatch(project, architect) {
+  const portfolio = architect.architectProfile?.portfolio || [];
+  let best = null;
+  for (const item of portfolio) {
+    const styles = capped(overlap(project.preferredStyles, item.styles) * 10, 30);
+    const materials = capped(overlap(project.preferredMaterials, item.materials) * 5, 15);
+    const fit = styles + materials;
+    if (!best || fit > best.fit) best = { item, styles, materials, fit };
+  }
+  return best;
+}
+
+function areaProximityScore(clientArea, itemArea) {
+  if (!clientArea || !itemArea) return 0;
+  return Math.abs(clientArea - itemArea) / itemArea <= 0.3 ? 5 : 0;
+}
+
+/**
+ * Match por projeto: em vez de comparar o projeto contra o perfil agregado
+ * do arquiteto, compara contra CADA peça do portfólio e usa a que melhor
+ * combina como "motivo" do match — é o que realmente implementa "o match vem
+ * do projeto do cliente e do portfólio do arquiteto", não de um perfil
+ * estático escolhido uma vez.
+ */
+export function scoreProjectToArchitect(project, client, architect) {
+  const a = architect.architectProfile || {};
+  const best = bestPortfolioMatch(project, architect);
+  const styles = best?.styles || 0;
+  const materials = best?.materials || 0;
+  const areaBonus = best ? areaProximityScore(project.areaM2, best.item.areaM2) : 0;
+
+  const location = a.workingAreas?.some((area) =>
+    [client?.city, client?.state]
+      .filter(Boolean)
+      .some((place) => area.toLowerCase().includes(place.toLowerCase())),
+  )
+    ? 20
+    : 0;
+  const property = a.specialties?.some(
+    (s) => project.propertyType && s.toLowerCase().includes(project.propertyType.toLowerCase()),
+  )
+    ? 15
+    : 0;
+  const availability =
+    a.availability === "available" ? 10 : a.availability === "limited" ? 5 : 0;
+  const experience = capped(a.yearsExperience || 0, 10);
+  const score = styles + materials + location + property + availability + experience + areaBonus;
+
+  const reasons = [
+    styles && best?.item?.title ? `combina com o projeto "${best.item.title}" do portfólio` : styles && "estilo arquitetônico compatível",
+    materials && "preferências de materiais em comum",
+    location && "atendimento na sua região",
+    property && "especialidade relevante para o projeto",
+    areaBonus && "já atendeu projetos de metragem parecida",
+    experience && `${a.yearsExperience} anos de experiência`,
+  ].filter(Boolean);
+  const breakdown = [
+    { label: "Estilo", value: styles, max: 30 },
+    { label: "Materiais", value: materials, max: 15 },
+    { label: "Localização", value: location, max: 20 },
+    { label: "Especialidade", value: property, max: 15 },
+    { label: "Disponibilidade", value: availability, max: 10 },
+    { label: "Experiência", value: experience, max: 10 },
+    { label: "Metragem", value: areaBonus, max: 5 },
+  ];
+  return { score, reasons, breakdown, matchedPortfolioItem: best?.item || null };
+}
+
+/** Equivalente a categorizeMatches, mas por projeto — mesma lógica de
+ * separação por indisponibilidade/região/orçamento, só trocando a função de
+ * pontuação de perfil↔perfil por projeto↔portfólio. */
+export function categorizeProjectMatches(project, client, architects) {
+  const evaluated = architects.map((architect) => {
+    const { score, reasons, breakdown, matchedPortfolioItem } = scoreProjectToArchitect(project, client, architect);
+    const a = architect.architectProfile || {};
+    const locationValue = breakdown.find((b) => b.label === "Localização")?.value || 0;
+    const availabilityValue = breakdown.find((b) => b.label === "Disponibilidade")?.value || 0;
+    const coreScore = score - locationValue - availabilityValue;
+    const sameCity = !!(
+      client?.city &&
+      architect.city &&
+      client.city.trim().toLowerCase() === architect.city.trim().toLowerCase()
+    );
+    return {
+      architect,
+      score,
+      reasons,
+      breakdown,
+      matchedPortfolioItem,
+      coreScore,
+      sameCity,
+      available: a.availability !== "unavailable",
+      inRegion: locationValue > 0,
+      inBudget: budgetsOverlap(project.budget, a.priceRange),
+    };
+  });
+
+  const main = [], unavailable = [], outOfRegion = [], outOfBudget = [], uncategorized = [];
+  for (const e of evaluated) {
+    if (e.coreScore <= 0) { uncategorized.push(e); continue; }
+    if (!e.available) unavailable.push(e);
+    else if (!e.inRegion) outOfRegion.push(e);
+    else if (!e.inBudget) outOfBudget.push(e);
+    else main.push(e);
+  }
+
+  const byBestScore = (a, b) => b.score - a.score;
+  const byCoreScore = (a, b) => b.coreScore - a.coreScore;
+  return {
+    main: main.sort(byBestScore).slice(0, 4),
+    unavailable: unavailable.sort(byCoreScore).slice(0, 3),
+    outOfRegion: outOfRegion.sort(byCoreScore).slice(0, 3),
+    outOfBudget: outOfBudget.sort(byCoreScore).slice(0, 3),
+    uncategorized,
+  };
+}
+
 export function rankArchitects(client, architects) {
   return architects
     .map((architect) => ({ architect, ...scoreArchitect(client, architect) }))
