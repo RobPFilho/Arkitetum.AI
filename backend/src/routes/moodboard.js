@@ -1,5 +1,5 @@
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { requireAuth } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { generateMoodboard, generateReferenceImage } from "../controllers/moodboardController.js";
@@ -8,7 +8,9 @@ const router = Router();
 const aiLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: 30,
-  keyGenerator: (req) => req.user?.id || req.ip,
+  keyGenerator: (req, res) => {
+    return req.user?.id || ipKeyGenerator(req, res);
+  },
   message: { error: "Limite de gerações de moodboard por hora atingido. Tente novamente mais tarde." },
 });
 router.post("/", requireAuth, aiLimiter, asyncHandler(generateMoodboard));
