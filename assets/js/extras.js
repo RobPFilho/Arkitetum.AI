@@ -261,9 +261,32 @@ const MatchExtras = (() => {
     return el ? el.dataset.value : '';
   }
 
+  /**
+   * Foco preso dentro de um painel (modal/drawer) — o mesmo padrão que já
+   * existia copiado 3x (founders.js, checkout.js, color-wheel.js), extraído
+   * uma vez só pra ser reusado pelo drawer de projetos/portfólio também.
+   */
+  function trapFocus(panel, { onEscape } = {}) {
+    function focusableEls() {
+      return Array.from(panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+        .filter(el => !el.disabled && el.offsetParent !== null);
+    }
+    function handleKeydown(e) {
+      if (e.key === 'Escape') { onEscape?.(); return; }
+      if (e.key !== 'Tab') return;
+      const els = focusableEls();
+      if (!els.length) return;
+      const first = els[0], last = els[els.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+    panel.addEventListener('keydown', handleKeydown);
+    return { focusFirst() { focusableEls()[0]?.focus(); } };
+  }
+
   return {
     PALETTE, getStyleProfile, setStyleProfile, getProjectMeta, setProjectMeta,
     generateMaterialCombos, setupFileInput, PLANS, getPlan, setPlan, getMatchUsage, recordMatchRun,
-    buildChipList, chipValues, addChipAdder, buildSingleChipList, singleChipValue,
+    buildChipList, chipValues, addChipAdder, buildSingleChipList, singleChipValue, trapFocus,
   };
 })();
