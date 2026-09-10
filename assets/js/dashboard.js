@@ -16,6 +16,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // causava ReferenceError de temporal dead zone — a função que o usa já
   // tinha sido chamada antes dessa linha ser executada.
   const favoriteIds = new Set();
+  // Mesmo motivo do favoriteIds acima: o clique automático de "acabou de se
+  // cadastrar" (mais abaixo) pode abrir o drawer antes do script terminar de
+  // rodar até a declaração original dessas listas, disparando um
+  // ReferenceError de temporal dead zone.
+  let myProjects = [];
+  let myPortfolio = [];
   const apiBanner = document.getElementById('apiBanner');
   document.getElementById('apiBaseLabel').textContent = MatchAPI.base();
   const uid = (u) => u.id || u._id;
@@ -107,7 +113,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupPortfolioForm(me);
     await renderStyleProfile(me);
     setupStyleProfile(me);
-    document.getElementById('upgradeFromPortfolioBtn').addEventListener('click', () => openUpgrade(me, () => { renderPlanCard(me); renderPortfolio(me); }));
     setupCauVerification(me);
     setupShareProfile(me);
     renderArchitectReviews(me);
@@ -122,6 +127,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupProfileEdit(me);
   setupPrivacyActions(me);
   setupReferral(me);
+
+  // Quem acabou de se cadastrar cai num painel vazio -- abre direto o
+  // menu de "criar meu primeiro projeto"/"adicionar minha primeira peça de
+  // portfólio" em vez de deixar a pessoa procurar o botão sozinha.
+  if (sessionStorage.getItem('matchia_just_registered') === '1') {
+    sessionStorage.removeItem('matchia_just_registered');
+    document.getElementById(me.role === 'client' ? 'openProjectsDrawerBtn' : 'openPortfolioDrawerBtn')?.click();
+  }
 
   function renderProfile(user) {
     document.getElementById('profileName').textContent = user.name;
@@ -306,11 +319,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // ---------------- Meus projetos (cliente pode ter mais de um projeto) ----------------
-  let myProjects = [];
-
-  function buildProjectStyleChips(selected = []) {
-    const container = document.getElementById('projStylesChips');
+  // ---------------- Meus projetos (drawer estilo lista de conversas) ----------------
+  function buildProjectStyleChips(containerId, selected = []) {
+    const container = document.getElementById(containerId);
     container.innerHTML = PROJECT_STYLES.map(style =>
       `<button type="button" class="chip${selected.includes(style) ? ' active' : ''}" data-style="${style}">${style}</button>`
     ).join('');
@@ -319,120 +330,148 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  function projectCardHtml(p) {
+  function projectDrawerCardHtml(p) {
     const budget = formatBudget(p.budget);
+    const statusLabel = { draft: 'Rascunho', matching: 'Buscando arquiteto', in_progress: 'Em andamento', completed: 'Concluído' }[p.status] || 'Rascunho';
     return `
-      <div class="material-card" style="position:relative; padding:16px;">
-        <div class="info" style="padding:0;">
-          <span class="cat">${p.propertyType || 'Projeto'}</span>
-          <h4>${p.name}</h4>
-          <div class="tag-row" style="margin:8px 0;">${(p.preferredStyles || []).map(s => `<span class="tag">${s}</span>`).join('') || '<span style="font-size:0.8rem; color:var(--ink-faint);">Nenhum estilo definido</span>'}</div>
-          ${budget !== '—' ? `<p style="font-size:0.82rem; color:var(--ink-faint); margin:4px 0;">Orçamento: ${budget}</p>` : ''}
-          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
-            <button type="button" class="btn btn-primary btn-sm" data-run-project="${p._id}">Rodar match</button>
-            <button type="button" class="btn btn-secondary btn-sm" data-edit-project="${p._id}">Editar</button>
-            <button type="button" class="btn btn-secondary btn-sm" data-delete-project="${p._id}">Excluir</button>
-          </div>
-        </div>
-      </div>`;
-  }
-
-  function renderProjectLimit(user) {
-    const plan = MatchExtras.getPlan(uid(user), 'client');
-    const atLimit = myProjects.length >= plan.maxExtraProjects;
-    document.getElementById('toggleProjectForm').style.display = atLimit ? 'none' : '';
-    document.getElementById('projectLimitCard').style.display = atLimit ? 'block' : 'none';
+      <h4>${p.name}</h4>
+      <div class="drawer-item-meta">${[statusLabel, p.propertyType, p.areaM2 ? `${p.areaM2} m²` : '', budget !== '—' ? budget : ''].filter(Boolean).join(' · ')}</div>`;
   }
 
   async function renderProjects(user) {
-    const list = document.getElementById('projectsList');
     try {
       myProjects = await MatchAPI.projects();
     } catch {
-      list.innerHTML = '<p style="font-size:0.86rem; color:var(--ink-faint);">Não foi possível carregar seus projetos extras agora.</p>';
-      return;
+      myProjects = [];
     }
-    list.innerHTML = `
-      <div class="material-card" style="padding:16px; border-color:var(--terracotta);">
-        <div class="info" style="padding:0;">
-          <span class="cat">Perfil principal</span>
-          <h4>${user.clientProfile?.propertyType || 'Projeto do cadastro'}</h4>
-          <div class="tag-row" style="margin:8px 0;">${(user.clientProfile?.preferredStyles || []).map(s => `<span class="tag">${s}</span>`).join('') || '<span style="font-size:0.8rem; color:var(--ink-faint);">Nenhum estilo definido</span>'}</div>
-          <p style="font-size:0.82rem; color:var(--ink-faint); margin:4px 0;">Vem do seu cadastro — para editar, use "Editar perfil" na barra lateral.</p>
-          <button type="button" class="btn btn-primary btn-sm" style="margin-top:10px;" data-run-project="">Rodar match</button>
-        </div>
-      </div>
-      ${myProjects.map(projectCardHtml).join('')}`;
-    renderProjectLimit(user);
-
-    list.querySelectorAll('[data-run-project]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        activateProfileTab(document.getElementById('clientProfileTabs'), document.getElementById('clientPanel'), 'match');
-        runMatch(user, btn.dataset.runProject || undefined);
-        document.getElementById('matchResults')?.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'start' });
-      });
-    });
-    list.querySelectorAll('[data-edit-project]').forEach(btn => {
-      btn.addEventListener('click', () => openProjectForm(myProjects.find(p => p._id === btn.dataset.editProject)));
-    });
-    list.querySelectorAll('[data-delete-project]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('Excluir este projeto? Isso não afeta seu perfil principal.')) return;
-        try {
-          await MatchAPI.deleteProject(btn.dataset.deleteProject);
-          renderProjects(user);
-        } catch (err) {
-          alert(err.message || 'Não foi possível excluir o projeto.');
-        }
-      });
-    });
   }
 
-  function openProjectForm(project) {
-    const form = document.getElementById('projectForm');
-    form.style.display = 'block';
-    form.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'nearest' });
-    document.getElementById('projEditId').value = project?._id || '';
+  function renderProjectDetail(project, container, { back }, user) {
+    container.innerHTML = `
+      <form id="drawerProjectForm">
+        <div class="form-grid">
+          <div class="form-field full">
+            <label for="projName">Nome do projeto</label>
+            <input type="text" id="projName" placeholder="Ex.: Reforma do apartamento da praia" required>
+          </div>
+          <div class="form-field">
+            <label for="projPropertyType">Tipo de imóvel</label>
+            <select id="projPropertyType">
+              <option value="Residencial unifamiliar">Residencial unifamiliar</option>
+              <option value="Apartamento">Apartamento</option>
+              <option value="Reforma">Reforma</option>
+              <option value="Interiores">Interiores</option>
+              <option value="Comercial">Comercial</option>
+              <option value="Paisagismo">Paisagismo</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="projAreaM2">Metragem (m²)</label>
+            <input type="number" id="projAreaM2" min="0" placeholder="100">
+          </div>
+          <div class="form-field">
+            <label for="projBudgetMin">Orçamento mínimo (R$)</label>
+            <input type="number" id="projBudgetMin" min="0">
+          </div>
+          <div class="form-field">
+            <label for="projBudgetMax">Orçamento máximo (R$)</label>
+            <input type="number" id="projBudgetMax" min="0">
+          </div>
+          ${project ? `
+          <div class="form-field">
+            <label for="projStatus">Status</label>
+            <select id="projStatus">
+              <option value="draft">Rascunho</option>
+              <option value="matching">Buscando arquiteto</option>
+              <option value="in_progress">Em andamento</option>
+              <option value="completed">Concluído</option>
+            </select>
+          </div>` : ''}
+          <div class="form-field full">
+            <label>Estilos desejados</label>
+            <div class="chip-select" id="projStylesChips"></div>
+          </div>
+          <div class="form-field full">
+            <label for="projMaterials">Materiais preferidos <span class="hint">(separados por vírgula)</span></label>
+            <input type="text" id="projMaterials" placeholder="Concreto aparente, madeira de demolição">
+          </div>
+          <div class="form-field full">
+            <label for="projGoals">Objetivos do projeto</label>
+            <textarea id="projGoals"></textarea>
+          </div>
+        </div>
+        <div class="drawer-detail-actions">
+          <button type="submit" class="btn btn-primary btn-sm">${project ? 'Salvar alterações' : 'Criar projeto'}</button>
+          ${project ? '<button type="button" class="btn btn-sage btn-sm" id="drawerRunMatchBtn">Rodar match</button>' : ''}
+          ${project ? '<button type="button" class="btn btn-secondary btn-sm" id="drawerDeleteProjectBtn">Excluir</button>' : ''}
+        </div>
+      </form>`;
+
+    buildProjectStyleChips('projStylesChips', project?.preferredStyles || []);
     document.getElementById('projName').value = project?.name || '';
     document.getElementById('projPropertyType').value = project?.propertyType || 'Residencial unifamiliar';
+    document.getElementById('projAreaM2').value = project?.areaM2 || '';
     document.getElementById('projBudgetMin').value = project?.budget?.min || '';
     document.getElementById('projBudgetMax').value = project?.budget?.max || '';
     document.getElementById('projMaterials').value = (project?.preferredMaterials || []).join(', ');
     document.getElementById('projGoals').value = project?.projectGoals || '';
-    buildProjectStyleChips(project?.preferredStyles || []);
-    document.getElementById('projSaveBtn').textContent = project ? 'Salvar alterações' : 'Salvar projeto';
-  }
+    if (project) document.getElementById('projStatus').value = project.status || 'draft';
 
-  function setupProjects(user) {
-    buildProjectStyleChips();
-    document.getElementById('toggleProjectForm').addEventListener('click', () => openProjectForm(null));
-    document.getElementById('cancelProjectForm').addEventListener('click', () => {
-      document.getElementById('projectForm').style.display = 'none';
-    });
-    document.getElementById('upgradeFromProjectBtn').addEventListener('click', () => openUpgrade(user, () => renderProjects(user)));
-
-    document.getElementById('projectForm').addEventListener('submit', async (e) => {
+    document.getElementById('drawerProjectForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const editId = document.getElementById('projEditId').value;
       const payload = {
         name: document.getElementById('projName').value.trim(),
         propertyType: document.getElementById('projPropertyType').value,
+        areaM2: document.getElementById('projAreaM2').value,
         budgetMin: document.getElementById('projBudgetMin').value,
         budgetMax: document.getElementById('projBudgetMax').value,
         preferredStyles: Array.from(document.querySelectorAll('#projStylesChips .chip.active')).map(c => c.dataset.style),
         preferredMaterials: document.getElementById('projMaterials').value,
         projectGoals: document.getElementById('projGoals').value.trim(),
       };
+      if (project) payload.status = document.getElementById('projStatus').value;
       if (!payload.name) { alert('Dê um nome para o projeto.'); return; }
       try {
-        if (editId) await MatchAPI.updateProject(editId, payload);
+        if (project) await MatchAPI.updateProject(project._id, payload);
         else await MatchAPI.createProject(payload);
-        document.getElementById('projectForm').style.display = 'none';
-        document.getElementById('projectForm').reset();
-        renderProjects(user);
+        await renderProjects(user);
+        back();
       } catch (err) {
         alert(err.message || 'Não foi possível salvar o projeto.');
       }
+    });
+
+    if (project) {
+      document.getElementById('drawerRunMatchBtn').addEventListener('click', () => {
+        ProjectDrawer.close();
+        activateProfileTab(document.getElementById('clientProfileTabs'), document.getElementById('clientPanel'), 'match');
+        runMatch(user, project._id);
+        document.getElementById('matchResults')?.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'start' });
+      });
+      document.getElementById('drawerDeleteProjectBtn').addEventListener('click', async () => {
+        if (!confirm('Excluir este projeto?')) return;
+        try {
+          await MatchAPI.deleteProject(project._id);
+          await renderProjects(user);
+          back();
+        } catch (err) {
+          alert(err.message || 'Não foi possível excluir o projeto.');
+        }
+      });
+    }
+  }
+
+  function setupProjects(user) {
+    document.getElementById('openProjectsDrawerBtn').addEventListener('click', () => {
+      ProjectDrawer.open({
+        title: 'Meus projetos',
+        newLabel: '+ Novo projeto',
+        emptyLabel: 'Você ainda não criou nenhum projeto — crie um pra rodar seu primeiro match.',
+        items: () => myProjects,
+        idOf: (p) => p._id,
+        cardHtml: projectDrawerCardHtml,
+        renderDetail: (project, container, helpers) => renderProjectDetail(project, container, helpers, user),
+      });
     });
   }
 
@@ -1136,79 +1175,143 @@ document.addEventListener('DOMContentLoaded', async () => {
       </li>`).join('');
   }
 
-  function renderPortfolio(user) {
-    const list = document.getElementById('portfolioList');
-    const items = (user.architectProfile && user.architectProfile.portfolio) || [];
-    document.getElementById('statPortfolioCount').textContent = items.length;
-
-    const plan = MatchExtras.getPlan(uid(user), 'architect');
-    const atLimit = items.length >= portfolioLimitFor(user, plan);
-    document.getElementById('togglePortfolioForm').style.display = atLimit ? 'none' : '';
-    document.getElementById('portfolioLimitCard').style.display = atLimit ? 'block' : 'none';
-
-    if (!items.length) {
-      list.innerHTML = emptyStateHtml('Você ainda não adicionou projetos ao portfólio.',
-        '<button type="button" class="btn btn-secondary btn-sm" data-empty-add-portfolio>+ Adicionar o primeiro projeto</button>');
-      list.querySelector('[data-empty-add-portfolio]')?.addEventListener('click', () => document.getElementById('togglePortfolioForm').click());
-      return;
-    }
-    list.innerHTML = `<div class="material-grid">${items.map(p => `
-      <div class="material-card" style="position:relative;">
-        <button type="button" class="remove-draft" data-portfolio-id="${p._id || p.title}" title="Remover projeto" style="position:absolute; top:8px; right:8px; z-index:1;">×</button>
-        <div class="thumb">${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.title}">` : ''}</div>
-        <div class="info">
-          <span class="cat">${p.status === 'ongoing' ? 'Em andamento' : 'Concluído'}</span>
-          <h4>${p.title}</h4>
-          ${p.projectUrl ? `<a href="${p.projectUrl}" target="_blank" rel="noopener" style="font-size:0.78rem; color:var(--terracotta); font-weight:600;">Ver projeto →</a>` : ''}
-        </div>
-      </div>`).join('')}</div>`;
-
-    list.querySelectorAll('[data-portfolio-id]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('Remover este projeto do portfólio?')) return;
-        try {
-          await MatchAPI.deletePortfolio(btn.dataset.portfolioId);
-          const refreshed = await MatchAPI.me();
-          renderPortfolio(refreshed);
-          renderPlanCard(refreshed);
-        } catch (err) {
-          alert(err.message || 'Não foi possível remover o projeto.');
-        }
-      });
-    });
+  function portfolioDrawerCardHtml(p) {
+    return `
+      <h4>${p.title}</h4>
+      <div class="drawer-item-meta">${[p.status === 'ongoing' ? 'Em andamento' : 'Concluído', (p.styles || []).join(', '), p.areaM2 ? `${p.areaM2} m²` : ''].filter(Boolean).join(' · ')}</div>`;
   }
 
-  function setupPortfolioForm(user) {
-    const toggle = document.getElementById('togglePortfolioForm');
-    const form = document.getElementById('portfolioForm');
-    toggle.addEventListener('click', () => { form.style.display = form.style.display === 'none' ? 'block' : 'none'; });
+  function renderPortfolio(user) {
+    myPortfolio = user.architectProfile?.portfolio || [];
+    document.getElementById('statPortfolioCount').textContent = myPortfolio.length;
+  }
+
+  function renderPortfolioDetail(item, container, { back }) {
+    container.innerHTML = `
+      <form id="drawerPortfolioForm">
+        <div class="form-grid">
+          <div class="form-field full">
+            <label for="pTitle">Título do projeto</label>
+            <input type="text" id="pTitle" required>
+          </div>
+          <div class="form-field full">
+            <label for="pDescription">Descrição</label>
+            <textarea id="pDescription"></textarea>
+          </div>
+          <div class="form-field full">
+            <label>Imagem do projeto <span class="hint">(anexe um arquivo ou cole um link abaixo)</span></label>
+            <div class="file-input-row">
+              <label class="file-btn" for="pImageFile">Anexar imagem</label>
+              <input type="file" id="pImageFile" accept="image/*" style="display:none;">
+              <span class="file-hint">JPG/PNG, até 2MB</span>
+            </div>
+            <div class="file-preview" id="pImagePreview"></div>
+            <input type="url" id="pImageUrl" placeholder="ou cole uma URL de imagem" style="margin-top:10px;">
+          </div>
+          <div class="form-field full">
+            <label>Arquivo do projeto <span class="hint">(plantas, PDF, portfólio completo...)</span></label>
+            <div class="file-input-row">
+              <label class="file-btn" for="pProjectFile">Anexar arquivo</label>
+              <input type="file" id="pProjectFile" accept=".pdf,image/*,.zip,.dwg" style="display:none;">
+              <span class="file-hint">PDF, imagem ou ZIP, até 2MB</span>
+            </div>
+            <div class="file-preview" id="pProjectFilePreview"></div>
+            <input type="url" id="pProjectUrl" placeholder="ou cole um link do projeto" style="margin-top:10px;">
+          </div>
+          <div class="form-field">
+            <label for="pStatus">Status</label>
+            <select id="pStatus">
+              <option value="completed">Concluído</option>
+              <option value="ongoing">Em andamento</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="pAreaM2">Metragem (m²)</label>
+            <input type="number" id="pAreaM2" min="0" placeholder="100">
+          </div>
+          <div class="form-field full">
+            <label>Estilo desta peça <span class="hint">(alimenta o match — seu perfil agregado é a soma de tudo que está aqui)</span></label>
+            <div class="chip-select" id="pStylesChips"></div>
+          </div>
+          <div class="form-field full">
+            <label for="pMaterials">Materiais usados <span class="hint">(separados por vírgula)</span></label>
+            <input type="text" id="pMaterials" placeholder="Concreto aparente, madeira de demolição">
+          </div>
+        </div>
+        <div class="drawer-detail-actions">
+          <button type="submit" class="btn btn-primary btn-sm">${item ? 'Salvar alterações' : 'Adicionar ao portfólio'}</button>
+          ${item ? '<button type="button" class="btn btn-secondary btn-sm" id="drawerDeletePortfolioBtn">Remover</button>' : ''}
+        </div>
+      </form>`;
+
+    buildProjectStyleChips('pStylesChips', item?.styles || []);
+    document.getElementById('pTitle').value = item?.title || '';
+    document.getElementById('pDescription').value = item?.description || '';
+    document.getElementById('pImageUrl').value = item?.imageUrl || '';
+    document.getElementById('pProjectUrl').value = item?.projectUrl || '';
+    document.getElementById('pStatus').value = item?.status || 'completed';
+    document.getElementById('pAreaM2').value = item?.areaM2 || '';
+    document.getElementById('pMaterials').value = (item?.materials || []).join(', ');
 
     let pImageDataUri = '';
     let pProjectDataUri = '';
     const pImageFileCtl = MatchExtras.setupFileInput('pImageFile', 'pImagePreview', (uri) => { pImageDataUri = uri; }, { isImage: true });
     const pProjectFileCtl = MatchExtras.setupFileInput('pProjectFile', 'pProjectFilePreview', (uri) => { pProjectDataUri = uri; });
 
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('drawerPortfolioForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const title = document.getElementById('pTitle').value.trim();
+      if (!title) { alert('Dê um título para o projeto.'); return; }
+      const payload = {
+        title,
+        description: document.getElementById('pDescription').value.trim(),
+        imageUrl: pImageDataUri || document.getElementById('pImageUrl').value.trim(),
+        projectUrl: pProjectDataUri || document.getElementById('pProjectUrl').value.trim(),
+        status: document.getElementById('pStatus').value,
+        areaM2: document.getElementById('pAreaM2').value || undefined,
+        styles: Array.from(document.querySelectorAll('#pStylesChips .chip.active')).map(c => c.dataset.style),
+        materials: document.getElementById('pMaterials').value.split(',').map(s => s.trim()).filter(Boolean),
+      };
       try {
-        await MatchAPI.addPortfolio({
-          title: document.getElementById('pTitle').value.trim(),
-          description: document.getElementById('pDescription').value.trim(),
-          imageUrl: pImageDataUri || document.getElementById('pImageUrl').value.trim(),
-          projectUrl: pProjectDataUri || document.getElementById('pProjectUrl').value.trim(),
-          status: document.getElementById('pStatus').value,
-        });
+        if (item) await MatchAPI.updatePortfolio(item._id || item.title, payload);
+        else await MatchAPI.addPortfolio(payload);
         const refreshed = await MatchAPI.me();
         renderPortfolio(refreshed);
         renderPlanCard(refreshed);
         renderOnboardingChecklist(refreshed);
-        form.reset();
-        form.style.display = 'none';
-        pImageDataUri = ''; pProjectDataUri = '';
-        pImageFileCtl?.clear(); pProjectFileCtl?.clear();
+        back();
       } catch (err) {
-        alert(err.message || 'Não foi possível adicionar o projeto.');
+        alert(err.message || 'Não foi possível salvar o projeto.');
       }
+    });
+
+    if (item) {
+      document.getElementById('drawerDeletePortfolioBtn').addEventListener('click', async () => {
+        if (!confirm('Remover este projeto do portfólio?')) return;
+        try {
+          await MatchAPI.deletePortfolio(item._id || item.title);
+          const refreshed = await MatchAPI.me();
+          renderPortfolio(refreshed);
+          renderPlanCard(refreshed);
+          back();
+        } catch (err) {
+          alert(err.message || 'Não foi possível remover o projeto.');
+        }
+      });
+    }
+  }
+
+  function setupPortfolioForm() {
+    document.getElementById('openPortfolioDrawerBtn').addEventListener('click', () => {
+      ProjectDrawer.open({
+        title: 'Meu portfólio',
+        newLabel: '+ Nova peça de portfólio',
+        emptyLabel: 'Você ainda não adicionou nada ao portfólio.',
+        items: () => myPortfolio,
+        idOf: (p) => p._id || p.title,
+        cardHtml: portfolioDrawerCardHtml,
+        renderDetail: renderPortfolioDetail,
+      });
     });
   }
 
