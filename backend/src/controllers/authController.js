@@ -14,35 +14,10 @@ const tokenFor = (user) =>
 const common = (body) => ({
   name: body.name,
   email: body.email,
-  phone: body.phone,
+  avatarUrl: body.avatarUrl,
+  bio: body.bio,
   passwordHash: body.password,
-  city: body.city,
-  state: body.state,
 });
-
-const normalizeStringArray = (value) =>
-  Array.isArray(value)
-    ? value
-    : typeof value === "string"
-      ? value
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean)
-      : [];
-
-const normalizeRange = (rawMin, rawMax) => {
-  const min = rawMin !== undefined && rawMin !== "" ? Number(rawMin) : undefined;
-  const max = rawMax !== undefined && rawMax !== "" ? Number(rawMax) : undefined;
-
-  if (min === undefined && max === undefined) return undefined;
-
-  return {
-    min: Number.isFinite(min) ? min : undefined,
-    max: Number.isFinite(max) ? max : undefined,
-  };
-};
-const normalizeBudget = (body) => normalizeRange(body.budgetMin, body.budgetMax);
-const normalizePriceRange = (body) => normalizeRange(body.priceMin, body.priceMax);
 
 export async function register(req, res) {
   const role = req.params.role;
@@ -57,31 +32,10 @@ export async function register(req, res) {
   if (await User.exists({ email }))
     return res.status(409).json({ error: "Email is already registered" });
 
-  const profile =
-    role === "client"
-      ? {
-        preferredStyles: normalizeStringArray(req.body.preferredStyles),
-        preferredMaterials: req.body.preferredMaterials || [],
-        budget: normalizeBudget(req.body),
-        propertyType: req.body.propertyType,
-        familySize: req.body.familySize ? Number(req.body.familySize) : undefined,
-        projectGoals: req.body.projectGoals,
-        preferences: req.body.preferences,
-      }
-      : {
-        styles: normalizeStringArray(req.body.styles),
-        specialties: normalizeStringArray(req.body.specialties),
-        yearsExperience: req.body.yearsExperience
-          ? Number(req.body.yearsExperience)
-          : undefined,
-        workingAreas: normalizeStringArray(req.body.workingAreas),
-        priceRange: normalizePriceRange(req.body),
-        favoriteMaterials: (req.body.favoriteMaterials || []).slice(0, 5),
-        bio: req.body.bio,
-        website: req.body.website,
-        instagram: req.body.instagram,
-        availability: req.body.availability || "available",
-      };
+  // Cadastro enxuto: nome, e-mail, senha, foto e bio — o resto do perfil
+  // (estilo, materiais, portfólio...) nasce vazio e é preenchido depois,
+  // a partir dos projetos/peças de portfólio que a pessoa cria no painel.
+  const profile = role === "architect" ? { bio: req.body.bio } : {};
 
   let referrer = null;
   if (req.body.referredBy) {

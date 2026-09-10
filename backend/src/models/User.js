@@ -26,7 +26,9 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    phone: { type: String, required: true },
+    phone: String,
+    avatarUrl: String,
+    bio: String,
     passwordHash: { type: String, required: true, select: false },
     // Guarda o hash do token de redefinição, nunca o token cru (o mesmo
     // princípio do passwordHash) — mesmo com o banco vazado, ninguém
