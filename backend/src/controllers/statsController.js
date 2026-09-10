@@ -1,6 +1,5 @@
 import User from "../models/User.js";
 import MatchHistory from "../models/MatchHistory.js";
-import { scoreToPercent } from "../services/scoringEngine.js";
 
 export async function getPublicStats(req, res) {
   const [architects, clients, scoreAgg] = await Promise.all([
@@ -16,9 +15,9 @@ export async function getPublicStats(req, res) {
   res.json({
     architects,
     clients,
-    // Normalizado pelo teto real do motor de scoring (115, não 100 — ver
-    // scoreToPercent) pra nunca mostrar mais de 100% de compatibilidade.
-    avgCompatibility: avg ? scoreToPercent(avg) : null,
+    // O motor de scoring soma até 100 pontos (30+15+20+15+10+10), então a
+    // pontuação já equivale diretamente a uma porcentagem de compatibilidade.
+    avgCompatibility: avg ? Math.round(avg) : null,
     totalMatches: scoreAgg[0]?.count || 0,
   });
 }

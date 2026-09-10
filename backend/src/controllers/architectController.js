@@ -24,29 +24,15 @@ export async function listArchitects(req, res) {
       },
     },
     {
-      // Comissões fechadas = negócios reais que esse arquiteto já entregou
-      // pela plataforma. Junto com a nota, é o que decide prioridade de
-      // exibição — sem nenhuma assinatura paga envolvida (mesma lógica do
-      // "Superhost" do Airbnb: quem entrega bem e com frequência aparece
-      // primeiro, ninguém compra o topo da lista).
-      $lookup: {
-        from: "commissions",
-        localField: "_id",
-        foreignField: "architect",
-        as: "commissions",
-      },
-    },
-    {
       $addFields: {
         avgRating: { $cond: [{ $gt: [{ $size: "$reviews" }, 0] }, { $round: [{ $avg: "$reviews.rating" }, 1] }, 0] },
         reviewCount: { $size: "$reviews" },
-        closedProjects: { $size: "$commissions" },
       },
     },
   ];
   if (minRating) pipeline.push({ $match: { avgRating: { $gte: minRating } } });
   pipeline.push(
-    { $sort: { closedProjects: -1, avgRating: -1, createdAt: -1 } },
+    { $sort: { createdAt: -1 } },
     {
       $facet: {
         data: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
@@ -68,7 +54,6 @@ export async function listArchitects(req, res) {
       profile: architect.architectProfile,
       avgRating: architect.avgRating,
       reviewCount: architect.reviewCount,
-      closedProjects: architect.closedProjects,
     })),
     total,
     page,

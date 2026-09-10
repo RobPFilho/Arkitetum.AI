@@ -1,8 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   // Quem pede menos animação no sistema também não quer rolagem suave.
   const SCROLL_BEHAVIOR = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-  const STYLES = StyleData.names();
-  const styleImages = await StyleData.load();
+  const STYLES = ['Moderno', 'Contemporâneo', 'Minimalista', 'Industrial', 'Clássico', 'Rústico', 'Escandinavo', 'Biofílico', 'Brutalista', 'Alto padrão'];
   const grid = document.getElementById('archGrid');
   const empty = document.getElementById('archEmpty');
   const filters = document.getElementById('styleFilters');
@@ -28,9 +27,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const p = a.profile || {};
     const initials = a.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
     const verified = p.cauVerification?.status === 'verified' ? '<span class="status-pill badge-validated" style="margin-left:6px;">✓ Verificado</span>' : '';
-    // "Destaque" é ganho, não comprado — mesma lógica do Superhost do Airbnb:
-    // aparece pra quem já fechou vários projetos reais pela plataforma.
-    const featuredBadge = a.closedProjects >= 3 ? '<span class="badge-featured" style="margin-left:6px;" title="Já fechou 3 ou mais projetos pela plataforma">★ Destaque</span>' : '';
     const checked = compareSelection.has(a.id) ? 'checked' : '';
     return `
       <div class="material-card" style="position:relative;">
@@ -43,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <div class="info">
             <span class="cat">${[a.city, a.state].filter(Boolean).join(' · ') || 'Localização não informada'}</span>
-            <h4>${a.name}${featuredBadge}${verified}</h4>
+            <h4>${a.name}${verified}</h4>
             <div class="tag-row" style="margin:6px 0;">${(p.styles || []).slice(0, 3).map(s => `<span class="tag">${s}</span>`).join('') || ''}</div>
             <p style="font-size:0.8rem; color:var(--ink-faint); margin:4px 0;">${p.yearsExperience ? `${p.yearsExperience} anos de experiência` : 'Experiência não informada'}</p>
             ${ratingHtml(a)}
@@ -54,12 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function buildFilters() {
     filters.innerHTML = `<button type="button" class="chip active" data-style="">Todos</button>` +
-      STYLES.map(s => {
-        const thumb = styleImages[s]?.imageUrl;
-        return thumb
-          ? `<button type="button" class="chip has-thumb" data-style="${s}" title="${styleImages[s].description || ''}"><img class="chip-thumb" src="${thumb}" alt="" loading="lazy">${s}</button>`
-          : `<button type="button" class="chip" data-style="${s}">${s}</button>`;
-      }).join('');
+      STYLES.map(s => `<button type="button" class="chip" data-style="${s}">${s}</button>`).join('');
     filters.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => {
         filters.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));

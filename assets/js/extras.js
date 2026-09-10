@@ -47,23 +47,17 @@ const MatchExtras = (() => {
   /**
    * Gera combinações de materiais SOMENTE a partir da lista que o próprio arquiteto
    * cadastrou como favorita — resolve o medo de "sugestão bonita mas inexequível".
-   * `catalog` (opcional, o retorno de GET /api/materials) permite mostrar em qual
-   * loja parceira cada combinação está disponível — segunda linha de monetização
-   * sugerida na mentoria final (comissão sobre venda indicada pela IA).
    */
-  function generateMaterialCombos(materials, catalog = []) {
+  function generateMaterialCombos(materials) {
     if (!materials || materials.length < 2) return [];
     const names = materials.map(m => typeof m === 'string' ? m : m.name);
-    const storeByName = new Map(catalog.filter(m => m.storeName).map(m => [m.name, { name: m.storeName, url: m.storeUrl }]));
     const combos = [];
     for (let i = 0; i < names.length && combos.length < 3; i += 2) {
       const pair = names.slice(i, i + 2);
       if (pair.length < 2) pair.push(names[0]);
-      const stores = [...new Map(pair.map(n => storeByName.get(n)).filter(Boolean).map(s => [s.name, s])).values()];
       combos.push({
         name: `Combinação ${combos.length + 1} — ${pair.join(' + ')}`,
         materials: pair,
-        stores,
       });
     }
     return combos;
@@ -117,20 +111,35 @@ const MatchExtras = (() => {
   }
 
   /**
-   * Não existe mais assinatura nem plano pago em nenhum dos dois lados
-   * (mentoria final: "o cliente não paga"; e do lado do arquiteto a
-   * prioridade de exibição vem de mérito — nota + projetos fechados, no
-   * estilo Superhost do Airbnb — não de assinatura). Isso fica só como um
-   * objeto único e sempre ilimitado pra não quebrar as várias telas que
-   * ainda leem plan.matchesPerMonth/visibleResults/maxPortfolio/etc.
+   * Assinatura (freemium) — o back-end Arkitetum.AI não tem gateway de pagamento,
+   * então isso é uma simulação client-side: nenhuma cobrança real acontece em
+   * nenhum momento. O "checkout" só existe para demonstrar a régua de planos do
+   * modelo de negócio. Para produção de verdade, isso precisa virar um campo real
+   * no schema do User + integração com um gateway (Stripe, Mercado Pago...) e a
+   * checagem de limite tem que ser validada no back-end, não só no navegador.
    */
-  const UNLIMITED_PLAN = { id: 'free', label: 'Gratuito', price: 0, matchesPerMonth: Infinity, visibleResults: Infinity, maxExtraProjects: Infinity, maxVisibleMessages: Infinity, maxPortfolio: Infinity };
-  const PLANS = { client: { free: UNLIMITED_PLAN }, architect: { free: UNLIMITED_PLAN } };
+  const PLANS = {
+    client: {
+      free: { label: 'Gratuito', price: 0, matchesPerMonth: 3, visibleResults: 2, maxExtraProjects: 1, maxVisibleMessages: 5 },
+      premium: { label: 'Premium', price: 29, matchesPerMonth: Infinity, visibleResults: 4, maxExtraProjects: Infinity, maxVisibleMessages: Infinity },
+    },
+    architect: {
+      free: { label: 'Gratuito', price: 0, maxPortfolio: 3, maxVisibleMessages: 5 },
+      pro: { label: 'Pro', price: 49, maxPortfolio: Infinity, badge: true, maxVisibleMessages: Infinity },
+    },
+  };
 
+  const planKey = (userId) => `matchia_plan_${userId}`;
   const usageKey = (userId) => `matchia_match_usage_${userId}`;
 
-  function getPlan() {
-    return UNLIMITED_PLAN;
+  function getPlan(userId, role) {
+    const stored = localStorage.getItem(planKey(userId));
+    const fallback = role === 'architect' ? 'free' : 'free';
+    const id = stored || fallback;
+    return { id, ...(PLANS[role] || PLANS.client)[id] };
+  }
+  function setPlan(userId, planId) {
+    localStorage.setItem(planKey(userId), planId);
   }
 
   function monthKey() {
@@ -153,6 +162,6 @@ const MatchExtras = (() => {
 
   return {
     PALETTE, getStyleProfile, setStyleProfile, getProjectMeta, setProjectMeta,
-    generateMaterialCombos, setupFileInput, PLANS, getPlan, getMatchUsage, recordMatchRun,
+    generateMaterialCombos, setupFileInput, PLANS, getPlan, setPlan, getMatchUsage, recordMatchRun,
   };
 })();

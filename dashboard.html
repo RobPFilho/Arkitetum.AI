@@ -93,9 +93,9 @@
         <div class="stat" id="clientStatFav" style="display:none;"><strong id="statFavCount">0</strong><span>favoritos</span></div>
         <div class="stat" id="architectStatRating" style="display:none;"><strong id="statRatingValue">—</strong><span id="statReviewCount">avaliação</span></div>
         <div class="stat" id="architectStatPortfolio" style="display:none;"><strong id="statPortfolioCount">0</strong><span>no portfólio</span></div>
-        <div class="stat" id="clientPlanStat" style="display:none;"><strong>R$0</strong><span>sempre grátis</span></div>
-        <div class="stat" id="architectCommissionStat" style="display:none;"><strong id="commissionTotal">R$0</strong><span>em comissões</span></div>
+        <div class="stat"><strong id="planName">—</strong><span id="planUsage">plano</span></div>
       </div>
+      <button id="upgradePlanBtn" class="btn btn-primary btn-sm" style="display:none; margin:-8px 0 20px;">Fazer upgrade</button>
 
       <!-- CLIENTE -->
       <div id="clientPanel" style="display:none;">
@@ -140,79 +140,52 @@
 
           <div class="dash-card" id="projectsCard">
             <h3>Meus projetos</h3>
-            <p class="card-lead">Nossa tecnologia encontra os arquitetos que mais combinam com o seu projeto — quanto mais projetos você descrever, mais buscas diferentes você pode fazer.</p>
+            <p class="card-lead">Tem mais de uma obra em mente? Cada projeto guarda seu próprio estilo, orçamento e prioridades — rode um match separado para cada um, sem misturar critérios.</p>
             <div id="projectsList" style="margin:16px 0;"></div>
-            <button type="button" id="toggleProjectForm" class="btn btn-primary btn-sm">+ Novo projeto</button>
-          </div>
-        </div>
-
-        <!-- Menu lateral de criar/editar projeto — pedido explícito da
-             mentoria: a captura de dados de projeto vive num painel que
-             desliza da lateral, não numa etapa de cadastro nem escondida
-             dentro do fluxo principal do conteúdo. -->
-        <div class="side-drawer-overlay" id="projectDrawerOverlay">
-          <div class="side-drawer" role="dialog" aria-modal="true" aria-labelledby="projectDrawerTitle">
-            <div class="side-drawer-header">
-              <h3 id="projectDrawerTitle" style="margin:0;">Novo projeto</h3>
-              <button type="button" class="side-drawer-close" id="closeProjectDrawer" aria-label="Fechar">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg>
-              </button>
+            <button type="button" id="toggleProjectForm" class="btn btn-secondary btn-sm">+ Adicionar outro projeto</button>
+            <div id="projectLimitCard" class="usage-limit-card" style="display:none;">
+              <p>Seu plano Gratuito permite até 1 projeto extra além do seu perfil principal.</p>
+              <button type="button" id="upgradeFromProjectBtn" class="btn btn-primary btn-sm">Assinar Premium e ter projetos ilimitados</button>
             </div>
-            <form id="projectForm">
+            <form id="projectForm" style="display:none; margin-top:20px;">
               <input type="hidden" id="projEditId">
-
-              <div class="field-subgroup">
-                <span class="field-subgroup-label">1. O que você quer construir ou reformar?</span>
-                <div class="chip-select" id="projInterventionChips"></div>
-              </div>
-              <div class="form-field full">
-                <label for="projPropertyType">Tipo de imóvel</label>
-                <select id="projPropertyType">
-                  <option value="Residencial unifamiliar">Casa</option>
-                  <option value="Apartamento">Apartamento</option>
-                  <option value="Interiores">Só interiores</option>
-                  <option value="Comercial">Espaço comercial</option>
-                  <option value="Paisagismo">Área externa / paisagismo</option>
-                </select>
-              </div>
-
-              <div class="field-subgroup">
-                <span class="field-subgroup-label">2. Qual estilo combina mais com você?</span>
-                <div class="chip-select" id="projStylesChips"></div>
-              </div>
-
-              <div class="form-field">
-                <label for="projAreaM2">3. Quantos m² terá o espaço?</label>
-                <input type="number" id="projAreaM2" min="0" step="1" placeholder="Ex.: 90">
-              </div>
-
-              <div class="form-field full">
-                <label for="projGoals">4. O que é mais importante para você nesse projeto?</label>
-                <textarea id="projGoals" placeholder="Ex.: mais luz natural, integrar cozinha e sala, um home office..."></textarea>
-              </div>
-
-              <details style="margin:6px 0 16px;">
-                <summary style="cursor:pointer; font-size:0.86rem; color:var(--ink-soft);">Mais detalhes (opcional)</summary>
-                <div class="form-grid" style="margin-top:14px;">
-                  <div class="form-field full">
-                    <label for="projName">Nome do projeto <span class="hint">(se não preencher, geramos um pra você)</span></label>
-                    <input type="text" id="projName" placeholder="Ex.: Reforma do apartamento da praia">
-                  </div>
-                  <div class="form-field">
-                    <label for="projBudgetMin">Orçamento mínimo (R$)</label>
-                    <input type="number" id="projBudgetMin" min="0">
-                  </div>
-                  <div class="form-field">
-                    <label for="projBudgetMax">Orçamento máximo (R$)</label>
-                    <input type="number" id="projBudgetMax" min="0">
-                  </div>
-                  <div class="form-field full">
-                    <label for="projMaterials">Materiais preferidos <span class="hint">(separados por vírgula)</span></label>
-                    <input type="text" id="projMaterials" placeholder="Concreto aparente, madeira de demolição">
-                  </div>
+              <div class="form-grid">
+                <div class="form-field full">
+                  <label for="projName">Nome do projeto</label>
+                  <input type="text" id="projName" placeholder="Ex.: Reforma do apartamento da praia" required>
                 </div>
-              </details>
-
+                <div class="form-field">
+                  <label for="projPropertyType">Tipo de imóvel</label>
+                  <select id="projPropertyType">
+                    <option value="Residencial unifamiliar">Residencial unifamiliar</option>
+                    <option value="Apartamento">Apartamento</option>
+                    <option value="Reforma">Reforma</option>
+                    <option value="Interiores">Interiores</option>
+                    <option value="Comercial">Comercial</option>
+                    <option value="Paisagismo">Paisagismo</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label for="projBudgetMin">Orçamento mínimo (R$)</label>
+                  <input type="number" id="projBudgetMin" min="0">
+                </div>
+                <div class="form-field">
+                  <label for="projBudgetMax">Orçamento máximo (R$)</label>
+                  <input type="number" id="projBudgetMax" min="0">
+                </div>
+                <div class="form-field full">
+                  <label>Estilos desejados</label>
+                  <div class="chip-select" id="projStylesChips"></div>
+                </div>
+                <div class="form-field full">
+                  <label for="projMaterials">Materiais preferidos <span class="hint">(separados por vírgula)</span></label>
+                  <input type="text" id="projMaterials" placeholder="Concreto aparente, madeira de demolição">
+                </div>
+                <div class="form-field full">
+                  <label for="projGoals">Objetivos do projeto</label>
+                  <textarea id="projGoals"></textarea>
+                </div>
+              </div>
               <div style="display:flex; gap:10px;">
                 <button type="submit" class="btn btn-primary" id="projSaveBtn">Salvar projeto</button>
                 <button type="button" class="btn btn-secondary" id="cancelProjectForm">Cancelar</button>
@@ -224,6 +197,10 @@
         <div class="profile-panel" data-profile-panel-content="match" hidden>
           <p class="card-lead">Clique em "Rodar match com IA" para receber os arquitetos mais compatíveis com o seu perfil, com pontuação e explicação gerada por IA.</p>
           <p style="font-size:0.82rem; color:var(--ink-faint); margin:-8px 0 16px;" id="matchContextLabel"></p>
+          <div id="usageLimitCard" class="usage-limit-card" style="display:none; margin-bottom:20px;">
+            <p>Você usou todas as buscas do plano Gratuito este mês.</p>
+            <button id="upgradeFromLimitBtn" class="btn btn-primary btn-sm">Assinar Premium e continuar buscando</button>
+          </div>
           <div id="matchTabs" class="match-tabs" role="tablist" aria-label="Categorias de match" style="display:none;"></div>
           <div id="matchPanelMain" class="match-tabpanel" role="tabpanel" aria-labelledby="matchTab-main">
             <div id="matchResults" class="result-list"></div>
@@ -268,7 +245,6 @@
           <button type="button" class="profile-tab" data-profile-panel="portfolio" role="tab" aria-selected="false">Portfólio</button>
           <button type="button" class="profile-tab" data-profile-panel="avaliacoes" role="tab" aria-selected="false">Avaliações</button>
           <button type="button" class="profile-tab" data-profile-panel="metricas" role="tab" aria-selected="false">Métricas</button>
-          <button type="button" class="profile-tab" data-profile-panel="comissoes" role="tab" aria-selected="false">Comissões</button>
           <button type="button" class="profile-tab" data-profile-panel="mensagens" role="tab" aria-selected="false">Mensagens <span class="unread-badge" id="architectUnreadBadge" style="display:none;"></span></button>
           <button type="button" class="profile-tab" data-profile-panel="conta" role="tab" aria-selected="false">Conta</button>
         </div>
@@ -329,37 +305,18 @@
 
           <div class="dash-card">
             <h3>Meu portfólio</h3>
-            <p class="card-lead">É daqui que sua compatibilidade é calculada: o estilo e os materiais de cada projeto que você adiciona formam o seu perfil de match — não é preciso preencher nenhum questionário à parte.</p>
+            <p class="card-lead">Projetos anteriores aumentam sua compatibilidade e visibilidade nos resultados de match.</p>
             <div id="portfolioList" style="margin:18px 0;"></div>
-            <button id="togglePortfolioForm" class="btn btn-primary btn-sm">+ Adicionar projeto</button>
+            <button id="togglePortfolioForm" class="btn btn-secondary btn-sm">+ Adicionar projeto</button>
+            <div id="portfolioLimitCard" class="usage-limit-card" style="display:none;">
+              <p>Seu plano Gratuito permite até 3 projetos no portfólio.</p>
+              <button id="upgradeFromPortfolioBtn" class="btn btn-primary btn-sm">Assinar Pro e ter portfólio ilimitado</button>
+            </div>
             <form id="portfolioForm" style="display:none; margin-top:20px;">
               <div class="form-grid">
                 <div class="form-field full">
                   <label for="pTitle">Título do projeto</label>
                   <input type="text" id="pTitle" required>
-                </div>
-                <div class="form-field full">
-                  <label>Estilo deste projeto</label>
-                  <div class="chip-select" id="pStyleChips"></div>
-                </div>
-                <div class="form-field">
-                  <label for="pPropertyType">Tipo de imóvel</label>
-                  <select id="pPropertyType">
-                    <option value="">Não informar</option>
-                    <option value="Residencial unifamiliar">Casa</option>
-                    <option value="Apartamento">Apartamento</option>
-                    <option value="Interiores">Só interiores</option>
-                    <option value="Comercial">Espaço comercial</option>
-                    <option value="Paisagismo">Área externa / paisagismo</option>
-                  </select>
-                </div>
-                <div class="form-field">
-                  <label for="pAreaM2">Área do projeto (m²)</label>
-                  <input type="number" id="pAreaM2" min="0" step="1" placeholder="Ex.: 120">
-                </div>
-                <div class="form-field full">
-                  <label for="pMaterials">Materiais usados <span class="hint">(separados por vírgula)</span></label>
-                  <input type="text" id="pMaterials" placeholder="Concreto aparente, madeira de demolição">
                 </div>
                 <div class="form-field full">
                   <label for="pDescription">Descrição</label>
@@ -412,21 +369,16 @@
         </div>
 
         <div class="profile-panel" data-profile-panel-content="metricas" hidden>
-          <div id="metricsUpsell" style="display:none;"></div>
+          <div id="metricsUpsell" class="usage-limit-card" style="display:none;">
+            <p>Métricas de perfil (visualizações, taxa de resposta e conversão) são um recurso do plano Pro.</p>
+            <button type="button" id="upgradeFromMetricsBtn" class="btn btn-primary btn-sm">Assinar Pro e ver minhas métricas</button>
+          </div>
           <div id="metricsContent" style="display:none;">
             <div class="dash-card">
               <h3>Métricas do seu perfil</h3>
               <p class="card-lead">Como seu perfil está performando na plataforma nos últimos 30 dias.</p>
               <div class="profile-stats" id="metricsStats" style="border-top:none; padding-top:0;"></div>
             </div>
-          </div>
-        </div>
-
-        <div class="profile-panel" data-profile-panel-content="comissoes" hidden id="comissoesPanel">
-          <div class="dash-card" id="commissionsCard" style="display:none;">
-            <h3>Comissão de sucesso</h3>
-            <p class="card-lead">match.IA não cobra assinatura sua — só uma pequena comissão quando um projeto do match fecha de verdade, confirmado por você e pelo cliente. Nada aqui é cobrado de verdade (protótipo acadêmico).</p>
-            <div id="commissionsList"></div>
           </div>
         </div>
 
@@ -455,10 +407,6 @@
           <div class="form-field">
             <label for="editState">Estado (UF)</label>
             <input type="text" id="editState" maxlength="2">
-          </div>
-          <div class="form-field full" id="editWorkingAreasField" style="display:none;">
-            <label for="editWorkingAreas">Onde você atende <span class="hint">(cidades, separadas por vírgula)</span></label>
-            <input type="text" id="editWorkingAreas" placeholder="São Paulo, Campinas">
           </div>
           <button id="saveProfileBtn" class="btn btn-primary btn-sm btn-block">Salvar alterações</button>
         </div>
@@ -506,9 +454,9 @@
 </footer>
 
 <script src="assets/js/api.js"></script>
-<script src="assets/js/styles-data.js"></script>
 <script src="assets/js/extras.js"></script>
 <script src="assets/js/color-wheel.js"></script>
+<script src="assets/js/checkout.js"></script>
 <script src="assets/js/style-share.js"></script>
 <script src="assets/js/theme.js"></script>
 <script src="assets/js/site.js"></script>

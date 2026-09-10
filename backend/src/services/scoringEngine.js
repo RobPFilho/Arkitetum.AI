@@ -2,41 +2,6 @@ const overlap = (left = [], right = []) =>
   left.filter((value) => right.map(String).includes(String(value))).length;
 const capped = (value, cap) => Math.min(value, cap);
 
-// Soma dos tetos de cada fator (estilo 30 + materiais 15 + localização 20 +
-// especialidade 15 + metragem 15 + disponibilidade 10 + experiência 10).
-// Deixou de ser 100 quando o fator de metragem foi adicionado — qualquer
-// lugar que trate a pontuação como uma porcentagem precisa normalizar por
-// isto (ver scoreToPercent), senão um match muito bom mostra mais de 100%.
-export const MAX_SCORE = 115;
-export const scoreToPercent = (score) => Math.round((score / MAX_SCORE) * 100);
-
-/** Metragem "típica" do arquiteto: média das áreas dos projetos que ele
- * cadastrou no portfólio (cada item leva sua própria areaM2 — ver User.js).
- * Sem projeto com área informada, não dá pra comparar (retorna null em vez
- * de penalizar por falta de dado). */
-function typicalAreaM2(architect) {
-  const areas = (architect.architectProfile?.portfolio || [])
-    .map((p) => p.areaM2)
-    .filter((v) => typeof v === "number" && v > 0);
-  if (!areas.length) return null;
-  return areas.reduce((sum, v) => sum + v, 0) / areas.length;
-}
-
-/** Pontuação por proximidade de metragem — substitui orçamento como o
- * critério de tamanho de obra (pedido explícito da cliente do TCC: perguntar
- * "quantos m²" em vez de "quanto você quer gastar"). Quanto mais perto da
- * metragem que o arquiteto costuma atender, mais pontos; sem dado de um dos
- * lados, não pontua nem penaliza. */
-function scoreArea(clientAreaM2, architect) {
-  const typical = typicalAreaM2(architect);
-  if (!clientAreaM2 || !typical) return 0;
-  const diff = Math.abs(clientAreaM2 - typical) / typical;
-  if (diff <= 0.2) return 15;
-  if (diff <= 0.5) return 10;
-  if (diff <= 1) return 5;
-  return 0;
-}
-
 export function scoreArchitect(client, architect) {
   const c = client.clientProfile || {},
     a = architect.architectProfile || {};
@@ -61,15 +26,13 @@ export function scoreArchitect(client, architect) {
   const availability =
     a.availability === "available" ? 10 : a.availability === "limited" ? 5 : 0;
   const experience = capped(a.yearsExperience || 0, 10);
-  const area = scoreArea(c.areaM2, architect);
   const score =
-    styles + materials + location + property + availability + experience + area;
+    styles + materials + location + property + availability + experience;
   const reasons = [
     styles && "estilo arquitetônico compatível",
     materials && "preferências de materiais em comum",
     location && "atendimento na sua região",
     property && "especialidade relevante para o projeto",
-    area && "já atendeu projetos de metragem parecida",
     experience && `${a.yearsExperience} anos de experiência`,
   ].filter(Boolean);
   const breakdown = [
@@ -77,7 +40,6 @@ export function scoreArchitect(client, architect) {
     { label: "Materiais", value: materials, max: 15 },
     { label: "Localização", value: location, max: 20 },
     { label: "Especialidade", value: property, max: 15 },
-    { label: "Metragem", value: area, max: 15 },
     { label: "Disponibilidade", value: availability, max: 10 },
     { label: "Experiência", value: experience, max: 10 },
   ];

@@ -7,34 +7,10 @@ import Favorite from "../models/Favorite.js";
 import Timeline from "../models/Timeline.js";
 import CaseStudy from "../models/CaseStudy.js";
 import ProfileView from "../models/ProfileView.js";
-import Commission from "../models/Commission.js";
 import { notify } from "../services/notificationService.js";
 
 export function getMe(req, res) {
   res.json(req.user);
-}
-
-/**
- * Histórico de comissão do arquiteto — o "sistema comissionado" precisa ser
- * uma tela real que ele consulta, não só uma notificação avulsa que passa.
- */
-export async function listMyCommissions(req, res) {
-  const commissions = await Commission.find({ architect: req.user.id })
-    .populate("client", "name")
-    .sort("-createdAt");
-  const total = commissions.reduce((sum, c) => sum + (c.amount || 0), 0);
-  res.json({
-    total,
-    count: commissions.length,
-    commissions: commissions.map((c) => ({
-      id: c.id,
-      clientName: c.client?.name,
-      amount: c.amount,
-      rate: c.rate,
-      estimated: c.estimated,
-      createdAt: c.createdAt,
-    })),
-  });
 }
 
 /**
@@ -155,30 +131,8 @@ async function notifyClientsArchitectAvailableAgain(architect) {
   );
 }
 
-/**
- * O perfil de match do arquiteto (styles/favoriteMaterials) não vem mais de
- * um questionário único no cadastro — é a união do que ele tageou em cada
- * projeto do portfólio. Chamado sempre que o portfólio muda (adicionar ou
- * remover um projeto).
- */
-function recomputeProfileFromPortfolio(user) {
-  const portfolio = user.architectProfile?.portfolio || [];
-  const styles = new Set(user.architectProfile.styles || []);
-  const materials = new Set(user.architectProfile.favoriteMaterials || []);
-  const specialties = new Set(user.architectProfile.specialties || []);
-  portfolio.forEach((project) => {
-    if (project.style) styles.add(project.style);
-    if (project.propertyType) specialties.add(project.propertyType);
-    (project.materialsUsed || []).forEach((m) => materials.add(m));
-  });
-  user.architectProfile.styles = Array.from(styles);
-  user.architectProfile.favoriteMaterials = Array.from(materials).slice(0, 12);
-  user.architectProfile.specialties = Array.from(specialties);
-}
-
 export async function addPortfolio(req, res) {
   req.user.architectProfile.portfolio.push(req.body);
-  recomputeProfileFromPortfolio(req.user);
   await req.user.save();
   res.status(201).json(req.user.architectProfile.portfolio.at(-1));
 }

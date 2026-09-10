@@ -112,7 +112,6 @@ const MatchAPI = (() => {
     addFavorite: (architectId) => request(`/favorites/${encodeURIComponent(architectId)}`, { method: 'POST', auth: true }),
     removeFavorite: (architectId) => request(`/favorites/${encodeURIComponent(architectId)}`, { method: 'DELETE', auth: true }),
     myStats: () => request('/dashboard/me/stats', { auth: true }),
-    myCommissions: () => request('/dashboard/me/commissions', { auth: true }),
     recordProfileView: (architectId) => request(`/architects/${encodeURIComponent(architectId)}/view`, { method: 'POST' }),
     getTimeline: (otherId) => request(`/timeline/${encodeURIComponent(otherId)}`, { auth: true }),
     advanceTimeline: (otherId) => request(`/timeline/${encodeURIComponent(otherId)}/advance`, { method: 'POST', auth: true }),
@@ -122,6 +121,5 @@ const MatchAPI = (() => {
     submitTestimonial: (otherId, testimonial) => request(`/case-studies/${encodeURIComponent(otherId)}/testimonial`, { method: 'POST', auth: true, body: { testimonial } }),
     approveCaseStudy: (otherId) => request(`/case-studies/${encodeURIComponent(otherId)}/approve`, { method: 'POST', auth: true }),
     publishedCaseStudies: (architectId) => request(`/case-studies/architect/${encodeURIComponent(architectId)}`),
-    allPublishedCaseStudies: (limit) => request(`/case-studies${limit ? `?limit=${limit}` : ''}`),
   };
 })();

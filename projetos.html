@@ -55,8 +55,8 @@
   <section class="hero" style="padding-bottom:0;">
     <div class="container center" style="max-width:720px;">
       <span class="eyebrow">Projetos &amp; IA</span>
-      <h1>Do match ao projeto em andamento</h1>
-      <p class="lead" style="margin:0 auto;">Depois que o match acontece, a tecnologia continua ajudando: sugere conceitos, materiais e referências visuais alinhadas ao perfil do cliente e ao jeito de projetar do arquiteto escolhido.</p>
+      <h1>Do questionário ao volume construído</h1>
+      <p class="lead" style="margin:0 auto;">Depois que o match acontece, a IA continua trabalhando: sugere conceitos, materiais e referências visuais alinhadas ao perfil do cliente e à linguagem do arquiteto selecionado.</p>
     </div>
   </section>
 
@@ -129,7 +129,7 @@
           </div>
           <div class="mock-body">
             <h4>Sugestões de materiais</h4>
-            <p class="mock-lede">Combinações geradas a partir do projeto do cliente — todas dentro do estilo do Studio Cantiléver.</p>
+            <p class="mock-lede">Combinações geradas pela IA a partir do questionário — todas dentro do estilo do Studio Cantiléver.</p>
 
             <div class="constraint-note">Essas combinações usam só materiais que o arquiteto cadastrou como disponíveis — nada aqui é bonito e inviável de comprar ou executar.</div>
 
@@ -166,7 +166,7 @@
           </div>
           <div class="mock-body">
             <h4>Resumo do projeto</h4>
-            <p class="mock-lede">Gerado automaticamente a partir do projeto do cliente. Revisem juntos antes de começar — assim ninguém parte de uma expectativa diferente da do outro.</p>
+            <p class="mock-lede">Gerado automaticamente a partir do questionário. Revisem juntos antes de começar — assim ninguém parte de uma expectativa diferente da do outro.</p>
 
             <div class="summary-grid">
               <div class="summary-item"><span class="mock-label">Estilo desejado</span><strong>Contemporâneo aconchegante, com toques naturais</strong></div>
@@ -189,27 +189,14 @@
 
   <section class="section section-alt">
     <div class="container">
-      <div class="section-head reveal">
-        <span class="eyebrow">Prova real, não ilustração</span>
-        <h2>Projetos que já viraram match</h2>
-        <p>Cada card abaixo só existe depois que cliente e arquiteto confirmam, dos dois lados, que o projeto aconteceu de verdade — não é imagem de banco de dados.</p>
+      <div class="showcase-3d reveal">
+        <span class="badge-3d">Estudo volumétrico 3D · arraste para girar, role para zoom</span>
+        <iframe src="assets/3d/mansion-3d.html" title="Residência Cantiléver — estudo volumétrico 3D interativo" loading="lazy"></iframe>
       </div>
-      <div id="showcaseGallery" class="showcase-gallery reveal"></div>
-      <div id="showcaseEmpty" class="empty-state" style="display:none;">
-        <p>Ainda não temos projetos publicados aqui — assim que o primeiro match virar projeto confirmado pelos dois lados, ele aparece nesta vitrine.</p>
+      <div class="section-head reveal" style="margin-top:32px; margin-bottom:0;">
+        <h2 style="font-size:1.4rem;">Residência Cantiléver — Estudo Volumétrico</h2>
+        <p>Concreto, madeira e vidro. Exemplo de como a IA do match.IA pode transformar o briefing de um cliente — estilo contemporâneo, integração de ambientes, piscina e paisagismo — em um volume 3D navegável para apoiar a fase de concepção do arquiteto.</p>
       </div>
-    </div>
-  </section>
-
-  <!-- CONHEÇA OS ESTILOS — pra quem não sabe o que "minimalista" ou "biofílico" significa -->
-  <section class="section">
-    <div class="container">
-      <div class="section-head reveal">
-        <span class="eyebrow">Pra quem não é do ramo</span>
-        <h2>Conheça os estilos</h2>
-        <p>Cada estilo usado no match tem uma foto real — assim você escolhe sabendo do que se trata, não só pelo nome.</p>
-      </div>
-      <div id="styleGlossary" class="material-grid reveal"></div>
     </div>
   </section>
 
@@ -242,8 +229,8 @@
         </div>
         <div class="feature-card">
           <span class="index">05</span>
-          <h3>Projetos reais confirmados</h3>
-          <p>Vitrine de projetos que já viraram match e foram confirmados pelos dois lados — prova social real, não uma simulação.</p>
+          <h3>Estudos volumétricos</h3>
+          <p>Modelos 3D exploratórios para validar volumetria antes do detalhamento executivo.</p>
         </div>
         <div class="feature-card">
           <span class="index">06</span>
@@ -270,7 +257,7 @@
     <div class="container">
       <div class="cta-banner reveal">
         <h2>Tem um projeto em mente?</h2>
-        <p>Nossa tecnologia encontra os arquitetos que mais combinam com o seu projeto — em poucos minutos.</p>
+        <p>Responda o questionário inteligente e receba os arquitetos mais compatíveis com sua ideia.</p>
         <a href="cadastro.html?tipo=cliente" class="btn btn-primary">Começar meu match</a>
       </div>
     </div>
@@ -288,10 +275,8 @@
 </footer>
 
 <script src="assets/js/api.js"></script>
-<script src="assets/js/styles-data.js"></script>
 <script src="assets/js/theme.js"></script>
 <script src="assets/js/site.js"></script>
-<script src="assets/js/case-studies.js"></script>
 <script src="assets/js/projetos.js"></script>
 </body>
 </html>

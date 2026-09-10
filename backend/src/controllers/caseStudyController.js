@@ -1,22 +1,7 @@
 import CaseStudy from "../models/CaseStudy.js";
 import Validation from "../models/Validation.js";
 import User from "../models/User.js";
-import Review from "../models/Review.js";
-import Commission from "../models/Commission.js";
-import MatchHistory from "../models/MatchHistory.js";
-import { scoreToPercent } from "../services/scoringEngine.js";
 import { notify } from "../services/notificationService.js";
-
-/** % de compatibilidade do match mais recente entre esse cliente e
- * arquiteto, se existir — é o quinto campo que a vitrine pública mostra,
- * puxado do resultado real, não digitado por ninguém. Guardado já
- * normalizado (0-100) pra quem exibe não precisar saber do teto do motor
- * de scoring. */
-async function latestCompatibilityScore(clientId, architectId) {
-  const history = await MatchHistory.findOne({ client: clientId, "results.architect": architectId }).sort("-createdAt");
-  const result = history?.results.find((r) => String(r.architect) === String(architectId));
-  return typeof result?.score === "number" ? scoreToPercent(result.score) : null;
-}
 
 const pairFor = (req) => {
   const otherId = req.params.otherId;
@@ -49,10 +34,8 @@ export async function proposeCaseStudy(req, res) {
   const pair = pairFor(req);
   if (!(await requireValidated(pair, res))) return;
 
-  const { title, description, images, style, areaM2 } = req.body || {};
+  const { title, description, images } = req.body || {};
   if (!title || !title.trim()) return res.status(400).json({ error: "Título é obrigatório." });
-
-  const compatibilityScore = await latestCompatibilityScore(pair.client, pair.architect);
 
   const caseStudy = await CaseStudy.findOneAndUpdate(
     pair,
@@ -61,9 +44,6 @@ export async function proposeCaseStudy(req, res) {
         title: title.trim(),
         description: (description || "").trim(),
         images: Array.isArray(images) ? images.filter(Boolean).slice(0, 4) : [],
-        style: style || undefined,
-        areaM2: areaM2 ? Number(areaM2) : undefined,
-        compatibilityScore: compatibilityScore ?? undefined,
         architectApproved: true,
         clientApproved: false,
       },
@@ -121,64 +101,6 @@ export async function listPublished(req, res) {
         images: c.images,
         testimonial: c.testimonial,
         clientName: c.client?.name,
-        style: c.style,
-        areaM2: c.areaM2,
-        compatibilityScore: c.compatibilityScore,
       })),
   );
-}
-
-/**
- * Vitrine pública site-wide de "projetos que já viraram match" — usada no
- * lugar do showcase 3D em index.html/projetos.html. Prioridade de exibição
- * é por mérito (quantos projetos esse arquiteto já fechou pela plataforma +
- * nota média), nunca por assinatura — o cliente não paga e o arquiteto
- * também não compra posição, só ganha com volume e qualidade entregue
- * (mesma lógica do selo "Superhost" do Airbnb).
- */
-export async function listAllPublished(req, res) {
-  const limit = Math.min(Number(req.query.limit) || 12, 24);
-  const caseStudies = await CaseStudy.find({ architectApproved: true, clientApproved: true, title: { $ne: null } })
-    .populate("architect", "name city state")
-    .sort("-updatedAt")
-    .limit(60);
-
-  const architectIds = [...new Map(caseStudies.filter((c) => c.architect).map((c) => [String(c.architect._id), c.architect._id])).values()];
-  const [ratings, closedCounts] = await Promise.all([
-    Review.aggregate([
-      { $match: { architect: { $in: architectIds } } },
-      { $group: { _id: "$architect", avg: { $avg: "$rating" } } },
-    ]),
-    Commission.aggregate([
-      { $match: { architect: { $in: architectIds } } },
-      { $group: { _id: "$architect", count: { $sum: 1 } } },
-    ]),
-  ]);
-  const ratingMap = new Map(ratings.map((r) => [String(r._id), r.avg]));
-  const closedMap = new Map(closedCounts.map((c) => [String(c._id), c.count]));
-
-  const shaped = caseStudies
-    .filter((c) => c.architect)
-    .map((c) => ({
-      id: c.id,
-      title: c.title,
-      description: c.description,
-      image: c.images?.[0] || null,
-      style: c.style,
-      areaM2: c.areaM2,
-      compatibilityScore: c.compatibilityScore,
-      architectName: c.architect.name,
-      architectCity: [c.architect.city, c.architect.state].filter(Boolean).join(" · "),
-      closedProjects: closedMap.get(String(c.architect._id)) || 0,
-      rating: ratingMap.get(String(c.architect._id)) || 0,
-      updatedAt: c.updatedAt,
-    }))
-    .sort((a, b) => {
-      if (b.closedProjects !== a.closedProjects) return b.closedProjects - a.closedProjects;
-      if (b.rating !== a.rating) return b.rating - a.rating;
-      return new Date(b.updatedAt) - new Date(a.updatedAt);
-    })
-    .slice(0, limit);
-
-  res.json(shaped);
 }

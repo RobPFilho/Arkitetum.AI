@@ -30,8 +30,6 @@ export async function createProject(req, res) {
     preferredMaterials: normalizeStringArray(req.body.preferredMaterials),
     budget: normalizeBudget(req.body),
     propertyType: req.body.propertyType,
-    interventionType: req.body.interventionType,
-    areaM2: req.body.areaM2 ? Number(req.body.areaM2) : undefined,
     familySize: req.body.familySize ? Number(req.body.familySize) : undefined,
     projectGoals: req.body.projectGoals,
     preferences: req.body.preferences,
@@ -43,10 +41,9 @@ export async function updateProject(req, res) {
   const project = await Project.findOne({ _id: req.params.id, client: req.user.id });
   if (!project) return res.status(404).json({ error: "Projeto não encontrado" });
 
-  const allowed = ["name", "propertyType", "interventionType", "projectGoals", "preferences"];
+  const allowed = ["name", "propertyType", "projectGoals", "preferences"];
   for (const key of allowed) if (req.body[key] !== undefined) project[key] = req.body[key];
   if (req.body.familySize !== undefined) project.familySize = Number(req.body.familySize);
-  if (req.body.areaM2 !== undefined) project.areaM2 = Number(req.body.areaM2);
   if (req.body.preferredStyles !== undefined) project.preferredStyles = normalizeStringArray(req.body.preferredStyles);
   if (req.body.preferredMaterials !== undefined) project.preferredMaterials = normalizeStringArray(req.body.preferredMaterials);
   if (req.body.budgetMin !== undefined || req.body.budgetMax !== undefined) project.budget = normalizeBudget(req.body);

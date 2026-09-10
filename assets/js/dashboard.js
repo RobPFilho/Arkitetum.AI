@@ -19,23 +19,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const apiBanner = document.getElementById('apiBanner');
   document.getElementById('apiBaseLabel').textContent = MatchAPI.base();
   const uid = (u) => u.id || u._id;
-  const PROJECT_STYLES = StyleData.names();
-  const INTERVENTION_TYPES = ['Construção', 'Reforma'];
-  const styleImages = await StyleData.load();
-  let materialCatalogCache = null;
-  async function materialCatalog() {
-    if (materialCatalogCache) return materialCatalogCache;
-    try { materialCatalogCache = await MatchAPI.materials(); } catch { materialCatalogCache = []; }
-    return materialCatalogCache;
-  }
-  function storeLineHtml(stores) {
-    if (!stores || !stores.length) return '';
-    return `<p style="font-size:0.78rem; color:var(--ink-faint); margin:4px 0 0;">Disponível na loja parceira ${stores.map(s => `<a href="${s.url}" target="_blank" rel="noopener sponsored" style="color:var(--terracotta); font-weight:600;">${s.name}</a>`).join(', ')}</p>`;
-  }
-  const styleChipHtml = (style, active) =>
-    styleImages[style]?.imageUrl
-      ? `<button type="button" class="chip has-thumb${active ? ' active' : ''}" data-style="${style}" title="${styleImages[style].description || ''}"><img class="chip-thumb" src="${styleImages[style].imageUrl}" alt="" loading="lazy">${style}</button>`
-      : `<button type="button" class="chip${active ? ' active' : ''}" data-style="${style}">${style}</button>`;
+  // Bônus de indicação (real, guardado no back-end) somado ao limite do plano —
+  // Infinity + N continua Infinity, então não muda nada pra quem já é Premium/Pro.
+  const matchLimitFor = (user, plan) => plan.matchesPerMonth + (user.clientProfile?.bonusMatches || 0);
+  const portfolioLimitFor = (user, plan) => plan.maxPortfolio + (user.architectProfile?.bonusPortfolioSlots || 0);
+  const PROJECT_STYLES = ['Moderno', 'Contemporâneo', 'Minimalista', 'Industrial', 'Clássico', 'Rústico', 'Escandinavo', 'Biofílico', 'Brutalista', 'Alto padrão'];
 
   async function refreshUnreadBadge(badgeId) {
     const badge = document.getElementById(badgeId);
@@ -74,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('dashState').style.display = 'block';
   renderProfile(me);
-  renderPlanStat(me);
+  renderPlanCard(me);
 
   if (me.role === 'client') {
     document.getElementById('clientPanel').style.display = 'block';
@@ -92,6 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('clientStatFav').style.display = '';
     await loadFavoriteIds(me);
     renderFavorites(me);
+    document.getElementById('upgradeFromLimitBtn').addEventListener('click', () => openUpgrade(me, () => { renderPlanCard(me); document.getElementById('usageLimitCard').style.display = 'none'; }));
     renderProjectSummary(me);
     setupProjectSummary(me);
     setupExportPdf(me);
@@ -118,6 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupPortfolioForm(me);
     await renderStyleProfile(me);
     setupStyleProfile(me);
+    document.getElementById('upgradeFromPortfolioBtn').addEventListener('click', () => openUpgrade(me, () => { renderPlanCard(me); renderPortfolio(me); }));
     setupCauVerification(me);
     setupShareProfile(me);
     renderArchitectReviews(me);
@@ -127,7 +117,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupMetrics(me);
     setupCaseStudies(me);
     renderCaseStudies(me);
-    renderCommissions(me);
   }
 
   setupProfileEdit(me);
@@ -156,29 +145,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ---------------- Sem assinatura: grátis pro cliente, comissão pro arquiteto ----------------
-  function renderPlanStat(user) {
-    document.getElementById(user.role === 'client' ? 'clientPlanStat' : 'architectCommissionStat').style.display = '';
+  // ---------------- Plano (freemium) ----------------
+  function renderPlanCard(user) {
+    const plan = MatchExtras.getPlan(uid(user), user.role);
+    document.getElementById('planName').innerHTML = plan.id === 'free' ? plan.label : `${plan.label} <span class="badge-pro">★ ${user.role === 'architect' ? 'Pro' : 'Premium'}</span>`;
+
+    const usageEl = document.getElementById('planUsage');
+    if (user.role === 'client') {
+      const usage = MatchExtras.getMatchUsage(uid(user));
+      const limit = matchLimitFor(user, plan);
+      usageEl.textContent = limit === Infinity
+        ? 'Buscas ilimitadas'
+        : `${usage.count}/${limit} buscas usadas este mês`;
+    } else {
+      const count = (user.architectProfile?.portfolio || []).length;
+      const limit = portfolioLimitFor(user, plan);
+      usageEl.textContent = limit === Infinity
+        ? 'Portfólio ilimitado'
+        : `${count}/${limit} projetos no portfólio`;
+    }
+
+    const upgradeBtn = document.getElementById('upgradePlanBtn');
+    if (plan.id === 'free') {
+      upgradeBtn.style.display = '';
+      upgradeBtn.onclick = () => openUpgrade(user, () => { renderPlanCard(user); if (user.role === 'architect') renderPortfolio(user); });
+    } else {
+      upgradeBtn.style.display = 'none';
+    }
   }
 
-  async function renderCommissions(user) {
-    const card = document.getElementById('commissionsCard');
-    const list = document.getElementById('commissionsList');
-    try {
-      const { total, commissions } = await MatchAPI.myCommissions();
-      document.getElementById('commissionTotal').textContent = 'R$ ' + total.toLocaleString('pt-BR');
-      if (!commissions.length) {
-        card.style.display = 'block';
-        list.innerHTML = emptyStateHtml('Nenhum projeto fechado pela plataforma ainda — assim que cliente e arquiteto confirmarem juntos um resumo de projeto, ele aparece aqui.');
-        return;
-      }
-      card.style.display = 'block';
-      list.innerHTML = `<table class="timeline-table"><thead><tr><th>Cliente</th><th>Data</th><th>Comissão (${(commissions[0].rate * 100).toFixed(0)}%)</th></tr></thead><tbody>${
-        commissions.map(c => `<tr><td>${c.clientName || '—'}</td><td>${new Date(c.createdAt).toLocaleDateString('pt-BR')}</td><td>${c.amount ? 'R$ ' + c.amount.toLocaleString('pt-BR') : 'sem orçamento pra estimar'}</td></tr>`).join('')
-      }</tbody></table>`;
-    } catch {
-      card.style.display = 'none';
-    }
+  function openUpgrade(user, onDone) {
+    const targetId = user.role === 'client' ? 'premium' : 'pro';
+    const plan = MatchExtras.PLANS[user.role][targetId];
+    CheckoutModal.open({
+      name: `Plano ${plan.label}`,
+      desc: user.role === 'client' ? 'Buscas de match ilimitadas e todos os arquitetos do resultado.' : 'Portfólio ilimitado e selo Pro no seu painel.',
+      price: plan.price,
+    }, () => {
+      MatchExtras.setPlan(uid(user), targetId);
+      onDone();
+    });
   }
 
   function formatBudget(budget) {
@@ -193,30 +199,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   function setupProfileEdit(user) {
     const editBtn = document.getElementById('editProfileBtn');
     const editCard = document.getElementById('editCard');
-    const workingAreasField = document.getElementById('editWorkingAreasField');
     editBtn.addEventListener('click', () => {
       goToAccountTab(user);
       editCard.style.display = 'block';
       document.getElementById('editName').value = user.name;
       document.getElementById('editCity').value = user.city || '';
       document.getElementById('editState').value = user.state || '';
-      workingAreasField.style.display = user.role === 'architect' ? '' : 'none';
-      if (user.role === 'architect') document.getElementById('editWorkingAreas').value = (user.architectProfile?.workingAreas || []).join(', ');
       editCard.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'start' });
     });
     document.getElementById('saveProfileBtn').addEventListener('click', async () => {
       try {
-        const payload = {
+        const updated = await MatchAPI.updateMe({
           name: document.getElementById('editName').value.trim(),
           city: document.getElementById('editCity').value.trim(),
           state: document.getElementById('editState').value.trim().toUpperCase(),
-        };
-        if (user.role === 'architect') {
-          payload.architectProfile = {
-            workingAreas: document.getElementById('editWorkingAreas').value.split(',').map(s => s.trim()).filter(Boolean),
-          };
-        }
-        const updated = await MatchAPI.updateMe(payload);
+        });
         MatchAPI.setSession(MatchAPI.token(), { id: updated.id || updated._id, name: updated.name, role: updated.role });
         renderProfile(updated);
         editCard.style.display = 'none';
@@ -314,35 +311,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function buildProjectStyleChips(selected = []) {
     const container = document.getElementById('projStylesChips');
-    container.innerHTML = PROJECT_STYLES.map(style => styleChipHtml(style, selected.includes(style))).join('');
+    container.innerHTML = PROJECT_STYLES.map(style =>
+      `<button type="button" class="chip${selected.includes(style) ? ' active' : ''}" data-style="${style}">${style}</button>`
+    ).join('');
     container.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => chip.classList.toggle('active'));
     });
   }
 
-  function buildInterventionChips(selected) {
-    const container = document.getElementById('projInterventionChips');
-    container.innerHTML = INTERVENTION_TYPES.map(type =>
-      `<button type="button" class="chip${selected === type ? ' active' : ''}" data-intervention="${type}">${type}</button>`
-    ).join('');
-    container.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-      });
-    });
-  }
-  function selectedIntervention() {
-    return document.getElementById('projInterventionChips').querySelector('.chip.active')?.dataset.intervention || '';
-  }
-
   function projectCardHtml(p) {
     const budget = formatBudget(p.budget);
-    const metaBits = [p.interventionType, p.propertyType, p.areaM2 ? `${p.areaM2} m²` : ''].filter(Boolean).join(' · ');
     return `
       <div class="material-card" style="position:relative; padding:16px;">
         <div class="info" style="padding:0;">
-          <span class="cat">${metaBits || 'Projeto'}</span>
+          <span class="cat">${p.propertyType || 'Projeto'}</span>
           <h4>${p.name}</h4>
           <div class="tag-row" style="margin:8px 0;">${(p.preferredStyles || []).map(s => `<span class="tag">${s}</span>`).join('') || '<span style="font-size:0.8rem; color:var(--ink-faint);">Nenhum estilo definido</span>'}</div>
           ${budget !== '—' ? `<p style="font-size:0.82rem; color:var(--ink-faint); margin:4px 0;">Orçamento: ${budget}</p>` : ''}
@@ -353,6 +335,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
         </div>
       </div>`;
+  }
+
+  function renderProjectLimit(user) {
+    const plan = MatchExtras.getPlan(uid(user), 'client');
+    const atLimit = myProjects.length >= plan.maxExtraProjects;
+    document.getElementById('toggleProjectForm').style.display = atLimit ? 'none' : '';
+    document.getElementById('projectLimitCard').style.display = atLimit ? 'block' : 'none';
   }
 
   async function renderProjects(user) {
@@ -374,6 +363,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       </div>
       ${myProjects.map(projectCardHtml).join('')}`;
+    renderProjectLimit(user);
 
     list.querySelectorAll('[data-run-project]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -398,93 +388,52 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  let projectDrawerLastFocused = null;
-  function projectDrawerFocusables() {
-    const drawer = document.querySelector('#projectDrawerOverlay .side-drawer');
-    return Array.from(drawer.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
-      .filter(el => !el.disabled && el.offsetParent !== null);
-  }
-  function projectDrawerKeydown(e) {
-    if (e.key === 'Escape') { closeProjectDrawer(); return; }
-    if (e.key !== 'Tab') return;
-    const items = projectDrawerFocusables();
-    if (!items.length) return;
-    const first = items[0], last = items[items.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  }
-  function closeProjectDrawer() {
-    document.getElementById('projectDrawerOverlay').classList.remove('open');
-    document.body.classList.remove('no-scroll');
-    document.removeEventListener('keydown', projectDrawerKeydown);
-    if (projectDrawerLastFocused) projectDrawerLastFocused.focus();
-  }
-
   function openProjectForm(project) {
-    projectDrawerLastFocused = document.activeElement;
-    const overlay = document.getElementById('projectDrawerOverlay');
-    overlay.classList.add('open');
-    document.body.classList.add('no-scroll');
-    document.addEventListener('keydown', projectDrawerKeydown);
-    document.getElementById('projectDrawerTitle').textContent = project ? 'Editar projeto' : 'Novo projeto';
-    document.getElementById('closeProjectDrawer').focus();
+    const form = document.getElementById('projectForm');
+    form.style.display = 'block';
+    form.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'nearest' });
     document.getElementById('projEditId').value = project?._id || '';
     document.getElementById('projName').value = project?.name || '';
     document.getElementById('projPropertyType').value = project?.propertyType || 'Residencial unifamiliar';
-    document.getElementById('projAreaM2').value = project?.areaM2 || '';
     document.getElementById('projBudgetMin').value = project?.budget?.min || '';
     document.getElementById('projBudgetMax').value = project?.budget?.max || '';
     document.getElementById('projMaterials').value = (project?.preferredMaterials || []).join(', ');
     document.getElementById('projGoals').value = project?.projectGoals || '';
     buildProjectStyleChips(project?.preferredStyles || []);
-    buildInterventionChips(project?.interventionType || '');
     document.getElementById('projSaveBtn').textContent = project ? 'Salvar alterações' : 'Salvar projeto';
   }
 
   function setupProjects(user) {
     buildProjectStyleChips();
-    buildInterventionChips();
     document.getElementById('toggleProjectForm').addEventListener('click', () => openProjectForm(null));
-    document.getElementById('cancelProjectForm').addEventListener('click', closeProjectDrawer);
-    document.getElementById('closeProjectDrawer').addEventListener('click', closeProjectDrawer);
-    document.getElementById('projectDrawerOverlay').addEventListener('click', (e) => {
-      if (e.target.id === 'projectDrawerOverlay') closeProjectDrawer();
+    document.getElementById('cancelProjectForm').addEventListener('click', () => {
+      document.getElementById('projectForm').style.display = 'none';
     });
+    document.getElementById('upgradeFromProjectBtn').addEventListener('click', () => openUpgrade(user, () => renderProjects(user)));
 
     document.getElementById('projectForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const editId = document.getElementById('projEditId').value;
-      const interventionType = selectedIntervention();
-      const propertyType = document.getElementById('projPropertyType').value;
       const payload = {
-        name: document.getElementById('projName').value.trim() || `${interventionType || 'Projeto'} · ${propertyType}`,
-        propertyType,
-        interventionType,
-        areaM2: document.getElementById('projAreaM2').value,
+        name: document.getElementById('projName').value.trim(),
+        propertyType: document.getElementById('projPropertyType').value,
         budgetMin: document.getElementById('projBudgetMin').value,
         budgetMax: document.getElementById('projBudgetMax').value,
         preferredStyles: Array.from(document.querySelectorAll('#projStylesChips .chip.active')).map(c => c.dataset.style),
         preferredMaterials: document.getElementById('projMaterials').value,
         projectGoals: document.getElementById('projGoals').value.trim(),
       };
+      if (!payload.name) { alert('Dê um nome para o projeto.'); return; }
       try {
         if (editId) await MatchAPI.updateProject(editId, payload);
         else await MatchAPI.createProject(payload);
-        closeProjectDrawer();
+        document.getElementById('projectForm').style.display = 'none';
         document.getElementById('projectForm').reset();
         renderProjects(user);
       } catch (err) {
         alert(err.message || 'Não foi possível salvar o projeto.');
       }
     });
-
-    // Quem acabou de se cadastrar cai direto no formulário de primeiro
-    // projeto — não faz sentido mostrar o painel vazio esperando o cliente
-    // achar o botão "+ Novo projeto" sozinho.
-    if (sessionStorage.getItem('matchia_just_registered') === '1') {
-      sessionStorage.removeItem('matchia_just_registered');
-      openProjectForm(null);
-    }
   }
 
   // ---------------- Perfil de estilo (arquiteto) ----------------
@@ -728,7 +677,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     </div>`;
   }
 
-  async function handleResultClick(e, user) {
+  function handleResultClick(e, user) {
     const breakdownBtn = e.target.closest('[data-toggle-breakdown]');
     if (breakdownBtn) {
       const archId = breakdownBtn.dataset.toggleBreakdown;
@@ -746,11 +695,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       const isOpen = box.style.display !== 'none';
       if (isOpen) { box.style.display = 'none'; comboBtn.textContent = 'Ver sugestões de materiais'; return; }
       const result = allResultsById.get(archId);
-      const catalog = await materialCatalog();
-      const combos = MatchExtras.generateMaterialCombos(result?.architect.profile?.favoriteMaterials, catalog);
+      const combos = MatchExtras.generateMaterialCombos(result?.architect.profile?.favoriteMaterials);
       box.innerHTML = combos.length
         ? `<div class="constraint-note">Combinações geradas só com os materiais que ${result.architect.name} cadastrou como favoritos.</div>` +
-          combos.map(c => `<div class="combo-card"><div class="combo-name">${c.name}</div>${storeLineHtml(c.stores)}</div>`).join('')
+          combos.map(c => `<div class="combo-card"><div class="combo-name">${c.name}</div></div>`).join('')
         : `<p style="font-size:0.84rem; color:var(--ink-faint); margin:0;">Este arquiteto ainda não cadastrou materiais favoritos suficientes para gerar combinações.</p>`;
       box.style.display = 'block';
       comboBtn.textContent = 'Ocultar sugestões de materiais';
@@ -1093,7 +1041,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btn = document.getElementById('runMatchBtn');
     const list = document.getElementById('matchResults');
     const empty = document.getElementById('matchEmpty');
+    const limitCard = document.getElementById('usageLimitCard');
     const contextLabel = document.getElementById('matchContextLabel');
+
+    const plan = MatchExtras.getPlan(uid(user), 'client');
+    const usage = MatchExtras.getMatchUsage(uid(user));
+    if (usage.count >= matchLimitFor(user, plan)) {
+      limitCard.style.display = 'block';
+      list.innerHTML = '';
+      empty.style.display = 'none';
+      document.getElementById('matchTabs').style.display = 'none';
+      document.getElementById('matchExtraPanels').innerHTML = '';
+      return;
+    }
+    limitCard.style.display = 'none';
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Analisando compatibilidade...';
@@ -1112,15 +1073,32 @@ document.addEventListener('DOMContentLoaded', async () => {
       allResultsById.clear();
       results.forEach(r => allResultsById.set(r.architect.id, r));
       contextLabel.textContent = project ? `Resultados para o projeto "${project.name}".` : 'Resultados para o seu perfil principal (dados do cadastro).';
+      MatchExtras.recordMatchRun(uid(user));
+      renderPlanCard(user);
       empty.style.display = results.length ? 'none' : 'block';
       if (!results.length) {
         empty.innerHTML = '<p>Nenhum arquiteto compatível encontrado ainda. Complete seu perfil com mais estilos e materiais preferidos.</p>';
       }
-      list.innerHTML = results.map((r, i) => `<div class="result-card" style="grid-template-columns:auto 1fr auto; align-items:start;">${resultCardHtml(r, i, user)}</div>`).join('');
+      list.innerHTML = results.map((r, i) => {
+        const locked = i >= plan.visibleResults;
+        if (!locked) return `<div class="result-card" style="grid-template-columns:auto 1fr auto; align-items:start;">${resultCardHtml(r, i, user)}</div>`;
+        return `
+          <div class="result-card locked-result" style="grid-template-columns:1fr;">
+            <div class="result-blur" style="display:grid; grid-template-columns:auto 1fr auto; gap:20px; align-items:start;">${resultCardHtml(r, i, user)}</div>
+            <div class="lock-overlay">
+              <span class="lock-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg></span>
+              <p>Assine o Premium para ver este arquiteto</p>
+              <button type="button" class="btn btn-primary btn-sm" data-unlock-plan>Assinar Premium</button>
+            </div>
+          </div>`;
+      }).join('');
+      list.querySelectorAll('[data-unlock-plan]').forEach(b => {
+        b.addEventListener('click', () => openUpgrade(user, () => runMatch(user)));
+      });
       document.getElementById('compareBtn').style.display = results.length > 1 ? '' : 'none';
       document.getElementById('exportMatchPdfBtn').style.display = results.length ? '' : 'none';
-      loadValidationStatuses(results);
-      loadResultThumbnails(results);
+      loadValidationStatuses(results.slice(0, plan.visibleResults));
+      loadResultThumbnails(results.slice(0, plan.visibleResults));
       renderMatchTabs(results.length, extra || [], user);
       renderMatchHistory(user);
     } catch (err) {
@@ -1163,6 +1141,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const items = (user.architectProfile && user.architectProfile.portfolio) || [];
     document.getElementById('statPortfolioCount').textContent = items.length;
 
+    const plan = MatchExtras.getPlan(uid(user), 'architect');
+    const atLimit = items.length >= portfolioLimitFor(user, plan);
+    document.getElementById('togglePortfolioForm').style.display = atLimit ? 'none' : '';
+    document.getElementById('portfolioLimitCard').style.display = atLimit ? 'block' : 'none';
+
     if (!items.length) {
       list.innerHTML = emptyStateHtml('Você ainda não adicionou projetos ao portfólio.',
         '<button type="button" class="btn btn-secondary btn-sm" data-empty-add-portfolio>+ Adicionar o primeiro projeto</button>');
@@ -1187,6 +1170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           await MatchAPI.deletePortfolio(btn.dataset.portfolioId);
           const refreshed = await MatchAPI.me();
           renderPortfolio(refreshed);
+          renderPlanCard(refreshed);
         } catch (err) {
           alert(err.message || 'Não foi possível remover o projeto.');
         }
@@ -1194,21 +1178,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  function buildPortfolioStyleChips() {
-    const container = document.getElementById('pStyleChips');
-    container.innerHTML = PROJECT_STYLES.map(style => styleChipHtml(style, false)).join('');
-    container.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-      });
-    });
-  }
-
   function setupPortfolioForm(user) {
     const toggle = document.getElementById('togglePortfolioForm');
     const form = document.getElementById('portfolioForm');
-    buildPortfolioStyleChips();
     toggle.addEventListener('click', () => { form.style.display = form.style.display === 'none' ? 'block' : 'none'; });
 
     let pImageDataUri = '';
@@ -1221,10 +1193,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         await MatchAPI.addPortfolio({
           title: document.getElementById('pTitle').value.trim(),
-          style: document.getElementById('pStyleChips').querySelector('.chip.active')?.dataset.style || undefined,
-          propertyType: document.getElementById('pPropertyType').value || undefined,
-          materialsUsed: document.getElementById('pMaterials').value.split(',').map(s => s.trim()).filter(Boolean),
-          areaM2: document.getElementById('pAreaM2').value || undefined,
           description: document.getElementById('pDescription').value.trim(),
           imageUrl: pImageDataUri || document.getElementById('pImageUrl').value.trim(),
           projectUrl: pProjectDataUri || document.getElementById('pProjectUrl').value.trim(),
@@ -1232,25 +1200,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         const refreshed = await MatchAPI.me();
         renderPortfolio(refreshed);
+        renderPlanCard(refreshed);
         renderOnboardingChecklist(refreshed);
         form.reset();
         form.style.display = 'none';
-        buildPortfolioStyleChips();
         pImageDataUri = ''; pProjectDataUri = '';
         pImageFileCtl?.clear(); pProjectFileCtl?.clear();
       } catch (err) {
         alert(err.message || 'Não foi possível adicionar o projeto.');
       }
     });
-
-    // Quem acabou de se cadastrar como arquiteto cai direto no formulário de
-    // primeiro projeto — é dali que o perfil de match dele nasce agora.
-    if (sessionStorage.getItem('matchia_just_registered') === '1') {
-      sessionStorage.removeItem('matchia_just_registered');
-      activateProfileTab(document.getElementById('architectProfileTabs'), document.getElementById('architectPanel'), 'portfolio');
-      toggle.click();
-      form.scrollIntoView({ behavior: SCROLL_BEHAVIOR, block: 'start' });
-    }
   }
 
   // ---------------- Exportar PDF (impressão do resumo) ----------------
@@ -1355,7 +1314,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ---------------- Comparador lado a lado ----------------
   function compareTableHtml(user) {
-    const visible = lastResults;
+    const plan = MatchExtras.getPlan(uid(user), 'client');
+    const visible = lastResults.slice(0, plan.visibleResults);
     return `
         <table class="compare-table">
           <thead><tr><th>Arquiteto</th>${visible.map(r => `<th>${r.architect.name}</th>`).join('')}</tr></thead>
@@ -1370,7 +1330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               return `<td>${v?.clientConfirmed && v?.architectConfirmed ? '✓ Sim' : '—'}</td>`;
             }).join('')}</tr>
           </tbody>
-        </table>`;
+        </table>${lastResults.length > plan.visibleResults ? '<p style="font-size:0.8rem; color:var(--ink-faint); padding:12px 16px;">Alguns arquitetos do seu match estão bloqueados no plano Gratuito e não entram no comparativo.</p>' : ''}`;
   }
   function setupCompare(user) {
     document.getElementById('compareBtn').addEventListener('click', () => {
@@ -1490,14 +1450,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ---------------- Métricas do perfil ----------------
+  // ---------------- Métricas do perfil (arquiteto Pro) ----------------
   function setupMetrics(user) {
+    document.getElementById('upgradeFromMetricsBtn').addEventListener('click', () =>
+      openUpgrade(user, () => { renderPlanCard(user); renderMetrics(user); }));
     renderMetrics(user);
   }
 
   async function renderMetrics(user) {
-    document.getElementById('metricsUpsell').style.display = 'none';
-    document.getElementById('metricsContent').style.display = 'block';
+    const plan = MatchExtras.getPlan(uid(user), 'architect');
+    const upsell = document.getElementById('metricsUpsell');
+    const content = document.getElementById('metricsContent');
+    if (plan.id !== 'pro') { upsell.style.display = 'block'; content.style.display = 'none'; return; }
+    upsell.style.display = 'none';
+    content.style.display = 'block';
     const statsEl = document.getElementById('metricsStats');
     statsEl.innerHTML = '<p style="font-size:0.86rem; color:var(--ink-faint);"><span class="spinner"></span> Carregando métricas...</p>';
     try {
@@ -1522,8 +1488,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const clientId = form.dataset.caseClient;
       const payload = {
         title: form.querySelector('[name="title"]').value.trim(),
-        style: form.querySelector('[name="style"]').value || undefined,
-        areaM2: form.querySelector('[name="areaM2"]').value || undefined,
         description: form.querySelector('[name="description"]').value.trim(),
         images: form.querySelector('[name="images"]').value.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 4),
       };
@@ -1571,17 +1535,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="form-field full">
               <label>Título do case</label>
               <input type="text" name="title" value="${cs?.title || ''}" required>
-            </div>
-            <div class="form-field">
-              <label>Estilo do projeto</label>
-              <select name="style">
-                <option value="">Não informar</option>
-                ${PROJECT_STYLES.map(s => `<option value="${s}" ${cs?.style === s ? 'selected' : ''}>${s}</option>`).join('')}
-              </select>
-            </div>
-            <div class="form-field">
-              <label>Área (m²)</label>
-              <input type="number" name="areaM2" min="0" step="1" value="${cs?.areaM2 || ''}">
             </div>
             <div class="form-field full">
               <label>Descrição</label>
@@ -1716,11 +1669,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function renderMessages(container, messages, user) {
     const myId = uid(user);
-    container.innerHTML = messages.length ? messages.map(m => `
+    const plan = MatchExtras.getPlan(myId, user.role);
+    const limit = plan.maxVisibleMessages;
+    const visible = messages.length > limit ? messages.slice(-limit) : messages;
+    const hiddenCount = messages.length - visible.length;
+    const limitNote = hiddenCount > 0
+      ? `<div class="chat-limit-note">Plano Gratuito mostra só as últimas ${limit} mensagens desta conversa (${hiddenCount} mais antiga${hiddenCount > 1 ? 's' : ''} oculta${hiddenCount > 1 ? 's' : ''}). <button type="button" class="btn btn-sage btn-sm" id="chatUpgradeBtn">Assinar ${user.role === 'architect' ? 'Pro' : 'Premium'}</button></div>`
+      : '';
+    container.innerHTML = limitNote + (visible.length ? visible.map(m => `
       <div class="chat-bubble ${String(m.from) === String(myId) ? 'mine' : 'theirs'}">
         ${m.text}
         <span class="chat-time">${new Date(m.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
-      </div>`).join('') : '<p style="text-align:center; color:var(--ink-faint); font-size:0.84rem;">Nenhuma mensagem ainda. Diga oi!</p>';
+      </div>`).join('') : '<p style="text-align:center; color:var(--ink-faint); font-size:0.84rem;">Nenhuma mensagem ainda. Diga oi!</p>');
     container.scrollTop = container.scrollHeight;
+    container.querySelector('#chatUpgradeBtn')?.addEventListener('click', () => openUpgrade(user, () => renderMessages(container, messages, user)));
   }
 });
