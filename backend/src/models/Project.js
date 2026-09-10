@@ -14,6 +14,12 @@ const projectSchema = new mongoose.Schema(
     familySize: Number,
     projectGoals: String,
     preferences: String,
+    areaM2: Number,
+    status: {
+      type: String,
+      enum: ["draft", "matching", "in_progress", "completed"],
+      default: "draft",
+    },
   },
   { timestamps: true },
 );

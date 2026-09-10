@@ -3,6 +3,7 @@ import { requireAuth, requireRole } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import {
   addPortfolio,
+  updatePortfolio,
   deletePortfolio,
   deleteMyAccount,
   exportMyData,
@@ -19,6 +20,7 @@ router.get("/me/export", asyncHandler(exportMyData));
 router.get("/me/stats", asyncHandler(getMyStats));
 router.delete("/me", asyncHandler(deleteMyAccount));
 router.post("/portfolio", requireRole("architect"), asyncHandler(addPortfolio));
+router.patch("/portfolio/:id", requireRole("architect"), asyncHandler(updatePortfolio));
 router.delete("/portfolio/:id", requireRole("architect"), asyncHandler(deletePortfolio));
 
 export default router;

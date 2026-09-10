@@ -7,6 +7,9 @@ const projectSchema = new mongoose.Schema(
     description: String,
     imageUrl: String,
     projectUrl: String,
+    styles: [String],
+    materials: [String],
+    areaM2: Number,
     status: {
       type: String,
       enum: ["ongoing", "completed"],

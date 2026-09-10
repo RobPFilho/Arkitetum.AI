@@ -8,6 +8,7 @@ import Timeline from "../models/Timeline.js";
 import CaseStudy from "../models/CaseStudy.js";
 import ProfileView from "../models/ProfileView.js";
 import { notify } from "../services/notificationService.js";
+import { recomputeProfileFromPortfolio } from "../services/portfolioProfile.js";
 
 export function getMe(req, res) {
   res.json(req.user);
@@ -133,8 +134,35 @@ async function notifyClientsArchitectAvailableAgain(architect) {
 
 export async function addPortfolio(req, res) {
   req.user.architectProfile.portfolio.push(req.body);
+  recomputeProfileFromPortfolio(req.user);
   await req.user.save();
   res.status(201).json(req.user.architectProfile.portfolio.at(-1));
+}
+
+/**
+ * Edita uma peça de portfólio já existente (usada pelo drawer do painel).
+ * Mesma lógica de casar por _id, título ou link do `deletePortfolio` — o
+ * portfólio pré-existe a esse recurso e nem toda peça antiga ganhou um _id.
+ */
+export async function updatePortfolio(req, res) {
+  if (req.user.role !== "architect")
+    return res.status(403).json({ error: "Only architects can edit projects" });
+
+  const targetId = String(req.params.id || "");
+  const portfolio = req.user.architectProfile?.portfolio || [];
+  const item = portfolio.find((project) =>
+    String(project?._id || "") === targetId ||
+    String(project?.title || "") === targetId ||
+    String(project?.projectUrl || "") === targetId,
+  );
+  if (!item) return res.status(404).json({ error: "Project not found" });
+
+  const allowed = ["title", "description", "imageUrl", "projectUrl", "status", "styles", "materials", "areaM2"];
+  for (const key of allowed) if (req.body[key] !== undefined) item[key] = req.body[key];
+
+  recomputeProfileFromPortfolio(req.user);
+  await req.user.save();
+  res.json(item);
 }
 
 export async function deletePortfolio(req, res) {
@@ -158,6 +186,7 @@ export async function deletePortfolio(req, res) {
     String(project?.projectUrl || "") !== targetId,
   );
 
+  recomputeProfileFromPortfolio(req.user);
   await req.user.save();
   res.status(200).json({ ok: true });
 }
