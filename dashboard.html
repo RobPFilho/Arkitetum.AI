@@ -140,57 +140,11 @@
 
           <div class="dash-card" id="projectsCard">
             <h3>Meus projetos</h3>
-            <p class="card-lead">Tem mais de uma obra em mente? Cada projeto guarda seu próprio estilo, orçamento e prioridades — rode um match separado para cada um, sem misturar critérios.</p>
-            <div id="projectsList" style="margin:16px 0;"></div>
-            <button type="button" id="toggleProjectForm" class="btn btn-secondary btn-sm">+ Adicionar outro projeto</button>
-            <div id="projectLimitCard" class="usage-limit-card" style="display:none;">
-              <p>Seu plano Gratuito permite até 1 projeto extra além do seu perfil principal.</p>
-              <button type="button" id="upgradeFromProjectBtn" class="btn btn-primary btn-sm">Assinar Premium e ter projetos ilimitados</button>
-            </div>
-            <form id="projectForm" style="display:none; margin-top:20px;">
-              <input type="hidden" id="projEditId">
-              <div class="form-grid">
-                <div class="form-field full">
-                  <label for="projName">Nome do projeto</label>
-                  <input type="text" id="projName" placeholder="Ex.: Reforma do apartamento da praia" required>
-                </div>
-                <div class="form-field">
-                  <label for="projPropertyType">Tipo de imóvel</label>
-                  <select id="projPropertyType">
-                    <option value="Residencial unifamiliar">Residencial unifamiliar</option>
-                    <option value="Apartamento">Apartamento</option>
-                    <option value="Reforma">Reforma</option>
-                    <option value="Interiores">Interiores</option>
-                    <option value="Comercial">Comercial</option>
-                    <option value="Paisagismo">Paisagismo</option>
-                  </select>
-                </div>
-                <div class="form-field">
-                  <label for="projBudgetMin">Orçamento mínimo (R$)</label>
-                  <input type="number" id="projBudgetMin" min="0">
-                </div>
-                <div class="form-field">
-                  <label for="projBudgetMax">Orçamento máximo (R$)</label>
-                  <input type="number" id="projBudgetMax" min="0">
-                </div>
-                <div class="form-field full">
-                  <label>Estilos desejados</label>
-                  <div class="chip-select" id="projStylesChips"></div>
-                </div>
-                <div class="form-field full">
-                  <label for="projMaterials">Materiais preferidos <span class="hint">(separados por vírgula)</span></label>
-                  <input type="text" id="projMaterials" placeholder="Concreto aparente, madeira de demolição">
-                </div>
-                <div class="form-field full">
-                  <label for="projGoals">Objetivos do projeto</label>
-                  <textarea id="projGoals"></textarea>
-                </div>
-              </div>
-              <div style="display:flex; gap:10px;">
-                <button type="submit" class="btn btn-primary" id="projSaveBtn">Salvar projeto</button>
-                <button type="button" class="btn btn-secondary" id="cancelProjectForm">Cancelar</button>
-              </div>
-            </form>
+            <p class="card-lead">Cada projeto guarda seu próprio estilo, metragem e prioridades — o match é feito a partir do projeto que você abrir, não de um perfil único.</p>
+            <button type="button" id="openProjectsDrawerBtn" class="btn btn-primary btn-sm">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+              Meus projetos
+            </button>
           </div>
         </div>
 
@@ -305,53 +259,11 @@
 
           <div class="dash-card">
             <h3>Meu portfólio</h3>
-            <p class="card-lead">Projetos anteriores aumentam sua compatibilidade e visibilidade nos resultados de match.</p>
-            <div id="portfolioList" style="margin:18px 0;"></div>
-            <button id="togglePortfolioForm" class="btn btn-secondary btn-sm">+ Adicionar projeto</button>
-            <div id="portfolioLimitCard" class="usage-limit-card" style="display:none;">
-              <p>Seu plano Gratuito permite até 3 projetos no portfólio.</p>
-              <button id="upgradeFromPortfolioBtn" class="btn btn-primary btn-sm">Assinar Pro e ter portfólio ilimitado</button>
-            </div>
-            <form id="portfolioForm" style="display:none; margin-top:20px;">
-              <div class="form-grid">
-                <div class="form-field full">
-                  <label for="pTitle">Título do projeto</label>
-                  <input type="text" id="pTitle" required>
-                </div>
-                <div class="form-field full">
-                  <label for="pDescription">Descrição</label>
-                  <textarea id="pDescription"></textarea>
-                </div>
-                <div class="form-field full">
-                  <label>Imagem do projeto <span class="hint">(anexe um arquivo ou cole um link abaixo)</span></label>
-                  <div class="file-input-row">
-                    <label class="file-btn" for="pImageFile">Anexar imagem</label>
-                    <input type="file" id="pImageFile" accept="image/*" style="display:none;">
-                    <span class="file-hint">JPG/PNG, até 2MB</span>
-                  </div>
-                  <div class="file-preview" id="pImagePreview"></div>
-                  <input type="url" id="pImageUrl" placeholder="ou cole uma URL de imagem" style="margin-top:10px;">
-                </div>
-                <div class="form-field full">
-                  <label>Arquivo do projeto <span class="hint">(plantas, PDF, portfólio completo...)</span></label>
-                  <div class="file-input-row">
-                    <label class="file-btn" for="pProjectFile">Anexar arquivo</label>
-                    <input type="file" id="pProjectFile" accept=".pdf,image/*,.zip,.dwg" style="display:none;">
-                    <span class="file-hint">PDF, imagem ou ZIP, até 2MB</span>
-                  </div>
-                  <div class="file-preview" id="pProjectFilePreview"></div>
-                  <input type="url" id="pProjectUrl" placeholder="ou cole um link do projeto" style="margin-top:10px;">
-                </div>
-                <div class="form-field">
-                  <label for="pStatus">Status</label>
-                  <select id="pStatus">
-                    <option value="completed">Concluído</option>
-                    <option value="ongoing">Em andamento</option>
-                  </select>
-                </div>
-              </div>
-              <button type="submit" class="btn btn-primary">Salvar projeto</button>
-            </form>
+            <p class="card-lead">O estilo, os materiais e a metragem de cada peça são o que alimenta o match — não um perfil escolhido uma vez só.</p>
+            <button type="button" id="openPortfolioDrawerBtn" class="btn btn-primary btn-sm">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+              Meu portfólio
+            </button>
           </div>
 
           <div class="dash-card" id="caseStudiesCard" style="display:none;">
@@ -457,6 +369,7 @@
 <script src="assets/js/extras.js"></script>
 <script src="assets/js/color-wheel.js"></script>
 <script src="assets/js/checkout.js"></script>
+<script src="assets/js/drawer.js"></script>
 <script src="assets/js/style-share.js"></script>
 <script src="assets/js/theme.js"></script>
 <script src="assets/js/site.js"></script>

@@ -72,6 +72,7 @@ const MatchAPI = (() => {
     exportMyData: () => request('/dashboard/me/export', { auth: true }),
     deleteMyAccount: () => request('/dashboard/me', { method: 'DELETE', auth: true }),
     addPortfolio: (payload) => request('/dashboard/portfolio', { method: 'POST', auth: true, body: payload }),
+    updatePortfolio: (id, payload) => request(`/dashboard/portfolio/${encodeURIComponent(id)}`, { method: 'PATCH', auth: true, body: payload }),
     deletePortfolio: (id) => request(`/dashboard/portfolio/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true }),
     materials: () => request('/materials'),
     architect: (id) => request(`/architects/${id}`),
