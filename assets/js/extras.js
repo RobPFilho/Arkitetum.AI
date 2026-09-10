@@ -160,8 +160,110 @@ const MatchExtras = (() => {
     return usage;
   }
 
+  // ---------------- Chips: multi-seleção (reusado no cadastro, no drawer de
+  // projetos do cliente e no drawer de portfólio do arquiteto) ----------------
+  function buildChipList(container, items, { max } = {}) {
+    container.innerHTML = '';
+    items.forEach(item => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = item.thumb ? 'chip has-thumb' : 'chip';
+      chip.dataset.value = item.value;
+      chip.setAttribute('aria-pressed', 'false');
+      if (item.thumb) {
+        chip.innerHTML = `<img class="chip-thumb" src="${item.thumb}" alt="" loading="lazy">${item.label}`;
+      } else {
+        chip.textContent = item.label;
+      }
+      chip.addEventListener('click', () => {
+        const activeCount = container.querySelectorAll('.chip.active').length;
+        if (!chip.classList.contains('active') && max && activeCount >= max) return;
+        chip.classList.toggle('active');
+        chip.setAttribute('aria-pressed', String(chip.classList.contains('active')));
+      });
+      container.appendChild(chip);
+    });
+  }
+  function chipValues(container) {
+    return Array.from(container.querySelectorAll('.chip.active')).map(c => c.dataset.value);
+  }
+
+  /** Botão "+ Outros..." — permite digitar um valor fora da lista sugerida. */
+  function addChipAdder(container, { max } = {}) {
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'chip-add';
+    addBtn.textContent = '+ Outros...';
+
+    addBtn.addEventListener('click', () => {
+      addBtn.style.display = 'none';
+      const group = document.createElement('span');
+      group.className = 'chip-input-group';
+      group.innerHTML = '<input type="text" placeholder="Digite e confirme" maxlength="40" aria-label="Novo valor"><button type="button" class="confirm" title="Adicionar" aria-label="Adicionar">✓</button><button type="button" class="cancel" title="Cancelar" aria-label="Cancelar">×</button>';
+      container.insertBefore(group, addBtn);
+      const input = group.querySelector('input');
+      input.focus();
+
+      const commit = () => {
+        const value = input.value.trim();
+        if (value) {
+          const activeCount = container.querySelectorAll('.chip.active').length;
+          if (!max || activeCount < max) {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'chip custom active';
+            chip.textContent = value;
+            chip.dataset.value = value;
+            chip.addEventListener('click', () => {
+              const count = container.querySelectorAll('.chip.active').length;
+              if (!chip.classList.contains('active') && max && count >= max) return;
+              chip.classList.toggle('active');
+            });
+            container.insertBefore(chip, addBtn);
+          }
+        }
+        group.remove();
+        addBtn.style.display = '';
+      };
+      const cancel = () => { group.remove(); addBtn.style.display = ''; };
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); commit(); }
+        if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+      });
+      group.querySelector('.confirm').addEventListener('click', commit);
+      group.querySelector('.cancel').addEventListener('click', cancel);
+    });
+
+    container.appendChild(addBtn);
+  }
+
+  // ---------------- Chips: seleção única (estilo "múltipla escolha") ----------------
+  function buildSingleChipList(container, items) {
+    container.innerHTML = '';
+    items.forEach(item => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip';
+      chip.textContent = item;
+      chip.dataset.value = item;
+      chip.setAttribute('aria-pressed', 'false');
+      chip.addEventListener('click', () => {
+        const wasActive = chip.classList.contains('active');
+        container.querySelectorAll('.chip').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-pressed', 'false'); });
+        if (!wasActive) { chip.classList.add('active'); chip.setAttribute('aria-pressed', 'true'); }
+      });
+      container.appendChild(chip);
+    });
+  }
+  function singleChipValue(container) {
+    const el = container.querySelector('.chip.active');
+    return el ? el.dataset.value : '';
+  }
+
   return {
     PALETTE, getStyleProfile, setStyleProfile, getProjectMeta, setProjectMeta,
     generateMaterialCombos, setupFileInput, PLANS, getPlan, setPlan, getMatchUsage, recordMatchRun,
+    buildChipList, chipValues, addChipAdder, buildSingleChipList, singleChipValue,
   };
 })();
