@@ -64,7 +64,7 @@
         Não foi possível conectar à API. Confira se o back-end (<a href="https://github.com/RobPFilho/Arkitetum.AI" target="_blank" rel="noopener">Arkitetum.AI</a>) está rodando em <code id="apiBaseLabel"></code>.
       </div>
 
-      <div class="role-toggle">
+      <div class="role-toggle" id="roleToggle">
         <button type="button" id="btnCliente" class="active" data-role="client">Sou cliente</button>
         <button type="button" id="btnArquiteto" data-role="architect">Sou arquiteto</button>
       </div>
@@ -74,6 +74,10 @@
 
       <form id="cadastroForm" novalidate>
         <div class="form-grid">
+          <div class="form-field full" id="storeNameField" style="display:none;">
+            <label for="storeName">Nome da loja</label>
+            <input type="text" id="storeName" placeholder="Como sua loja aparece pros clientes">
+          </div>
           <div class="form-field full">
             <label for="name">Nome completo</label>
             <input type="text" id="name" name="name" required autocomplete="name">
@@ -107,6 +111,7 @@
 
         <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Criar conta</button>
         <p class="form-note">Já tem uma conta? <a href="login.html">Entrar</a></p>
+        <p class="form-note" id="storeLinkNote"><a href="cadastro.html?tipo=loja">Sou uma loja parceira</a></p>
       </form>
     </div>
   </div>

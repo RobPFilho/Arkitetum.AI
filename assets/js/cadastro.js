@@ -10,18 +10,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   apiBaseLabel.textContent = MatchAPI.base();
 
+  const roleLabels = { client: 'cliente', architect: 'arquiteto', store: 'loja' };
   let role = 'client';
   function setRole(next) {
     role = next;
     btnCliente.classList.toggle('active', role === 'client');
     btnArquiteto.classList.toggle('active', role === 'architect');
-    submitBtn.textContent = role === 'client' ? 'Criar conta de cliente' : 'Criar conta de arquiteto';
+    submitBtn.textContent = `Criar conta de ${roleLabels[role]}`;
+    document.getElementById('storeNameField').style.display = role === 'store' ? '' : 'none';
   }
   btnCliente.addEventListener('click', () => setRole('client'));
   btnArquiteto.addEventListener('click', () => setRole('architect'));
 
   const params = new URLSearchParams(location.search);
-  setRole(params.get('tipo') === 'arquiteto' ? 'architect' : 'client');
+  const tipo = params.get('tipo');
+  if (tipo === 'loja') {
+    // Loja parceira não escolhe papel pelo toggle -- chega direto pelo link
+    // discreto "Sou uma loja parceira".
+    document.getElementById('roleToggle').style.display = 'none';
+    document.getElementById('storeLinkNote').style.display = 'none';
+    setRole('store');
+  } else {
+    setRole(tipo === 'arquiteto' ? 'architect' : 'client');
+  }
 
   function val(id) { return document.getElementById(id).value.trim(); }
 
@@ -52,16 +63,20 @@ document.addEventListener('DOMContentLoaded', () => {
       bio: val('bio') || undefined,
       referredBy: params.get('ref') || undefined,
     };
+    if (role === 'store') payload.storeName = val('storeName');
+
+    const registerFn = { client: MatchAPI.registerClient, architect: MatchAPI.registerArchitect, store: MatchAPI.registerStore }[role];
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Criando conta...';
     try {
-      const res = role === 'client' ? await MatchAPI.registerClient(payload) : await MatchAPI.registerArchitect(payload);
+      const res = await registerFn(payload);
       MatchAPI.setSession(res.token, res.user);
       formSuccess.textContent = 'Conta criada com sucesso! Redirecionando para o seu painel...';
       formSuccess.classList.add('show');
       // Sinaliza pro painel abrir direto o menu de "primeiro projeto"
-      // (cliente) ou de "primeira peça de portfólio" (arquiteto).
+      // (cliente), "primeira peça de portfólio" (arquiteto) ou "primeiro
+      // produto" (loja).
       sessionStorage.setItem('matchia_just_registered', '1');
       setTimeout(() => { location.href = 'dashboard.html'; }, 900);
     } catch (err) {
@@ -72,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (err.offline) apiBanner.classList.add('show');
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = role === 'client' ? 'Criar conta de cliente' : 'Criar conta de arquiteto';
+      submitBtn.textContent = `Criar conta de ${roleLabels[role]}`;
     }
   });
 });
