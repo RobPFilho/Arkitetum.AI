@@ -1205,7 +1205,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 
 /* Vitrine "projetos que já viraram match" (carrossel + ranking), no lugar
    do showcase 3D em index.html/projetos.html. */
-.showcase-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 32px; align-items: start; }
+.showcase-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 32px; align-items: start; }
 .showcase-carousel { position: relative; }
 .showcase-track {
   display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px;
@@ -1239,7 +1239,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .showcase-rank-info span { font-size: 0.76rem; color: var(--ink-faint); }
 .showcase-empty { font-size: 0.86rem; color: var(--ink-faint); }
 @media (max-width: 900px) {
-  .showcase-grid { grid-template-columns: 1fr; }
+  .showcase-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 .share-card-modal { max-width: 460px; text-align: left; position: relative; max-height: 90vh; overflow-y: auto; }

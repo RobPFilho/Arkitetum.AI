@@ -10,19 +10,22 @@ visual e da documentação do TCC, com integração pronta para o back-end de re
 ## Estrutura
 
 ```
-index.html         Landing page (hero, como funciona, match inteligente, 3D, CTA)
-cadastro.html       Cadastro de cliente/arquiteto (POST /api/auth/register/:role)
+index.html         Landing page (hero, como funciona, vitrine de projetos + ranking, CTA)
+cadastro.html       Cadastro enxuto de cliente/arquiteto/loja (POST /api/auth/register/:role)
 login.html          Login (POST /api/auth/login)
-dashboard.html       Painel autenticado — match para clientes, portfólio para arquitetos
+dashboard.html       Painel autenticado — drawer de projetos/portfólio/produtos por papel
 arquiteto.html       Perfil público de arquiteto (GET /api/architects/:id)
-projetos.html         IA + estudo volumétrico 3D interativo + banco de materiais
+projetos.html         IA sob medida + vitrine de projetos + banco de materiais
 sobre.html           Empresa, modelo de negócio, mercado e time (a partir do TCC)
 blog.html            Blog institucional (stub)
 assets/css/style.css  Design system (cores, tipografia, componentes)
 assets/js/api.js      Cliente da API (fetch + sessão em localStorage)
+assets/js/drawer.js   Menu lateral genérico (lista → detalhe) usado no painel
+assets/js/showcase.js Carrossel de projetos + ranking (home/projetos)
 assets/js/*.js         Lógica de cada página
 assets/img/mark.svg   Símbolo da marca (casa + pessoas + arco tecnológico)
-assets/3d/            Estudo volumétrico 3D interativo (three.js), embutido via <iframe>
+assets/3d/            Estudo volumétrico 3D (three.js) — não é mais referenciado por
+                       nenhuma página, ver "Reformulação pós-mentorias v2" abaixo
 ```
 
 ## Identidade visual
@@ -548,3 +551,51 @@ Só não fica no mesmo lugar do mockup (que mostra uma tela dedicada
 "Projeto de Ana Beatriz / Sugestões") — na implementação real, fica dentro
 de cada resultado de match, o que faz mais sentido: a sugestão já nasce
 amarrada ao arquiteto específico que vai executar o projeto.
+
+## Reformulação pós-mentorias v2: cadastro enxuto, match por projeto/portfólio, drawer, Pro real, comissão, lojas parceiras
+
+Rodada grande que supera várias descrições acima (mantidas como histórico, não como
+estado atual). Resumo do que mudou de fato:
+
+- **Cadastro** (`cadastro.html`): não é mais um wizard de 8 etapas — é um único passo
+  (nome, e-mail, senha, foto de perfil, bio) pros três papéis (cliente, arquiteto e,
+  a partir desta rodada, **loja parceira** via `cadastro.html?tipo=loja`). O
+  questionário completo de estilo/orçamento/materiais saiu do cadastro; agora é dado
+  de **projeto** (cliente) ou de **peça de portfólio** (arquiteto), criado depois do
+  login.
+- **Match por projeto/portfólio, não por perfil**: `POST /api/matches/run` agora exige
+  `projectId` (não existe mais "match pelo perfil geral" — não sobra dado de perfil
+  pra isso). `scoreProjectToArchitect` (`scoringEngine.js`) compara o projeto contra
+  **cada peça** do portfólio do arquiteto e usa a que melhor combina como motivo do
+  match, com um fator novo de proximidade de metragem (`areaM2`).
+- **Painel vira um menu lateral deslizante** (`assets/js/drawer.js`, `ProjectDrawer`):
+  lista → detalhe, no espírito do menu de conversas do Claude Desktop — substitui os
+  formulários inline de "Meus projetos" (cliente), "Meu portfólio" (arquiteto) e
+  "Meus produtos" (loja).
+- **Assinatura Pro real do arquiteto**: `architectProfile.subscriptionTier` (real, no
+  back-end) substitui a simulação 100% front-end que existia em
+  `MatchExtras.PLANS`/`getPlan`/`setPlan` (removida). Cliente é **sempre gratuito**,
+  sem plano, sem limite de busca, sem resultado bloqueado — isso saiu do produto
+  inteiro. `planos.html` foi reescrita: só existe o plano do arquiteto (Free vs Pro),
+  e o Pro dá um **bônus** de pontos no ranking (`architectController.listArchitects`),
+  nunca um topo garantido — mérito real (nota + projetos fechados) sempre pode
+  superar um Pro fraco.
+- **Comissão real**: quando cliente e arquiteto confirmam mutuamente que um projeto
+  fechou pela plataforma (`Validation`), uma `Commission` simulada é criada e o
+  contador `architectProfile.closedProjectsCount` sobe (alimenta o ranking). Aba
+  "Comissões" no painel do arquiteto.
+- **Lojas parceiras** (novo papel `role: "store"`): loja se cadastra, cadastra os
+  próprios produtos (`StoreProduct` — nunca por scraping do site dela), e a IA
+  (`storeMatchService.suggestProductsForProject` + `geminiService.extractProjectKeywords`)
+  sugere produtos que combinam com o projeto do cliente. Cliente confirma
+  explicitamente "Simular compra" (`StoreReferral`, nunca por rastreamento passivo) —
+  aba "Indicações" no painel da loja.
+- **Vitrine sem 3D**: `assets/3d/mansion-3d.html` não é mais referenciado em nenhuma
+  página (arquivo continua no repo, só não é mais exibido). Home e `projetos.html`
+  mostram um carrossel de projetos reais com match verificado
+  (`GET /api/case-studies/featured`) + um top-5 do ranking de arquitetos, lado a lado
+  (`assets/js/showcase.js`).
+
+Consequência prática pra quem for ler as seções acima deste README: qualquer menção a
+"plano Gratuito do cliente", "buscas por mês", "wizard de N etapas" ou "3D na home" já
+não reflete o estado atual do produto — reflete o estado em que foi escrita.
