@@ -1,34 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const btnCliente = document.getElementById('btnPlanCliente');
-  const btnArquiteto = document.getElementById('btnPlanArquiteto');
-  const clientPlans = document.getElementById('clientPlans');
-  const architectPlans = document.getElementById('architectPlans');
   const user = MatchAPI.currentUser();
-
-  function setView(role) {
-    btnCliente.classList.toggle('active', role === 'client');
-    btnArquiteto.classList.toggle('active', role === 'architect');
-    clientPlans.style.display = role === 'client' ? 'grid' : 'none';
-    architectPlans.style.display = role === 'architect' ? 'grid' : 'none';
-  }
-  btnCliente.addEventListener('click', () => setView('client'));
-  btnArquiteto.addEventListener('click', () => setView('architect'));
-  if (user && user.role === 'architect') setView('architect');
 
   function refreshButtons() {
     document.querySelectorAll('[data-plan]').forEach(btn => {
-      const [role, planId] = btn.dataset.plan.split(':');
+      const [, planId] = btn.dataset.plan.split(':');
       if (!user) {
-        btn.textContent = planId === 'free' ? 'Criar conta gratuita' : `Assinar ${MatchExtras.PLANS[role][planId].label}`;
+        btn.textContent = planId === 'free' ? 'Criar conta gratuita' : 'Assinar Pro';
         return;
       }
-      if (user.role !== role) {
-        btn.textContent = `Plano para conta de ${role === 'client' ? 'cliente' : 'arquiteto'}`;
+      if (user.role !== 'architect') {
+        btn.textContent = 'Plano para conta de arquiteto';
         btn.classList.add('btn-secondary');
         btn.classList.remove('btn-primary');
         return;
       }
-      const current = MatchExtras.getPlan(user.id, role).id;
+      const current = user.architectProfile?.subscriptionTier || 'free';
       if (current === planId) {
         btn.textContent = '✓ Plano atual';
         btn.classList.add('btn-secondary');
@@ -38,42 +24,60 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.classList.add('btn-secondary');
         btn.classList.remove('btn-primary');
       } else {
-        btn.textContent = `Assinar ${MatchExtras.PLANS[role][planId].label}`;
+        btn.textContent = 'Assinar Pro';
         btn.classList.add('btn-primary');
         btn.classList.remove('btn-secondary');
       }
     });
   }
-  refreshButtons();
+
+  // O plano do usuário logado vem do próprio token/cache local, que pode
+  // estar desatualizado -- busca o perfil fresco pra não mostrar "Plano
+  // atual" errado logo após um upgrade feito em outra aba/sessão.
+  (async () => {
+    if (user && user.role === 'architect') {
+      try {
+        const fresh = await MatchAPI.me();
+        user.architectProfile = fresh.architectProfile;
+      } catch { /* usa o que já tinha em cache */ }
+    }
+    refreshButtons();
+  })();
 
   document.querySelectorAll('[data-plan]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const [role, planId] = btn.dataset.plan.split(':');
+      const [, planId] = btn.dataset.plan.split(':');
 
       if (!user) {
-        location.href = `cadastro.html?tipo=${role === 'client' ? 'cliente' : 'arquiteto'}`;
+        location.href = 'cadastro.html?tipo=arquiteto';
         return;
       }
-      if (user.role !== role) return;
+      if (user.role !== 'architect') return;
 
-      const plan = MatchExtras.PLANS[role][planId];
-      const current = MatchExtras.getPlan(user.id, role).id;
+      const current = user.architectProfile?.subscriptionTier || 'free';
       if (current === planId) return;
 
       if (planId === 'free') {
-        MatchExtras.setPlan(user.id, 'free');
-        refreshButtons();
+        MatchAPI.setArchitectSubscription('free').then(() => {
+          user.architectProfile = { ...user.architectProfile, subscriptionTier: 'free' };
+          refreshButtons();
+        }).catch(err => alert(err.message || 'Não foi possível voltar para o Gratuito agora.'));
         return;
       }
 
       CheckoutModal.open({
-        name: `Plano ${plan.label}`,
-        desc: role === 'client' ? 'Buscas de match ilimitadas e todos os arquitetos do resultado.' : 'Portfólio ilimitado e selo Pro no seu painel.',
-        price: plan.price,
-      }, () => {
-        MatchExtras.setPlan(user.id, planId);
-        refreshButtons();
-        alert(`Plano ${plan.label} ativado! Veja no seu painel.`);
+        name: 'Plano Pro',
+        desc: 'Portfólio ilimitado, selo Pro e um bônus de prioridade nos resultados.',
+        price: 49,
+      }, async () => {
+        try {
+          await MatchAPI.setArchitectSubscription('pro');
+          user.architectProfile = { ...user.architectProfile, subscriptionTier: 'pro' };
+          refreshButtons();
+          alert('Plano Pro ativado! Veja no seu painel.');
+        } catch (err) {
+          alert(err.message || 'Não foi possível ativar o Pro agora.');
+        }
       });
     });
   });
