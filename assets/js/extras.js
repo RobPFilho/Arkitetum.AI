@@ -110,56 +110,6 @@ const MatchExtras = (() => {
     return { clear };
   }
 
-  /**
-   * Assinatura (freemium) — o back-end Arkitetum.AI não tem gateway de pagamento,
-   * então isso é uma simulação client-side: nenhuma cobrança real acontece em
-   * nenhum momento. O "checkout" só existe para demonstrar a régua de planos do
-   * modelo de negócio. Para produção de verdade, isso precisa virar um campo real
-   * no schema do User + integração com um gateway (Stripe, Mercado Pago...) e a
-   * checagem de limite tem que ser validada no back-end, não só no navegador.
-   */
-  const PLANS = {
-    client: {
-      free: { label: 'Gratuito', price: 0, matchesPerMonth: 3, visibleResults: 2, maxExtraProjects: 1, maxVisibleMessages: 5 },
-      premium: { label: 'Premium', price: 29, matchesPerMonth: Infinity, visibleResults: 4, maxExtraProjects: Infinity, maxVisibleMessages: Infinity },
-    },
-    architect: {
-      free: { label: 'Gratuito', price: 0, maxPortfolio: 3, maxVisibleMessages: 5 },
-      pro: { label: 'Pro', price: 49, maxPortfolio: Infinity, badge: true, maxVisibleMessages: Infinity },
-    },
-  };
-
-  const planKey = (userId) => `matchia_plan_${userId}`;
-  const usageKey = (userId) => `matchia_match_usage_${userId}`;
-
-  function getPlan(userId, role) {
-    const stored = localStorage.getItem(planKey(userId));
-    const fallback = role === 'architect' ? 'free' : 'free';
-    const id = stored || fallback;
-    return { id, ...(PLANS[role] || PLANS.client)[id] };
-  }
-  function setPlan(userId, planId) {
-    localStorage.setItem(planKey(userId), planId);
-  }
-
-  function monthKey() {
-    const d = new Date();
-    return `${d.getFullYear()}-${d.getMonth()}`;
-  }
-  function getMatchUsage(userId) {
-    try {
-      const data = JSON.parse(localStorage.getItem(usageKey(userId)));
-      if (!data || data.month !== monthKey()) return { month: monthKey(), count: 0 };
-      return data;
-    } catch { return { month: monthKey(), count: 0 }; }
-  }
-  function recordMatchRun(userId) {
-    const usage = getMatchUsage(userId);
-    usage.count += 1;
-    localStorage.setItem(usageKey(userId), JSON.stringify(usage));
-    return usage;
-  }
-
   // ---------------- Chips: multi-seleção (reusado no cadastro, no drawer de
   // projetos do cliente e no drawer de portfólio do arquiteto) ----------------
   function buildChipList(container, items, { max } = {}) {
@@ -286,7 +236,7 @@ const MatchExtras = (() => {
 
   return {
     PALETTE, getStyleProfile, setStyleProfile, getProjectMeta, setProjectMeta,
-    generateMaterialCombos, setupFileInput, PLANS, getPlan, setPlan, getMatchUsage, recordMatchRun,
+    generateMaterialCombos, setupFileInput,
     buildChipList, chipValues, addChipAdder, buildSingleChipList, singleChipValue, trapFocus,
   };
 })();
