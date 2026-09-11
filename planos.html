@@ -5,15 +5,15 @@
 <script>try{var t=localStorage.getItem('matchia_theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Planos — match.IA</title>
-<meta name="description" content="Conheça os planos gratuito e premium do match.IA para clientes e arquitetos.">
+<meta name="description" content="Para clientes, o match.IA é sempre gratuito. Conheça o plano Pro para arquitetos e como a plataforma se sustenta.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="match.IA">
 <meta property="og:title" content="Planos — match.IA">
-<meta property="og:description" content="Conheça os planos gratuito e premium do match.IA para clientes e arquitetos.">
+<meta property="og:description" content="Para clientes, o match.IA é sempre gratuito. Conheça o plano Pro para arquitetos e como a plataforma se sustenta.">
 <meta property="og:image" content="assets/img/mark.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Planos — match.IA">
-<meta name="twitter:description" content="Conheça os planos gratuito e premium do match.IA para clientes e arquitetos.">
+<meta name="twitter:description" content="Para clientes, o match.IA é sempre gratuito. Conheça o plano Pro para arquitetos e como a plataforma se sustenta.">
 <meta name="twitter:image" content="assets/img/mark.png">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="manifest" href="manifest.json">
@@ -55,89 +55,46 @@
   <section class="hero" style="padding-bottom:20px;">
     <div class="container center" style="max-width:680px;">
       <span class="eyebrow">Planos</span>
-      <h1>Comece grátis, cresça quando fizer sentido</h1>
-      <p class="lead" style="margin:0 auto;">O match.IA é gratuito para começar — tanto para quem procura um arquiteto quanto para quem projeta. Os planos pagos existem para quem quer usar a plataforma sem limites.</p>
+      <h1>Para clientes, o match.IA é e sempre será gratuito</h1>
+      <p class="lead" style="margin:0 auto;">Quem procura um arquiteto nunca paga nada, nunca vê um limite e nunca esbarra num paywall — em nenhuma etapa. O plano abaixo é só para arquitetos.</p>
     </div>
   </section>
 
   <section class="section" style="padding-top:20px;">
     <div class="container">
-      <div class="plan-toggle">
-        <button type="button" id="btnPlanCliente" class="active" data-role="client">Para clientes</button>
-        <button type="button" id="btnPlanArquiteto" data-role="architect">Para arquitetos</button>
-      </div>
-
-      <!-- PLANOS DO CLIENTE -->
-      <div id="clientPlans" class="pricing-grid reveal">
-        <div class="pricing-card">
-          <h3>Gratuito</h3>
-          <p class="plan-desc">Para quem quer testar o match antes de decidir.</p>
-          <div class="plan-price">R$0</div>
-          <ul>
-            <li>3 buscas de match por mês</li>
-            <li>Veja os 2 arquitetos mais compatíveis por busca</li>
-            <li>1 projeto extra além do seu perfil principal</li>
-            <li>Últimas 5 mensagens de cada conversa</li>
-            <li>Questionário completo de estilo e projeto</li>
-            <li>Resumo do projeto gerado por IA</li>
-            <li class="unavailable">Ver todos os 4 arquitetos do resultado</li>
-            <li class="unavailable">Buscas e projetos ilimitados</li>
-          </ul>
-          <button type="button" class="btn btn-secondary btn-block" data-plan="client:free">Plano atual</button>
-        </div>
-        <div class="pricing-card featured">
-          <span class="plan-badge-ribbon">Mais popular</span>
-          <h3>Premium</h3>
-          <p class="plan-desc">Para quem está decidido a encontrar o arquiteto certo agora.</p>
-          <div class="plan-price">R$29<span>/mês</span></div>
-          <ul>
-            <li>Buscas de match ilimitadas</li>
-            <li>Veja os 4 arquitetos mais compatíveis por busca</li>
-            <li>Projetos ilimitados (uma busca por projeto)</li>
-            <li>Histórico completo de mensagens</li>
-            <li>Questionário completo de estilo e projeto</li>
-            <li>Resumo do projeto gerado por IA</li>
-            <li>Suporte prioritário por e-mail</li>
-          </ul>
-          <button type="button" class="btn btn-primary btn-block" data-plan="client:premium">Assinar Premium</button>
-        </div>
-      </div>
-
-      <!-- PLANOS DO ARQUITETO -->
-      <div id="architectPlans" class="pricing-grid reveal" style="display:none;">
+      <div id="architectPlans" class="pricing-grid reveal">
         <div class="pricing-card">
           <h3>Gratuito</h3>
           <p class="plan-desc">Para começar a aparecer nos resultados de match.</p>
           <div class="plan-price">R$0</div>
           <ul>
-            <li>Perfil completo com estilos e especialidades</li>
-            <li>Até 3 projetos no portfólio</li>
-            <li>Perfil de estilo (paleta de cores e palavras-chave)</li>
-            <li>Apareça nos resultados de compatibilidade</li>
+            <li>Perfil e portfólio completos</li>
+            <li>Até 3 peças no portfólio</li>
+            <li>Apareça nos resultados de compatibilidade, por mérito</li>
             <li>Últimas 5 mensagens de cada conversa</li>
             <li class="unavailable">Portfólio ilimitado</li>
-            <li class="unavailable">Selo Pro no perfil</li>
+            <li class="unavailable">Selo Pro e prioridade nos resultados</li>
           </ul>
           <button type="button" class="btn btn-secondary btn-block" data-plan="architect:free">Plano atual</button>
         </div>
         <div class="pricing-card featured">
           <span class="plan-badge-ribbon">Recomendado</span>
           <h3>Pro</h3>
-          <p class="plan-desc">Para quem vive de projetos fechados pela plataforma.</p>
+          <p class="plan-desc">Para quem quer mais visibilidade enquanto constrói seu histórico na plataforma.</p>
           <div class="plan-price">R$49<span>/mês</span></div>
           <ul>
             <li>Tudo do plano Gratuito</li>
-            <li>Portfólio ilimitado de projetos</li>
+            <li>Portfólio ilimitado de peças</li>
             <li>Histórico completo de mensagens</li>
-            <li>Selo "Pro" visível no seu painel</li>
-            <li>Prioridade no suporte</li>
+            <li>Selo "Pro" visível no seu perfil</li>
+            <li>Prioridade nos resultados — um bônus, não um topo garantido: mérito real (nota, histórico de projetos fechados) sempre conta mais</li>
           </ul>
           <button type="button" class="btn btn-primary btn-block" data-plan="architect:pro">Assinar Pro</button>
         </div>
       </div>
 
       <p class="center reveal" style="margin-top:32px; font-size:0.82rem; color:var(--ink-faint); max-width:560px; margin-left:auto; margin-right:auto;">
-        O selo Pro hoje é uma vitrine do seu plano dentro do próprio painel — ele ainda não influencia a pontuação de compatibilidade calculada pelo motor de match.
+        O Pro nunca muda a % de compatibilidade que o cliente vê — isso continua calculado só pelo quanto seu portfólio combina com o projeto dele.
       </p>
     </div>
   </section>
@@ -145,17 +102,45 @@
   <section class="section section-alt">
     <div class="container" style="max-width:820px;">
       <div class="section-head reveal">
+        <span class="eyebrow">Modelo de negócio</span>
+        <h2>Como o match.IA se sustenta</h2>
+        <p>Nenhuma cobrança abaixo é real — este é um projeto acadêmico (TCC), sem gateway de pagamento.</p>
+      </div>
+      <div class="reveal" style="display:flex; flex-direction:column; gap:18px;">
+        <div class="dash-card">
+          <h3 style="font-size:1rem;">1. Assinatura Pro do arquiteto</h3>
+          <p style="margin:0; font-size:0.9rem;">Um valor mensal baixo, opcional, que dá mais visibilidade a quem está construindo seu histórico na plataforma — nunca substitui o mérito, só soma a ele.</p>
+        </div>
+        <div class="dash-card">
+          <h3 style="font-size:1rem;">2. Comissão quando um projeto fecha</h3>
+          <p style="margin:0; font-size:0.9rem;">Quando cliente e arquiteto confirmam que o projeto saiu do papel pela plataforma, uma pequena comissão simulada é registrada — o arquiteto só "paga" quando o match realmente vira negócio.</p>
+        </div>
+        <div class="dash-card">
+          <h3 style="font-size:1rem;">3. Comissão com lojas parceiras</h3>
+          <p style="margin:0; font-size:0.9rem;">Durante o projeto, a IA identifica produtos (materiais, móveis, iluminação) que combinam com o que está sendo desenvolvido e sugere opções de lojas parceiras — a plataforma recebe uma comissão sobre a indicação. Cliente e arquiteto nunca pagam nada por isso.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container" style="max-width:820px;">
+      <div class="section-head reveal">
         <span class="eyebrow">Perguntas frequentes</span>
         <h2>Antes de assinar</h2>
       </div>
       <div class="reveal" style="display:flex; flex-direction:column; gap:18px;">
+        <div class="dash-card">
+          <h3 style="font-size:1rem;">Um arquiteto Pro sempre aparece na frente?</h3>
+          <p style="margin:0; font-size:0.9rem;">Não. O Pro dá um bônus de pontos na ordenação, mas a nota, o histórico de projetos fechados pela plataforma e as avaliações contam mais — um perfil free com mérito melhor continua na frente de um Pro fraco.</p>
+        </div>
         <div class="dash-card">
           <h3 style="font-size:1rem;">Posso cancelar quando quiser?</h3>
           <p style="margin:0; font-size:0.9rem;">Sim. Como é uma assinatura mensal, você pode voltar para o plano gratuito a qualquer momento pelo seu painel.</p>
         </div>
         <div class="dash-card">
           <h3 style="font-size:1rem;">O plano gratuito é limitado para sempre?</h3>
-          <p style="margin:0; font-size:0.9rem;">Sim, o plano gratuito não expira — ele só tem os limites de uso mensal descritos acima.</p>
+          <p style="margin:0; font-size:0.9rem;">Sim, o plano gratuito não expira — ele só tem os limites descritos acima.</p>
         </div>
         <div class="dash-card">
           <h3 style="font-size:1rem;">Isso é uma cobrança real?</h3>
