@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     refreshUnreadBadge('architectUnreadBadge');
     renderPendingValidations();
     setupMetrics(me);
+    renderCommissions();
     setupCaseStudies(me);
     renderCaseStudies(me);
   }
@@ -1656,6 +1657,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
     } catch (err) {
       container.innerHTML = `<p style="font-size:0.86rem; color:var(--ink-faint);">${err.message || 'Não foi possível carregar as avaliações.'}</p>`;
+    }
+  }
+
+  // ---------------- Comissões (arquiteto) ----------------
+  async function renderCommissions() {
+    const list = document.getElementById('commissionsList');
+    try {
+      const { total, count, commissions } = await MatchAPI.myCommissions();
+      document.getElementById('commissionTotal').textContent = `R$${total}`;
+      document.getElementById('commissionCount').textContent = count;
+      list.innerHTML = commissions.length
+        ? `<div class="tag-row" style="flex-direction:column; align-items:stretch; gap:8px;">${commissions.map(c => `
+          <div class="material-card" style="padding:14px;">
+            <div class="info" style="padding:0;">
+              <span class="cat">${new Date(c.createdAt).toLocaleDateString('pt-BR')}</span>
+              <h4>${c.clientName || 'Cliente'}${c.projectName ? ` — ${c.projectName}` : ''}</h4>
+              <p style="font-size:0.82rem; color:var(--ink-faint); margin:4px 0;">R$${c.amount} simulado (${Math.round(c.rate * 100)}% de R$${c.estimatedValue})</p>
+            </div>
+          </div>`).join('')}</div>`
+        : emptyStateHtml('Nenhum projeto fechado pela plataforma ainda.');
+    } catch (err) {
+      list.innerHTML = `<p style="font-size:0.86rem; color:var(--ink-faint);">${err.message || 'Não foi possível carregar suas comissões agora.'}</p>`;
     }
   }
 

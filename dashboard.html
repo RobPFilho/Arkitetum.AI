@@ -195,6 +195,7 @@
           <button type="button" class="profile-tab" data-profile-panel="portfolio" role="tab" aria-selected="false">Portfólio</button>
           <button type="button" class="profile-tab" data-profile-panel="avaliacoes" role="tab" aria-selected="false">Avaliações</button>
           <button type="button" class="profile-tab" data-profile-panel="metricas" role="tab" aria-selected="false">Métricas</button>
+          <button type="button" class="profile-tab" data-profile-panel="comissoes" role="tab" aria-selected="false">Comissões</button>
           <button type="button" class="profile-tab" data-profile-panel="mensagens" role="tab" aria-selected="false">Mensagens <span class="unread-badge" id="architectUnreadBadge" style="display:none;"></span></button>
           <button type="button" class="profile-tab" data-profile-panel="conta" role="tab" aria-selected="false">Conta</button>
         </div>
@@ -287,6 +288,18 @@
               <p class="card-lead">Como seu perfil está performando na plataforma nos últimos 30 dias.</p>
               <div class="profile-stats" id="metricsStats" style="border-top:none; padding-top:0;"></div>
             </div>
+          </div>
+        </div>
+
+        <div class="profile-panel" data-profile-panel-content="comissoes" hidden>
+          <div class="dash-card">
+            <h3>Comissões</h3>
+            <p class="card-lead">Quando cliente e você confirmam que um projeto fechou pela plataforma, uma comissão simulada é registrada aqui — nenhuma cobrança real acontece (projeto acadêmico).</p>
+            <div class="profile-stats" style="border-top:none; padding-top:0; margin-bottom:16px;">
+              <div class="stat"><strong id="commissionTotal">R$0</strong><span>total simulado</span></div>
+              <div class="stat"><strong id="commissionCount">0</strong><span>projetos fechados</span></div>
+            </div>
+            <div id="commissionsList"></div>
           </div>
         </div>
 
