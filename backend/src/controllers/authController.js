@@ -21,7 +21,7 @@ const common = (body) => ({
 
 export async function register(req, res) {
   const role = req.params.role;
-  if (!["client", "architect"].includes(role))
+  if (!["client", "architect", "store"].includes(role))
     return res.status(400).json({ error: "Invalid role" });
 
   const { password, confirmPassword } = req.body;
@@ -34,8 +34,13 @@ export async function register(req, res) {
 
   // Cadastro enxuto: nome, e-mail, senha, foto e bio — o resto do perfil
   // (estilo, materiais, portfólio...) nasce vazio e é preenchido depois,
-  // a partir dos projetos/peças de portfólio que a pessoa cria no painel.
-  const profile = role === "architect" ? { bio: req.body.bio } : {};
+  // a partir dos projetos/peças de portfólio/produtos que a pessoa cria no painel.
+  const profile =
+    role === "architect"
+      ? { bio: req.body.bio }
+      : role === "store"
+        ? { storeName: req.body.storeName, description: req.body.bio, logoUrl: req.body.avatarUrl }
+        : {};
 
   let referrer = null;
   if (req.body.referredBy) {
@@ -55,7 +60,7 @@ export async function register(req, res) {
   });
   welcomeEmail(user).catch(() => {});
 
-  if (referrer) {
+  if (referrer && referrer.role !== "store") {
     const bonusField = referrer.role === "client" ? "clientProfile.bonusMatches" : "architectProfile.bonusPortfolioSlots";
     User.updateOne({ _id: referrer.id }, { $inc: { [bonusField]: 1 } }).catch(() => {});
     const bonusText = referrer.role === "client" ? "+1 busca de match bônus" : "+1 vaga bônus no portfólio";

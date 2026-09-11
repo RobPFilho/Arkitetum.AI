@@ -7,6 +7,8 @@ import Favorite from "../models/Favorite.js";
 import Timeline from "../models/Timeline.js";
 import CaseStudy from "../models/CaseStudy.js";
 import ProfileView from "../models/ProfileView.js";
+import StoreProduct from "../models/StoreProduct.js";
+import StoreReferral from "../models/StoreReferral.js";
 import { notify } from "../services/notificationService.js";
 import { recomputeProfileFromPortfolio } from "../services/portfolioProfile.js";
 
@@ -65,6 +67,8 @@ export async function deleteMyAccount(req, res) {
     Timeline.deleteMany({ $or: [{ client: userId }, { architect: userId }] }),
     CaseStudy.deleteMany({ $or: [{ client: userId }, { architect: userId }] }),
     ProfileView.deleteMany({ architect: userId }),
+    StoreProduct.deleteMany({ store: userId }),
+    StoreReferral.deleteMany({ $or: [{ store: userId }, { client: userId }] }),
   ]);
   await req.user.deleteOne();
   res.json({ ok: true });

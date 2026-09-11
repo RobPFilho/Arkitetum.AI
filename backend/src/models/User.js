@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
     // consegue forjar um link de redefinição válido a partir daqui.
     passwordResetTokenHash: { type: String, select: false },
     passwordResetExpires: { type: Date, select: false },
-    role: { type: String, required: true, enum: ["client", "architect"] },
+    role: { type: String, required: true, enum: ["client", "architect", "store"] },
     city: String,
     state: String,
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -93,6 +93,14 @@ const userSchema = new mongoose.Schema(
         },
       },
     },
+    storeProfile: {
+      storeName: String,
+      description: String,
+      logoUrl: String,
+      city: String,
+      state: String,
+      categories: [String],
+    },
   },
   { timestamps: true },
 );
@@ -101,6 +109,7 @@ userSchema.pre("validate", function (next) {
   if (this.role === "client" && !this.clientProfile) this.clientProfile = {};
   if (this.role === "architect" && !this.architectProfile)
     this.architectProfile = {};
+  if (this.role === "store" && !this.storeProfile) this.storeProfile = {};
   next();
 });
 
