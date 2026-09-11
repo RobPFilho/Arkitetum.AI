@@ -1,4 +1,5 @@
 import Project from "../models/Project.js";
+import { suggestProductsForProject } from "../services/storeMatchService.js";
 
 const normalizeStringArray = (value) =>
   Array.isArray(value)
@@ -59,4 +60,11 @@ export async function deleteProject(req, res) {
   const project = await Project.findOneAndDelete({ _id: req.params.id, client: req.user.id });
   if (!project) return res.status(404).json({ error: "Projeto não encontrado" });
   res.json({ ok: true });
+}
+
+export async function listSuggestedProducts(req, res) {
+  const project = await Project.findOne({ _id: req.params.id, client: req.user.id });
+  if (!project) return res.status(404).json({ error: "Projeto não encontrado" });
+  const products = await suggestProductsForProject(project);
+  res.json(products);
 }
