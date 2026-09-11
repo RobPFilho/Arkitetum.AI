@@ -132,8 +132,17 @@ async function notifyClientsArchitectAvailableAgain(architect) {
   );
 }
 
+const FREE_PORTFOLIO_LIMIT = 3;
+
 export async function addPortfolio(req, res) {
-  req.user.architectProfile.portfolio.push(req.body);
+  const p = req.user.architectProfile;
+  const limit = p.subscriptionTier === "pro" ? Infinity : FREE_PORTFOLIO_LIMIT + (p.bonusPortfolioSlots || 0);
+  if (p.portfolio.length >= limit) {
+    return res.status(403).json({
+      error: `O plano Gratuito permite até ${limit} projeto(s) no portfólio. Assine o Pro para ter portfólio ilimitado.`,
+    });
+  }
+  p.portfolio.push(req.body);
   recomputeProfileFromPortfolio(req.user);
   await req.user.save();
   res.status(201).json(req.user.architectProfile.portfolio.at(-1));

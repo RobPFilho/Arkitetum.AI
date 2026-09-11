@@ -29,10 +29,39 @@ export async function listArchitects(req, res) {
         reviewCount: { $size: "$reviews" },
       },
     },
+    {
+      /**
+       * Ranking por mérito + bônus de assinatura Pro -- nunca uma posição
+       * garantida. meritScore (0-100) já cobre a maior parte da nota;
+       * proBonus (+15) e verifiedBonus (+5, trajetória consistente) somados
+       * não bastam pra superar um mérito claramente melhor (ex.: free com
+       * meritScore 60 continua na frente de um Pro com meritScore 40 -- 40+15=55 < 60).
+       */
+      $addFields: {
+        closedProjectsCount: { $ifNull: ["$architectProfile.closedProjectsCount", 0] },
+        meritScore: {
+          $add: [
+            { $multiply: [{ $ifNull: ["$avgRating", 0] }, 10] },
+            { $multiply: [{ $min: [{ $ifNull: ["$reviewCount", 0] }, 10] }, 2] },
+            { $multiply: [{ $min: [{ $ifNull: ["$architectProfile.closedProjectsCount", 0] }, 10] }, 3] },
+          ],
+        },
+        isPro: { $eq: ["$architectProfile.subscriptionTier", "pro"] },
+      },
+    },
+    {
+      $addFields: {
+        verifiedBonus: {
+          $cond: [{ $and: [{ $gte: ["$closedProjectsCount", 5] }, { $gte: [{ $ifNull: ["$avgRating", 0] }, 4.5] }] }, 5, 0],
+        },
+        proBonus: { $cond: ["$isPro", 15, 0] },
+      },
+    },
+    { $addFields: { rankScore: { $add: ["$meritScore", "$proBonus", "$verifiedBonus"] } } },
   ];
   if (minRating) pipeline.push({ $match: { avgRating: { $gte: minRating } } });
   pipeline.push(
-    { $sort: { createdAt: -1 } },
+    { $sort: { rankScore: -1, createdAt: -1 } },
     {
       $facet: {
         data: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
@@ -54,6 +83,8 @@ export async function listArchitects(req, res) {
       profile: architect.architectProfile,
       avgRating: architect.avgRating,
       reviewCount: architect.reviewCount,
+      isPro: architect.isPro,
+      isVerifiedTrackRecord: architect.verifiedBonus > 0,
     })),
     total,
     page,
@@ -105,6 +136,23 @@ export async function recordProfileView(req, res) {
   if (!exists) return res.status(404).json({ error: "Arquiteto não encontrado" });
   await ProfileView.create({ architect: req.params.id });
   res.status(204).end();
+}
+
+/**
+ * Assinatura Pro simulada -- sem gateway de pagamento real (mesma fidelidade
+ * do resto do projeto). Isso é o que o checkout do front-end chama de
+ * verdade em vez de só gravar no localStorage: passa a existir de fato no
+ * back-end e afeta o limite de portfólio e o ranking (ver listArchitects).
+ */
+export async function setSubscriptionTier(req, res) {
+  const tier = req.body?.tier;
+  if (!["free", "pro"].includes(tier))
+    return res.status(400).json({ error: "Plano inválido." });
+
+  req.user.architectProfile.subscriptionTier = tier;
+  if (tier === "pro" && !req.user.architectProfile.proSince) req.user.architectProfile.proSince = new Date();
+  await req.user.save();
+  res.json({ subscriptionTier: req.user.architectProfile.subscriptionTier, proSince: req.user.architectProfile.proSince });
 }
 
 export async function getArchitectProfile(req, res) {
