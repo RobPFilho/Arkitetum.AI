@@ -69,6 +69,9 @@ const userSchema = new mongoose.Schema(
       website: String,
       instagram: String,
       bonusPortfolioSlots: { type: Number, default: 0 },
+      subscriptionTier: { type: String, enum: ["free", "pro"], default: "free" },
+      proSince: Date,
+      closedProjectsCount: { type: Number, default: 0 },
       availability: {
         type: String,
         enum: ["available", "limited", "unavailable"],
