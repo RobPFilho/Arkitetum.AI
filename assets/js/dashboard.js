@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderMatchHistory(me);
     setupCompareExport(me);
     refreshUnreadBadge('clientUnreadBadge');
-  } else {
+  } else if (me.role === 'architect') {
     document.getElementById('architectPanel').style.display = 'block';
     document.getElementById('clientActions').style.display = 'none';
     document.getElementById('roleLabel').textContent = 'Painel do arquiteto';
@@ -118,6 +118,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderCommissions();
     setupCaseStudies(me);
     renderCaseStudies(me);
+  } else {
+    document.getElementById('storePanel').style.display = 'block';
+    document.getElementById('clientActions').style.display = 'none';
+    document.getElementById('roleLabel').textContent = 'Painel da loja parceira';
+    setupProfileTabs('storeProfileTabs', 'storePanel');
+    setupStoreProducts(me);
+    renderStoreReferrals();
   }
 
   setupProfileEdit(me);
@@ -158,8 +165,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderPlanCard(user) {
     const planStat = document.getElementById('planName')?.closest('.stat');
     const upgradeBtn = document.getElementById('upgradePlanBtn');
-    if (user.role === 'client') {
-      // Cliente nunca paga -- não existe nada de plano/upgrade pra mostrar.
+    if (user.role !== 'architect') {
+      // Cliente nunca paga; loja parceira não tem mensalidade, só comissão
+      // sobre indicação -- nenhum dos dois tem nada de plano pra mostrar.
       if (planStat) planStat.style.display = 'none';
       upgradeBtn.style.display = 'none';
       return;
@@ -401,7 +409,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           ${project ? '<button type="button" class="btn btn-sage btn-sm" id="drawerRunMatchBtn">Rodar match</button>' : ''}
           ${project ? '<button type="button" class="btn btn-secondary btn-sm" id="drawerDeleteProjectBtn">Excluir</button>' : ''}
         </div>
-      </form>`;
+      </form>
+      ${project ? '<div id="suggestedProductsBox" style="margin-top:20px;"></div>' : ''}`;
 
     buildProjectStyleChips('projStylesChips', project?.preferredStyles || []);
     document.getElementById('projName').value = project?.name || '';
@@ -454,6 +463,51 @@ document.addEventListener('DOMContentLoaded', async () => {
           alert(err.message || 'Não foi possível excluir o projeto.');
         }
       });
+      renderSuggestedProducts(project);
+    }
+  }
+
+  /** Painel "produtos sugeridos" dentro do detalhe do projeto -- a IA casa
+   * o estilo/materiais/objetivos do projeto contra o catálogo das lojas
+   * parceiras (ver storeMatchService no back-end). "Simular compra" segue
+   * o mesmo espírito do CheckoutModal: confirma, nunca cobra de verdade. */
+  async function renderSuggestedProducts(project) {
+    const box = document.getElementById('suggestedProductsBox');
+    if (!box) return;
+    box.innerHTML = '<p style="font-size:0.86rem; color:var(--ink-faint);"><span class="spinner"></span> Buscando produtos que combinam com o projeto...</p>';
+    try {
+      const products = await MatchAPI.suggestedProducts(project._id);
+      if (!products.length) { box.innerHTML = ''; return; }
+      box.innerHTML = `
+        <div class="dash-card" style="padding:16px;">
+          <h4 style="margin:0 0 4px;">Produtos sugeridos</h4>
+          <p style="font-size:0.8rem; color:var(--ink-faint); margin:0 0 12px;">Combinam com o estilo/objetivos deste projeto, em lojas parceiras.</p>
+          <div class="tag-row" style="flex-direction:column; align-items:stretch; gap:8px;">
+            ${products.map(p => `
+              <div class="material-card" style="padding:12px; display:flex; gap:10px; align-items:center;">
+                ${p.photo ? `<img src="${p.photo}" alt="" style="width:48px; height:48px; object-fit:cover; border-radius:8px; flex-shrink:0;">` : ''}
+                <div style="flex:1; min-width:0;">
+                  <strong style="font-size:0.86rem;">${p.name}</strong>
+                  <p style="font-size:0.76rem; color:var(--ink-faint); margin:2px 0;">${p.storeName || 'Loja parceira'}${p.price ? ` — R$${p.price}` : ''}</p>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" data-simulate-buy="${p.id}">Simular compra</button>
+              </div>`).join('')}
+          </div>
+        </div>`;
+      box.querySelectorAll('[data-simulate-buy]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true;
+          try {
+            const { purchaseUrl } = await MatchAPI.createStoreReferral(btn.dataset.simulateBuy, project._id);
+            alert('Compra simulada registrada! Nenhuma cobrança real acontece (projeto acadêmico).' + (purchaseUrl ? `\n\nLink do produto: ${purchaseUrl}` : ''));
+          } catch (err) {
+            alert(err.message || 'Não foi possível simular a compra agora.');
+            btn.disabled = false;
+          }
+        });
+      });
+    } catch {
+      box.innerHTML = '';
     }
   }
 
@@ -1027,8 +1081,8 @@ document.addEventListener('DOMContentLoaded', async () => {
    * card de edição — usado pelo botão "Editar perfil" no cabeçalho, que
    * fica fora de qualquer aba específica. */
   function goToAccountTab(user) {
-    const tabsId = user.role === 'client' ? 'clientProfileTabs' : 'architectProfileTabs';
-    const scopeId = user.role === 'client' ? 'clientPanel' : 'architectPanel';
+    const ids = { client: ['clientProfileTabs', 'clientPanel'], architect: ['architectProfileTabs', 'architectPanel'], store: ['storeProfileTabs', 'storePanel'] };
+    const [tabsId, scopeId] = ids[user.role] || ids.client;
     const tabsBar = document.getElementById(tabsId);
     activateProfileTab(tabsBar, document.getElementById(scopeId), 'conta');
   }
@@ -1291,6 +1345,138 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderDetail: renderPortfolioDetail,
       });
     });
+  }
+
+  // ---------------- Produtos da loja parceira (drawer) ----------------
+  let myStoreProducts = [];
+
+  function productDrawerCardHtml(p) {
+    return `
+      <h4>${p.name}</h4>
+      <div class="drawer-item-meta">${[p.category, (p.styles || []).join(', '), p.price ? `R$${p.price}` : ''].filter(Boolean).join(' · ')}</div>`;
+  }
+
+  async function renderStoreProducts() {
+    try {
+      myStoreProducts = await MatchAPI.myStoreProducts();
+    } catch {
+      myStoreProducts = [];
+    }
+  }
+
+  function renderProductDetail(product, container, { back }) {
+    container.innerHTML = `
+      <form id="drawerProductForm">
+        <div class="form-grid">
+          <div class="form-field full">
+            <label for="storeProductName">Nome do produto</label>
+            <input type="text" id="storeProductName" required>
+          </div>
+          <div class="form-field">
+            <label for="storeProductCategory">Categoria</label>
+            <input type="text" id="storeProductCategory" placeholder="Iluminação, revestimento, mobiliário...">
+          </div>
+          <div class="form-field">
+            <label for="storeProductPrice">Preço (R$)</label>
+            <input type="number" id="storeProductPrice" min="0">
+          </div>
+          <div class="form-field full">
+            <label for="storeProductPhoto">Foto (URL) <span class="hint">(opcional)</span></label>
+            <input type="url" id="storeProductPhoto" placeholder="https://...">
+          </div>
+          <div class="form-field full">
+            <label for="storeProductUrl">Link de compra</label>
+            <input type="url" id="storeProductUrl" placeholder="https://...">
+          </div>
+          <div class="form-field full">
+            <label>Estilos combinados <span class="hint">(a IA usa isso pra sugerir o produto certo)</span></label>
+            <div class="chip-select" id="storeProductStylesChips"></div>
+          </div>
+        </div>
+        <div class="drawer-detail-actions">
+          <button type="submit" class="btn btn-primary btn-sm">${product ? 'Salvar alterações' : 'Adicionar produto'}</button>
+          ${product ? '<button type="button" class="btn btn-secondary btn-sm" id="drawerDeleteProductBtn">Remover</button>' : ''}
+        </div>
+      </form>`;
+
+    buildProjectStyleChips('storeProductStylesChips', product?.styles || []);
+    document.getElementById('storeProductName').value = product?.name || '';
+    document.getElementById('storeProductCategory').value = product?.category || '';
+    document.getElementById('storeProductPrice').value = product?.price || '';
+    document.getElementById('storeProductPhoto').value = product?.photo || '';
+    document.getElementById('storeProductUrl').value = product?.purchaseUrl || '';
+
+    document.getElementById('drawerProductForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('storeProductName').value.trim();
+      if (!name) { alert('Dê um nome para o produto.'); return; }
+      const payload = {
+        name,
+        category: document.getElementById('storeProductCategory').value.trim(),
+        price: document.getElementById('storeProductPrice').value || undefined,
+        photo: document.getElementById('storeProductPhoto').value.trim(),
+        purchaseUrl: document.getElementById('storeProductUrl').value.trim(),
+        styles: Array.from(document.querySelectorAll('#storeProductStylesChips .chip.active')).map(c => c.dataset.style),
+      };
+      try {
+        if (product) await MatchAPI.updateStoreProduct(product._id, payload);
+        else await MatchAPI.createStoreProduct(payload);
+        await renderStoreProducts();
+        back();
+      } catch (err) {
+        alert(err.message || 'Não foi possível salvar o produto.');
+      }
+    });
+
+    if (product) {
+      document.getElementById('drawerDeleteProductBtn').addEventListener('click', async () => {
+        if (!confirm('Remover este produto?')) return;
+        try {
+          await MatchAPI.deleteStoreProduct(product._id);
+          await renderStoreProducts();
+          back();
+        } catch (err) {
+          alert(err.message || 'Não foi possível remover o produto.');
+        }
+      });
+    }
+  }
+
+  function setupStoreProducts(user) {
+    renderStoreProducts();
+    document.getElementById('openProductsDrawerBtn').addEventListener('click', () => {
+      ProjectDrawer.open({
+        title: 'Meus produtos',
+        newLabel: '+ Novo produto',
+        emptyLabel: 'Você ainda não cadastrou nenhum produto.',
+        items: () => myStoreProducts,
+        idOf: (p) => p._id,
+        cardHtml: productDrawerCardHtml,
+        renderDetail: renderProductDetail,
+      });
+    });
+  }
+
+  // ---------------- Indicações de venda simulada (loja parceira) ----------------
+  async function renderStoreReferrals() {
+    const list = document.getElementById('referralsList');
+    try {
+      const { total, count, referrals } = await MatchAPI.myStoreReferrals();
+      document.getElementById('referralTotal').textContent = `R$${total}`;
+      document.getElementById('referralCount').textContent = count;
+      list.innerHTML = referrals.length
+        ? `<div class="tag-row" style="flex-direction:column; align-items:stretch; gap:8px;">${referrals.map(r => `
+          <div class="material-card" style="padding:14px;">
+            <div class="info" style="padding:0;">
+              <span class="cat">${new Date(r.createdAt).toLocaleDateString('pt-BR')}</span>
+              <h4>${r.productName || 'Produto'}</h4>
+              <p style="font-size:0.82rem; color:var(--ink-faint); margin:4px 0;">Indicado a ${r.clientName || 'um cliente'} — R$${r.simulatedAmount} simulado</p>
+            </div>
+          </div>`).join('')}</div>`
+        : emptyStateHtml('Nenhuma indicação simulada ainda.');
+    } catch (err) {
+      list.innerHTML = `<p style="font-size:0.86rem; color:var(--ink-faint);">${err.message || 'Não foi possível carregar as indicações agora.'}</p>`;
+    }
   }
 
   // ---------------- Exportar PDF (impressão do resumo) ----------------
