@@ -39,6 +39,12 @@
   --font-logo: 'Poppins', 'Inter', -apple-system, sans-serif;
   --brand-gradient: linear-gradient(100deg, var(--sage) 0%, var(--terracotta) 100%);
   --container: 1180px;
+  /* Curvas de easing do sistema — só duas, de propósito. --ease-out já era
+     usada (sem nome) só no modal da roda de cores; agora é a curva padrão
+     de qualquer entrada/reveal do site. --ease-spring (leve overshoot) é
+     só pra microinteração de clique/hover em elementos pequenos. */
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
 }
 
 /* ---- Modo escuro: segue o sistema por padrão, ou a escolha salva no botão da navbar ---- */
@@ -73,8 +79,22 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    /* Sem isso, o atraso incremental do stagger (--reveal-delay) ainda
+       segurava cada item por até algumas centenas de ms antes do "pulo"
+       instantâneo — nada de movimento, mas ainda uma espera perceptível. */
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Continuidade entre páginas — API nativa do navegador, sem JS e sem
+   dependência: troca a navegação padrão (recarrega tudo de uma vez) por um
+   crossfade suave entre o documento antigo e o novo. Só funciona em
+   Chromium por enquanto; em outros navegadores a navegação continua igual
+   a hoje (nenhum risco, é puramente aditivo). */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
 }
 
 .theme-toggle {
@@ -90,11 +110,7 @@ body {
   margin: 0;
   max-width: 100vw;
   overflow-x: clip;
-  background:
-    radial-gradient(760px 480px at 92% -8%, rgba(176, 117, 90, 0.10), transparent 60%),
-    radial-gradient(680px 460px at -8% 12%, rgba(123, 142, 126, 0.12), transparent 60%),
-    var(--bg);
-  background-attachment: fixed;
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 16px;
@@ -180,7 +196,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   font-weight: 600;
   font-size: 0.95rem;
   border: 1px solid transparent;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease, border-color .18s ease;
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s var(--ease-out), background 0.18s ease, color 0.18s ease, border-color .18s ease;
   white-space: nowrap;
 }
 .btn-primary { background: var(--terracotta); color: var(--on-accent); box-shadow: var(--shadow-glow); }
@@ -200,6 +216,11 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
    ter o mesmo peso visual de uma ação neutra só porque os dois usam borda. */
 .btn-danger { background: transparent; color: var(--terracotta-dark); border-color: var(--terracotta-dark); }
 .btn-danger:hover { background: var(--terracotta-dark); color: var(--on-accent); transform: translateY(-2px); }
+/* Feedback de clique — nenhum botão do site tinha estado :active antes, só
+   hover. Vem depois de todos os :hover de propósito, pra vencer o lift
+   deles enquanto o botão está pressionado (o caso comum: mouse down em
+   cima de um botão em hover). */
+.btn:active { transform: scale(.97); box-shadow: none; }
 .btn-block { width: 100%; }
 .btn[disabled] { opacity: 0.55; cursor: not-allowed; transform: none !important; }
 .btn-sm { padding: 9px 18px; font-size: 0.85rem; }
@@ -259,7 +280,16 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .notif-item.unread { background: rgba(176,117,90,0.06); font-weight: 600; }
 .notif-time { font-size: 0.72rem; color: var(--ink-faint); font-weight: 400; }
 .nav-toggle { display: none; background: none; border: none; padding: 6px; }
-.nav-toggle span { display: block; width: 22px; height: 2px; background: var(--ink); margin: 5px 0; transition: 0.2s; }
+.nav-toggle span {
+  display: block; width: 22px; height: 2px; background: var(--ink); margin: 5px 0; transform-origin: center;
+  transition: transform .25s var(--ease-spring), opacity .2s ease;
+}
+/* Morph pra X quando o menu mobile abre — o CSS de transição já existia,
+   só nunca era ativado porque nenhuma classe .open chegava a esse
+   elemento (só em .nav-links). site.js agora alterna as duas juntas. */
+.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 @media (max-width: 1180px) {
   .nav-toggle { display: block; }
@@ -291,7 +321,9 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 }
 
 /* ---------- Hero ---------- */
-.hero { padding: 64px 0 40px; }
+.hero { padding: 64px 0 40px; position: relative; }
+#heroParticles { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+.hero .container { position: relative; z-index: 1; }
 .hero-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center;
 }
@@ -322,7 +354,12 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .floating-card.profile .fc-label { font-size: 0.68rem; letter-spacing: 0.1em; color: var(--ink-faint); text-transform: uppercase; margin-bottom: 8px; }
 .floating-card.profile ul li { font-size: 0.84rem; padding: 3px 0; color: var(--ink); }
 .floating-card.match { bottom: -8%; right: -8%; width: 230px; }
-.floating-card.match .fc-label { font-size: 0.65rem; letter-spacing: 0.1em; color: var(--terracotta); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+/* Era var(--terracotta) — mas a borda giratória (.glow-border) passa por
+   terracota e sálvia atrás do card, e num rótulo tão pequeno a mesma cor
+   camuflava o texto no exato instante em que o anel girava pra terracota
+   por trás dele. --ink-faint (mesmo tom do rótulo "Seu perfil" do outro
+   card) nunca colide com o anel e mantém contraste nos dois temas. */
+.floating-card.match .fc-label { font-size: 0.65rem; letter-spacing: 0.1em; color: var(--ink-faint); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
 .floating-card.match strong { font-family: var(--font-display); font-size: 1.02rem; }
 .floating-card.match .fc-score { color: var(--sage-dark); font-size: 0.82rem; font-weight: 600; }
 
@@ -810,13 +847,13 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .founder-modal-overlay {
   position: fixed; inset: 0; background: rgba(51,51,51,0.42); backdrop-filter: blur(2px);
   display: flex; align-items: center; justify-content: center; z-index: 300; padding: 24px;
-  opacity: 0; pointer-events: none; transition: opacity .2s ease;
+  opacity: 0; pointer-events: none; transition: opacity .2s var(--ease-out);
 }
 .founder-modal-overlay.open { opacity: 1; pointer-events: auto; }
 .founder-modal {
   background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
   padding: 44px 40px 36px; max-width: 880px; width: 100%; max-height: 88vh; overflow-y: auto;
-  position: relative; transform: translateY(12px); transition: transform .2s ease;
+  position: relative; transform: translateY(12px); transition: transform .22s var(--ease-out);
 }
 .founder-modal-overlay.open .founder-modal { transform: translateY(0); }
 .founder-close {
@@ -884,8 +921,15 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   .founder-body h2 { font-size: 1.32rem; }
 }
 
-.reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
-.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal {
+  opacity: 0; transform: translateY(28px) scale(.96); filter: blur(6px);
+  transition: opacity .65s var(--ease-out), transform .65s var(--ease-out), filter .65s var(--ease-out);
+  /* Preenchido por site.js quando o wrapper tem data-stagger — cada filho
+     recebe um delay incremental. Fica em 0 (sem atraso) por padrão. */
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: transform, opacity, filter;
+}
+.reveal.in { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 
 .api-banner {
   background: var(--bg-alt); border: 1px dashed var(--terracotta); border-radius: var(--radius-sm);
@@ -992,7 +1036,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .color-wheel-overlay {
   position: fixed; inset: 0; background: rgba(51,51,51,0.42); backdrop-filter: blur(2px);
   display: flex; align-items: center; justify-content: center; z-index: 300;
-  opacity: 0; pointer-events: none; transition: opacity .2s ease;
+  opacity: 0; pointer-events: none; transition: opacity .2s var(--ease-out);
   padding: 24px;
 }
 .color-wheel-overlay.open { opacity: 1; pointer-events: auto; }
@@ -1001,7 +1045,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   padding: 30px; display: flex; gap: 30px; align-items: flex-start; position: relative;
   max-width: 560px; width: 100%; flex-wrap: wrap;
   max-height: 100%; overflow-y: auto;
-  opacity: 0; transform: translateY(8px); transition: opacity .22s ease .06s, transform .22s ease .06s;
+  opacity: 0; transform: translateY(8px); transition: opacity .22s var(--ease-out) .06s, transform .22s var(--ease-out) .06s;
 }
 .color-wheel-overlay.open .color-wheel-panel { opacity: 1; transform: translateY(0); }
 .color-wheel-close {
@@ -1016,7 +1060,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .color-wheel-wrap {
   position: relative; width: 240px; height: 240px; flex-shrink: 0;
   transform-origin: center center;
-  transition: transform .4s cubic-bezier(.2,.8,.2,1);
+  transition: transform .4s var(--ease-out);
 }
 .color-wheel-wrap canvas { width: 100%; height: 100%; border-radius: 50%; cursor: crosshair; box-shadow: 0 0 0 1px var(--line), var(--shadow-sm); display: block; }
 .color-wheel-cursor {
@@ -1027,7 +1071,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 
 .color-wheel-controls {
   flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 14px;
-  opacity: 0; transform: translateX(6px); transition: opacity .25s ease .18s, transform .25s ease .18s;
+  opacity: 0; transform: translateX(6px); transition: opacity .25s var(--ease-out) .18s, transform .25s var(--ease-out) .18s;
 }
 .color-wheel-overlay.open .color-wheel-controls { opacity: 1; transform: translateX(0); }
 .cw-preview-row { display: flex; align-items: center; gap: 12px; }
@@ -1226,12 +1270,12 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .checkout-modal-overlay {
   position: fixed; inset: 0; background: rgba(51,51,51,0.42); backdrop-filter: blur(2px);
   display: flex; align-items: center; justify-content: center; z-index: 300; padding: 20px;
-  opacity: 0; pointer-events: none; transition: opacity .2s ease;
+  opacity: 0; pointer-events: none; transition: opacity .2s var(--ease-out);
 }
 .checkout-modal-overlay.open { opacity: 1; pointer-events: auto; }
 .checkout-modal {
   background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 34px;
-  max-width: 420px; width: 100%; text-align: center; transform: translateY(10px); transition: transform .2s ease;
+  max-width: 420px; width: 100%; text-align: center; transform: translateY(10px); transition: transform .22s var(--ease-out);
 }
 .checkout-modal-overlay.open .checkout-modal { transform: translateY(0); }
 .checkout-modal .sim-badge { margin-bottom: 16px; }
@@ -1243,13 +1287,13 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 
 .project-drawer-overlay {
   position: fixed; inset: 0; background: rgba(51,51,51,0.42); backdrop-filter: blur(2px);
-  z-index: 320; opacity: 0; pointer-events: none; transition: opacity .25s ease;
+  z-index: 320; opacity: 0; pointer-events: none; transition: opacity .25s var(--ease-out);
 }
 .project-drawer-overlay.open { opacity: 1; pointer-events: auto; }
 .project-drawer {
   position: fixed; top: 0; left: 0; height: 100%; width: 380px; max-width: 88vw;
   background: var(--white); box-shadow: var(--shadow-lg); display: flex; flex-direction: column;
-  transform: translateX(-100%); transition: transform .25s ease;
+  transform: translateX(-100%); transition: transform .3s var(--ease-out);
 }
 .project-drawer-overlay.open .project-drawer { transform: translateX(0); }
 .drawer-header { display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
@@ -1473,4 +1517,75 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   #printableResumo, #printableResumo * { visibility: visible; }
   #printableResumo { display: block !important; position: absolute; top: 0; left: 0; width: 100%; padding: 40px; color: #222; background: #fff; }
   #printableResumo .summary-section-title { color: #96603F; }
+}
+
+/* =========================================================
+   Motion FX — camada de efeitos mais expressivos (spotlight,
+   tilt 3D, botão magnético, borda animada, fundo em movimento,
+   texto com brilho, contador). Tudo em CSS/JS puro, sem
+   dependência nova — site.js liga cada um só onde o elemento
+   existe na página.
+   ========================================================= */
+
+/* ---- Fundo animado (mesh de gradientes que respira devagar) ---- */
+@keyframes bg-drift {
+  0%   { transform: translate(-4%, -3%) scale(1); }
+  50%  { transform: translate(3%, 4%) scale(1.08); }
+  100% { transform: translate(-4%, -3%) scale(1); }
+}
+body::before {
+  content: ''; position: fixed; inset: -10%; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(760px 480px at 92% -8%, rgba(176, 117, 90, 0.16), transparent 60%),
+    radial-gradient(680px 460px at -8% 12%, rgba(123, 142, 126, 0.18), transparent 60%),
+    radial-gradient(600px 500px at 50% 100%, rgba(176, 117, 90, 0.08), transparent 65%);
+  animation: bg-drift 22s ease-in-out infinite;
+}
+
+/* ---- Spotlight: brilho que segue o cursor sobre o card ---- */
+.spotlight { position: relative; overflow: hidden; }
+.spotlight::after {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0; transition: opacity .3s ease;
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(176, 117, 90, 0.16), transparent 70%);
+}
+.spotlight:hover::after { opacity: 1; }
+.spotlight > * { position: relative; z-index: 1; }
+
+/* ---- Tilt 3D: perspectiva que segue o mouse ---- */
+.tilt {
+  transform-style: preserve-3d; perspective: 900px;
+  transition: transform .35s var(--ease-out);
+}
+
+/* ---- Botão magnético: puxa levemente na direção do cursor ---- */
+.magnetic { transition: transform .25s var(--ease-spring); }
+
+/* ---- Borda em gradiente animado (destaque real, tipo plano recomendado) ---- */
+@property --border-angle {
+  syntax: '<angle>'; inherits: false; initial-value: 0deg;
+}
+@keyframes border-spin { to { --border-angle: 360deg; } }
+/* Não define position/z-index aqui de propósito — isso derrubava o
+   position:absolute (e o z-index) de .floating-card por ordem de cascata
+   (mesma especificidade, regra declarada depois no arquivo), tirando o
+   card "Match encontrado" do canto da foto e jogando ele pro fluxo normal
+   do documento. O elemento que usa .glow-border já precisa estar
+   posicionado por conta própria — só o pseudo-elemento abaixo depende
+   disso, e o inset:-2px garante que o anel fica atrás do conteúdo real. */
+.glow-border::before {
+  content: ''; position: absolute; inset: -2px; z-index: -1; border-radius: inherit;
+  background: conic-gradient(from var(--border-angle), var(--terracotta), var(--sage), var(--terracotta));
+  animation: border-spin 4s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+  .glow-border::before { animation: none; }
+}
+
+/* ---- Texto com brilho em movimento (título de destaque) ---- */
+@keyframes text-shimmer { to { background-position: 200% center; } }
+.shimmer-text {
+  background-size: 200% auto;
+  animation: text-shimmer 4s linear infinite;
 }

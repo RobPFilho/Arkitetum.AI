@@ -67,7 +67,7 @@
       <!-- Cabeçalho de perfil (avatar + nome + bio), inspirado em como
            Instagram/X/TikTok mostram um perfil, em vez da barra lateral
            fixa que o painel tinha antes. -->
-      <div class="profile-header">
+      <div class="profile-header" data-stagger>
         <div class="profile-avatar-lg" id="avatarInitials">—</div>
         <div class="profile-header-info">
           <span class="eyebrow" id="roleLabel">Painel</span>
@@ -99,7 +99,7 @@
 
       <!-- CLIENTE -->
       <div id="clientPanel" style="display:none;">
-        <div class="dash-overview" id="clientOverview">
+        <div class="dash-overview" id="clientOverview" data-stagger>
           <button type="button" class="dash-overview-tile" data-jump-tab="match">
             <strong id="overviewMatchCount">0</strong>
             <span>buscas de compatibilidade feitas</span>
@@ -126,7 +126,7 @@
         </div>
 
         <div class="profile-panel" data-profile-panel-content="projeto">
-          <div class="dash-card">
+          <div class="dash-card spotlight">
             <h3>Resumo do projeto</h3>
             <p class="card-lead">Este é o resumo que os arquitetos veem no seu match — revise antes de validar.</p>
             <div class="summary-grid">
@@ -144,19 +144,19 @@
             </div>
           </div>
 
-          <div id="moodboardCard" class="dash-card" style="display:none;">
+          <div id="moodboardCard" class="dash-card spotlight" style="display:none;">
             <h3>Moodboard do seu projeto</h3>
             <p class="card-lead">Conceito gerado por IA a partir das suas respostas no questionário.</p>
             <div id="moodboardContent"></div>
           </div>
 
-          <div id="referenceImageCard" class="dash-card" style="display:none;">
+          <div id="referenceImageCard" class="dash-card spotlight" style="display:none;">
             <h3>É mais ou menos assim que você imagina?</h3>
             <p class="card-lead">Uma foto real de arquitetura/interiores parecida com o estilo que você descreveu, pra ajudar a alinhar expectativas com o arquiteto.</p>
             <div id="referenceImageContent"></div>
           </div>
 
-          <div class="dash-card" id="projectsCard">
+          <div class="dash-card spotlight" id="projectsCard">
             <h3>Meus projetos</h3>
             <p class="card-lead">Cada projeto guarda seu próprio estilo, metragem e prioridades — o match é feito a partir do projeto que você abrir, não de um perfil único.</p>
             <button type="button" id="openProjectsDrawerBtn" class="btn btn-secondary btn-sm">Ver meus projetos</button>
@@ -174,7 +174,7 @@
             </div>
             <button id="compareBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">⇄ Comparar arquitetos lado a lado</button>
             <button id="exportMatchPdfBtn" class="btn btn-secondary btn-sm" style="display:none; margin-top:16px;">Exportar resultados em PDF</button>
-            <div id="compareSection" class="dash-card" style="display:none; margin-top:16px;">
+            <div id="compareSection" class="dash-card spotlight" style="display:none; margin-top:16px;">
               <h3>Comparativo</h3>
               <div id="compareContent" class="compare-table-wrap"></div>
               <button id="exportCompareBtn" class="btn btn-secondary btn-sm" style="margin-top:14px;">Exportar comparativo em PDF</button>
@@ -182,7 +182,7 @@
           </div>
           <div id="matchExtraPanels"></div>
 
-          <div class="dash-card" style="margin-top:20px;">
+          <div class="dash-card spotlight" style="margin-top:20px;">
             <h3>Histórico de buscas</h3>
             <p class="card-lead">Suas últimas buscas de match, por projeto.</p>
             <div id="matchHistoryList"></div>
@@ -216,12 +216,12 @@
         </div>
 
         <div class="profile-panel" data-profile-panel-content="perfil">
-          <div class="dash-card" id="onboardingChecklistCard" style="display:none;">
+          <div class="dash-card spotlight" id="onboardingChecklistCard" style="display:none;">
             <h3>Complete seu perfil</h3>
             <p class="card-lead">Perfis completos aparecem melhor nos resultados de match e passam mais confiança pro cliente.</p>
             <ul class="checklist" id="onboardingChecklist" style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;"></ul>
           </div>
-          <div class="dash-card" id="pendingValidationsCard" style="display:none;">
+          <div class="dash-card spotlight" id="pendingValidationsCard" style="display:none;">
             <h3>Resumos para confirmar</h3>
             <p class="card-lead">Clientes que já validaram o resumo do projeto do lado deles e esperam sua confirmação.</p>
             <div id="pendingValidationsList"></div>
@@ -245,7 +245,7 @@
             </div>
           </div>
 
-          <div class="dash-card">
+          <div class="dash-card spotlight">
             <h3>Verificação profissional <span id="cauStatusBadge"></span></h3>
             <p class="card-lead">Um selo de verificado aumenta a confiança do cliente no seu perfil. A validação é feita manualmente pela equipe match.IA.</p>
             <div class="form-grid">
@@ -259,7 +259,7 @@
         </div>
 
         <div class="profile-panel" data-profile-panel-content="portfolio" hidden>
-          <div class="dash-card">
+          <div class="dash-card spotlight">
             <h3>Compartilhar perfil</h3>
             <p class="card-lead">Divulgue seu perfil match.IA nas redes sociais ou no seu site.</p>
             <div class="share-row">
@@ -269,13 +269,13 @@
             </div>
           </div>
 
-          <div class="dash-card">
+          <div class="dash-card spotlight">
             <h3>Meu portfólio</h3>
             <p class="card-lead">O estilo, os materiais e a metragem de cada peça são o que alimenta o match — não um perfil escolhido uma vez só.</p>
             <button type="button" id="openPortfolioDrawerBtn" class="btn btn-secondary btn-sm">Ver meu portfólio</button>
           </div>
 
-          <div class="dash-card" id="caseStudiesCard" style="display:none;">
+          <div class="dash-card spotlight" id="caseStudiesCard" style="display:none;">
             <h3>Cases de sucesso</h3>
             <p class="card-lead">Depois que o resumo do projeto é confirmado pelos dois lados, proponha um case pra exibir no seu perfil público — imagens, descrição e o testemunho do cliente.</p>
             <div id="caseStudiesList"></div>
@@ -283,7 +283,7 @@
         </div>
 
         <div class="profile-panel" data-profile-panel-content="avaliacoes" hidden>
-          <div class="dash-card">
+          <div class="dash-card spotlight">
             <h3>Minhas avaliações</h3>
             <div id="architectReviews"></div>
           </div>
@@ -295,7 +295,7 @@
             <button type="button" id="upgradeFromMetricsBtn" class="btn btn-primary btn-sm">Assinar Pro e ver minhas métricas</button>
           </div>
           <div id="metricsContent" style="display:none;">
-            <div class="dash-card">
+            <div class="dash-card spotlight">
               <h3>Métricas do seu perfil</h3>
               <p class="card-lead">Como seu perfil está performando na plataforma nos últimos 30 dias.</p>
               <div class="profile-stats" id="metricsStats" style="border-top:none; padding-top:0;"></div>
@@ -304,7 +304,7 @@
         </div>
 
         <div class="profile-panel" data-profile-panel-content="comissoes" hidden>
-          <div class="dash-card">
+          <div class="dash-card spotlight">
             <h3>Comissões</h3>
             <p class="card-lead">Quando cliente e você confirmam que um projeto fechou pela plataforma, uma comissão simulada é registrada aqui — nenhuma cobrança real acontece (projeto acadêmico).</p>
             <div class="profile-stats" style="border-top:none; padding-top:0; margin-bottom:16px;">
@@ -333,7 +333,7 @@
         </div>
 
         <div class="profile-panel" data-profile-panel-content="produtos">
-          <div class="dash-card">
+          <div class="dash-card spotlight">
             <h3>Meus produtos</h3>
             <p class="card-lead">A IA sugere seus produtos pros clientes durante o desenvolvimento do projeto, quando o estilo/categoria combina.</p>
             <button type="button" id="openProductsDrawerBtn" class="btn btn-secondary btn-sm">Ver meus produtos</button>
@@ -341,7 +341,7 @@
         </div>
 
         <div class="profile-panel" data-profile-panel-content="indicacoes" hidden>
-          <div class="dash-card">
+          <div class="dash-card spotlight">
             <h3>Indicações</h3>
             <p class="card-lead">Quando um cliente confirma "Simular compra" a partir de uma sugestão da IA, a indicação aparece aqui — nenhuma cobrança real acontece (projeto acadêmico).</p>
             <div class="profile-stats" style="border-top:none; padding-top:0; margin-bottom:16px;">
@@ -356,7 +356,7 @@
       <!-- Conta: compartilhado entre cliente e arquiteto, uma "aba" de cada
            barra aponta pra este mesmo bloco em vez de duplicar o conteúdo. -->
       <div id="contaPanel" class="profile-panel" hidden>
-        <div class="dash-card" id="editCard" style="display:none;">
+        <div class="dash-card spotlight" id="editCard" style="display:none;">
           <h3>Editar dados</h3>
           <div class="form-field">
             <label for="editName">Nome</label>
@@ -373,7 +373,7 @@
           <button id="saveProfileBtn" class="btn btn-primary btn-sm btn-block">Salvar alterações</button>
         </div>
 
-        <div class="dash-card">
+        <div class="dash-card spotlight">
           <div class="dash-subhead" style="margin-top:0;">Convide e ganhe</div>
           <p class="card-lead" id="referralExplainer">Compartilhe seu link — cada pessoa que se cadastrar por ele te dá um bônus.</p>
           <div class="share-row" style="margin-bottom:10px;">

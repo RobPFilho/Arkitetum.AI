@@ -492,7 +492,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <p style="font-size:0.8rem; color:var(--ink-faint); margin:0 0 12px;">Combinam com o estilo/objetivos deste projeto, em lojas parceiras.</p>
           <div class="tag-row" style="flex-direction:column; align-items:stretch; gap:8px;">
             ${products.map(p => `
-              <div class="material-card" style="padding:12px; display:flex; gap:10px; align-items:center;">
+              <div class="material-card spotlight" style="padding:12px; display:flex; gap:10px; align-items:center;">
                 ${p.photo ? `<img src="${p.photo}" alt="" style="width:48px; height:48px; object-fit:cover; border-radius:8px; flex-shrink:0;">` : ''}
                 <div style="flex:1; min-width:0;">
                   <strong style="font-size:0.86rem;">${p.name}</strong>
@@ -1476,7 +1476,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('referralCount').textContent = count;
       list.innerHTML = referrals.length
         ? `<div class="tag-row" style="flex-direction:column; align-items:stretch; gap:8px;">${referrals.map(r => `
-          <div class="material-card" style="padding:14px;">
+          <div class="material-card spotlight" style="padding:14px;">
             <div class="info" style="padding:0;">
               <span class="cat">${new Date(r.createdAt).toLocaleDateString('pt-BR')}</span>
               <h4>${r.productName || 'Produto'}</h4>
@@ -1867,7 +1867,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('commissionCount').textContent = count;
       list.innerHTML = commissions.length
         ? `<div class="tag-row" style="flex-direction:column; align-items:stretch; gap:8px;">${commissions.map(c => `
-          <div class="material-card" style="padding:14px;">
+          <div class="material-card spotlight" style="padding:14px;">
             <div class="info" style="padding:0;">
               <span class="cat">${new Date(c.createdAt).toLocaleDateString('pt-BR')}</span>
               <h4>${c.clientName || 'Cliente'}${c.projectName ? ` — ${c.projectName}` : ''}</h4>

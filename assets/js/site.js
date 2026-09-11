@@ -1,11 +1,29 @@
+// A troca de página nativa (@view-transition no CSS) rejeita a própria
+// promise interna do navegador como "AbortError: Transition was skipped"
+// sempre que uma navegação começa antes da anterior terminar de animar —
+// comportamento normal e documentado da API, não um bug daqui, mas o
+// navegador loga como erro não tratado se ninguém escuta. Silencia só esse
+// caso específico, sem mexer em nenhum outro erro real da página.
+window.addEventListener('unhandledrejection', (e) => {
+  if (e.reason?.name === 'AbortError' && /transition was skipped/i.test(e.reason?.message || '')) {
+    e.preventDefault();
+  }
+});
+
 // Comportamento compartilhado do site: navegação mobile, ano do rodapé,
 // destaque do link ativo, animações de entrada e estado de sessão no header.
 document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.querySelector('.nav-toggle');
   const links = document.querySelector('.nav-links');
   if (toggle && links) {
-    toggle.addEventListener('click', () => links.classList.toggle('open'));
-    links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => links.classList.remove('open')));
+    toggle.addEventListener('click', () => {
+      links.classList.toggle('open');
+      toggle.classList.toggle('open');
+    });
+    links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      links.classList.remove('open');
+      toggle.classList.remove('open');
+    }));
   }
 
   const path = location.pathname.split('/').pop() || 'index.html';
@@ -15,6 +33,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.querySelectorAll('[data-year]').forEach(el => { el.textContent = new Date().getFullYear(); });
 
+  // Entrada em sequência: um wrapper marcado com [data-stagger] (ex.: uma
+  // lista de steps ou uma grade de cards) não anima ele mesmo — cada filho
+  // direto vira um alvo de reveal individual, com um atraso incremental,
+  // pra aparecer em sequência em vez de tudo de uma vez.
+  document.querySelectorAll('[data-stagger]').forEach(wrapper => {
+    Array.from(wrapper.children).forEach((child, i) => {
+      child.classList.add('reveal');
+      child.style.setProperty('--reveal-delay', `${i * 70}ms`);
+    });
+  });
+
   const revealEls = document.querySelectorAll('.reveal');
   if (revealEls.length) {
     const io = new IntersectionObserver((entries) => {
@@ -23,6 +52,158 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }, { threshold: 0.14 });
     revealEls.forEach(el => io.observe(el));
+  }
+
+  // Parallax sutil da foto do hero — só existe na home, onde .hero-photo
+  // existe; em qualquer outra página este bloco não faz nada.
+  const heroPhoto = document.querySelector('.hero-photo');
+  if (heroPhoto && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let ticking = false;
+    const updateParallax = () => {
+      const rect = heroPhoto.getBoundingClientRect();
+      const offset = Math.max(-24, Math.min(24, rect.top * -0.05));
+      heroPhoto.style.transform = `translateY(${offset}px)`;
+      ticking = false;
+    };
+    window.addEventListener('scroll', () => {
+      if (!ticking) { requestAnimationFrame(updateParallax); ticking = true; }
+    }, { passive: true });
+    updateParallax();
+  }
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- Spotlight: brilho que segue o cursor em qualquer .spotlight ----
+  if (!reduceMotion) {
+    document.addEventListener('pointermove', (e) => {
+      if (!(e.target instanceof Element)) return;
+      const card = e.target.closest('.spotlight');
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+      card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+    });
+  }
+
+  // ---- Tilt 3D e botão magnético: delegados no document (em vez de um
+  // listener por elemento) pra também funcionar em cards/botões que só
+  // existem depois de uma resposta assíncrona da API (vitrine, resultados
+  // de match, produtos sugeridos etc.), não só nos que já estão no HTML
+  // estático quando esse script roda.
+  if (!reduceMotion) {
+    let activeTilt = null;
+    let activeMagnet = null;
+    document.addEventListener('mousemove', (e) => {
+      if (!(e.target instanceof Element)) return;
+      const card = e.target.closest('.tilt');
+      if (card) {
+        const rect = card.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width - 0.5;
+        const py = (e.clientY - rect.top) / rect.height - 0.5;
+        card.style.transform = `translateY(-6px) rotateX(${py * -8}deg) rotateY(${px * 8}deg)`;
+        activeTilt = card;
+      } else if (activeTilt) {
+        activeTilt.style.transform = '';
+        activeTilt = null;
+      }
+
+      const btn = e.target.closest('.magnetic');
+      if (btn) {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        btn.style.transform = `translate(${x * 0.25}px, ${y * 0.35}px)`;
+        activeMagnet = btn;
+      } else if (activeMagnet) {
+        activeMagnet.style.transform = '';
+        activeMagnet = null;
+      }
+    });
+  }
+
+  // ---- Contador numérico: sobe de 0 até o valor real quando entra na tela ----
+  document.querySelectorAll('[data-count-to]').forEach((el) => {
+    const target = parseFloat(el.dataset.countTo);
+    const suffix = el.dataset.countSuffix || '';
+    if (reduceMotion) { el.textContent = target + suffix; return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        io.unobserve(entry.target);
+        const duration = 1100;
+        const start = performance.now();
+        const step = (now) => {
+          const progress = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = Math.round(target * eased) + suffix;
+          if (progress < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      });
+    }, { threshold: 0.6 });
+    io.observe(el);
+  });
+
+  // ---- Campo de partículas do hero (só existe na home) ----
+  const particleCanvas = document.getElementById('heroParticles');
+  if (particleCanvas && !reduceMotion) {
+    const ctx = particleCanvas.getContext('2d');
+    const heroSection = particleCanvas.closest('.hero');
+    let particles = [];
+    let width, height, rafId;
+
+    function resize() {
+      width = particleCanvas.width = heroSection.offsetWidth;
+      height = particleCanvas.height = heroSection.offsetHeight;
+    }
+
+    function makeParticles() {
+      const count = Math.min(50, Math.round((width * height) / 22000));
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        r: Math.random() * 1.6 + 0.6,
+      }));
+    }
+
+    function tick() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach((p) => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(176, 117, 90, 0.35)';
+        ctx.fill();
+      });
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i], b = particles[j];
+          const dist = Math.hypot(a.x - b.x, a.y - b.y);
+          if (dist < 120) {
+            ctx.strokeStyle = `rgba(123, 142, 126, ${0.18 * (1 - dist / 120)})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    resize();
+    makeParticles();
+    tick();
+    window.addEventListener('resize', () => { resize(); makeParticles(); });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) { cancelAnimationFrame(rafId); }
+      else { tick(); }
+    });
   }
 
   // Estado de sessão no cabeçalho (login/cadastro <-> painel/sair)

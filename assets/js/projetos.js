@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function render(materials) {
     grid.innerHTML = materials.map(m => `
-      <div class="material-card">
+      <div class="material-card spotlight">
         <div class="thumb"><img src="${m.imageUrl}" alt="${m.name}" loading="lazy"></div>
         <div class="info">
           <span class="cat">${m.category || 'Material'}</span>

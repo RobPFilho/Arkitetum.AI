@@ -54,18 +54,19 @@
 
   <!-- HERO -->
   <section class="hero">
+    <canvas id="heroParticles" aria-hidden="true"></canvas>
     <div class="container hero-grid">
-      <div class="hero-copy">
+      <div class="hero-copy" data-stagger>
         <span class="eyebrow">Mais assertividade, menos dor de cabeça</span>
-        <h1>Encontre seu arquiteto ideal com <span class="accent">Inteligência Artificial</span></h1>
+        <h1>Encontre seu arquiteto ideal com <span class="accent shimmer-text">Inteligência Artificial</span></h1>
         <p class="lead">Encontre o arquiteto certo para o seu projeto, sem perder horas procurando.</p>
         <div class="hero-actions">
-          <a href="cadastro.html?tipo=cliente" class="btn btn-primary">Encontrar meu arquiteto</a>
+          <a href="cadastro.html?tipo=cliente" class="btn btn-primary magnetic">Encontrar meu arquiteto</a>
           <a href="cadastro.html?tipo=arquiteto" class="btn btn-secondary">Sou arquiteto</a>
         </div>
         <div class="hero-stats">
-          <div><strong>4+</strong><span>arquitetos por match</span></div>
-          <div><strong>95%</strong><span>compatibilidade média</span></div>
+          <div><strong data-count-to="4" data-count-suffix="+">0</strong><span>arquitetos por match</span></div>
+          <div><strong data-count-to="95" data-count-suffix="%">0</strong><span>compatibilidade média</span></div>
         </div>
       </div>
       <div class="hero-visual reveal">
@@ -81,7 +82,7 @@
             <li>Integração &amp; sustentabilidade</li>
           </ul>
         </div>
-        <div class="floating-card match">
+        <div class="floating-card match glow-border">
           <div class="fc-label">Match encontrado</div>
           <strong>Studio Cantiléver</strong>
           <div class="fc-score">95% de compatibilidade</div>
@@ -110,7 +111,7 @@
         <span class="eyebrow">Como funciona</span>
         <h2>Encontre o arquiteto certo para o seu projeto, sem perder horas procurando.</h2>
       </div>
-      <div class="steps reveal">
+      <div class="steps" data-stagger>
         <div class="step">
           <div class="step-num">1</div>
           <h3>Conte sua ideia</h3>
@@ -143,7 +144,7 @@
         <h2>A IA compara seu perfil com o portfólio de arquitetos cadastrados</h2>
         <p> Nossa tecnologia encontra seus arquitetos mais compatíveis com seu projeto — pontuação por estilo, materiais, localização, especialidade e disponibilidade.</p>
       </div>
-      <div class="match-demo reveal">
+      <div class="match-demo" data-stagger>
         <div class="match-card">
           <h4>Seu perfil</h4>
           <ul>
@@ -188,65 +189,65 @@
           <h2>IA como sua parceira-chave</h2>
         </div>
       </div>
-      <div class="feature-grid reveal" style="margin-bottom:20px;">
-        <div class="feature-card">
+      <div class="feature-grid" data-stagger style="margin-bottom:20px;">
+        <div class="feature-card spotlight tilt">
           <span class="index">01</span>
           <h3>Encontre seu arquiteto ideal</h3>
           <p>Compatibilidade calculada a partir do seu estilo, orçamento e necessidades reais.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card spotlight tilt">
           <span class="index">02</span>
           <h3>Menos retrabalho e alterações</h3>
           <p>O match certo desde o início reduz revisões e mudanças de rota no projeto.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card spotlight tilt">
           <span class="index">03</span>
           <h3>Mais transparência no processo</h3>
           <p>Acompanhe score, sugestões e referências geradas por IA.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card spotlight tilt">
           <span class="index">04</span>
           <h3>Projetos alinhados ao seu estilo</h3>
           <p>Preferências estéticas e funcionais levadas a sério desde o cadastro.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card spotlight tilt">
           <span class="index">05</span>
           <h3>Economia de tempo e dinheiro</h3>
           <p>Menos reuniões de alinhamento, mais tempo dedicado ao que importa.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card spotlight tilt">
           <span class="index">06</span>
           <h3>Experiência personalizada do início ao fim</h3>
           <p>Do questionário ao acompanhamento do projeto, tudo pensado para você.</p>
         </div>
       </div>
-      <div class="feature-grid reveal">
-        <div class="feature-card">
+      <div class="feature-grid" data-stagger>
+        <div class="feature-card spotlight tilt">
           <span class="index">01</span>
           <h3>Preserve sua identidade autoral</h3>
           <p>A IA aprende o seu estilo — não substitui sua assinatura criativa.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card spotlight tilt">
           <span class="index">02</span>
           <h3>Acelere pesquisa e criação</h3>
           <p>Sugestões de conceitos, materiais e referências visuais sob medida.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card spotlight tilt">
           <span class="index">03</span>
           <h3>Entenda melhor o perfil do cliente</h3>
           <p>Dados estruturados de estilo, orçamento e composição familiar num só lugar.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card spotlight tilt">
           <span class="index">04</span>
           <h3>Sugestões de materiais e layouts</h3>
           <p>Banco de materiais integrado para acelerar a etapa conceitual.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card spotlight tilt">
           <span class="index">05</span>
           <h3>Aumente produtividade e eficiência</h3>
           <p>Menos tempo em briefing, mais tempo em projeto.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card spotlight tilt">
           <span class="index">06</span>
           <h3>Mais conversões e projetos fechados</h3>
           <p>Visibilidade priorizada nos resultados de compatibilidade.</p>
@@ -263,7 +264,7 @@
         <h2>Projetos que já viraram match na plataforma</h2>
         <p>Cada card abaixo é um projeto de verdade, com match verificado pelos dois lados — e ao lado, os arquitetos com melhor mérito na plataforma agora.</p>
       </div>
-      <div class="showcase-grid reveal">
+      <div class="showcase-grid" data-stagger>
         <div class="showcase-carousel">
           <div class="showcase-track" id="showcaseTrack"><p class="showcase-empty">Carregando...</p></div>
           <div class="showcase-nav">
@@ -287,7 +288,7 @@
         <h2>Pronto para encontrar seu match?</h2>
         <p>Cadastre-se gratuitamente como cliente ou arquiteto e deixe a IA cuidar da compatibilidade.</p>
         <div class="hero-actions" style="justify-content:center;">
-          <a href="cadastro.html?tipo=cliente" class="btn btn-primary">Criar conta gratuita</a>
+          <a href="cadastro.html?tipo=cliente" class="btn btn-primary magnetic">Criar conta gratuita</a>
         </div>
       </div>
     </div>

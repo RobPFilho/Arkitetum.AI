@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function projectCardHtml(c) {
     return `
-      <div class="showcase-card">
+      <div class="showcase-card spotlight tilt">
         <div class="showcase-card-media">
           ${c.image ? `<img src="${c.image}" alt="${c.title}" loading="lazy">` : '<div class="showcase-card-noimg"></div>'}
           ${typeof c.compatibilityScore === 'number' ? `<span class="showcase-compat">${c.compatibilityScore}% match</span>` : ''}

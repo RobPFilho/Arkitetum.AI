@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const portfolio = p.portfolio || [];
     document.getElementById('archPortfolio').innerHTML = portfolio.length
       ? `<div class="material-grid">${portfolio.map(proj => `
-          <div class="material-card">
+          <div class="material-card spotlight">
             <div class="thumb">${proj.imageUrl ? `<img src="${proj.imageUrl}" alt="${proj.title}">` : ''}</div>
             <div class="info">
               <span class="cat">${proj.status === 'ongoing' ? 'Em andamento' : 'Concluído'}</span>

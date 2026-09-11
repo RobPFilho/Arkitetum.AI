@@ -253,7 +253,7 @@ const ColorWheelPicker = (() => {
       // Força o reflow antes de religar a transição.
       void wrap.offsetWidth;
       requestAnimationFrame(() => {
-        wrap.style.transition = 'transform .45s cubic-bezier(.2,.8,.2,1), opacity .3s ease';
+        wrap.style.transition = 'transform .45s var(--ease-out), opacity .3s ease';
         wrap.style.transform = 'translate(0, 0) scale(1)';
         wrap.style.opacity = '1';
       });
