@@ -99,6 +99,24 @@
 
       <!-- CLIENTE -->
       <div id="clientPanel" style="display:none;">
+        <div class="dash-overview" id="clientOverview">
+          <button type="button" class="dash-overview-tile" data-jump-tab="match">
+            <strong id="overviewMatchCount">0</strong>
+            <span>buscas de compatibilidade feitas</span>
+          </button>
+          <button type="button" class="dash-overview-tile" data-jump-tab="favoritos">
+            <strong id="overviewFavCount">0</strong>
+            <span>arquitetos favoritados</span>
+          </button>
+          <button type="button" class="dash-overview-tile" data-jump-tab="mensagens">
+            <strong id="overviewUnreadCount">0</strong>
+            <span>mensagens não lidas</span>
+          </button>
+          <button type="button" class="dash-overview-tile" data-jump-tab="conta">
+            <strong>Conta</strong>
+            <span>Perfil, plano e privacidade</span>
+          </button>
+        </div>
         <div class="profile-tabs" id="clientProfileTabs" role="tablist" aria-label="Seções do painel">
           <button type="button" class="profile-tab active" data-profile-panel="projeto" role="tab" aria-selected="true">Seu projeto</button>
           <button type="button" class="profile-tab" data-profile-panel="match" role="tab" aria-selected="false">Compatibilidade</button>

@@ -27,13 +27,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   const uid = (u) => u.id || u._id;
   const PROJECT_STYLES = ['Moderno', 'Contemporâneo', 'Minimalista', 'Industrial', 'Clássico', 'Rústico', 'Escandinavo', 'Biofílico', 'Brutalista', 'Alto padrão'];
 
-  async function refreshUnreadBadge(badgeId) {
+  async function refreshUnreadBadge(badgeId, mirrorId) {
     const badge = document.getElementById(badgeId);
-    if (!badge) return;
+    const mirror = mirrorId ? document.getElementById(mirrorId) : null;
+    if (!badge && !mirror) return;
     try {
       const { count } = await MatchAPI.unreadCount();
-      if (count) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'inline-flex'; }
-      else badge.style.display = 'none';
+      if (badge) {
+        if (count) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'inline-flex'; }
+        else badge.style.display = 'none';
+      }
+      if (mirror) mirror.textContent = count;
     } catch { /* offline: só não mostra o contador, sem travar o painel */ }
   }
 
@@ -78,6 +82,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('matchExtraPanels').addEventListener('click', (e) => handleResultClick(e, me));
     setupMatchTabs();
     setupProfileTabs('clientProfileTabs', 'clientPanel');
+    document.getElementById('clientOverview').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-jump-tab]');
+      if (btn) activateProfileTab(document.getElementById('clientProfileTabs'), document.getElementById('clientPanel'), btn.dataset.jumpTab);
+    });
     document.getElementById('clientStatMatch').style.display = '';
     document.getElementById('clientStatFav').style.display = '';
     await loadFavoriteIds(me);
@@ -95,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupProjects(me);
     renderMatchHistory(me);
     setupCompareExport(me);
-    refreshUnreadBadge('clientUnreadBadge');
+    refreshUnreadBadge('clientUnreadBadge', 'overviewUnreadCount');
   } else if (me.role === 'architect') {
     document.getElementById('architectPanel').style.display = 'block';
     document.getElementById('clientActions').style.display = 'none';
@@ -614,6 +622,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const favorites = await MatchAPI.favorites();
       document.getElementById('statFavCount').textContent = favorites.length;
+      const overviewFavCount = document.getElementById('overviewFavCount');
+      if (overviewFavCount) overviewFavCount.textContent = favorites.length;
       if (!favorites.length) {
         list.innerHTML = emptyStateHtml('Nenhum arquiteto salvo ainda. Use o botão "Salvar para depois" nos resultados do match.');
         return;
@@ -1624,6 +1634,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const history = await MatchAPI.matchHistory();
       document.getElementById('statMatchCount').textContent = history.length;
+      const overviewMatchCount = document.getElementById('overviewMatchCount');
+      if (overviewMatchCount) overviewMatchCount.textContent = history.length;
       if (!history.length) {
         container.innerHTML = emptyStateHtml('Nenhuma busca registrada ainda — clique em "Rodar match com IA" no topo da página.');
         return;

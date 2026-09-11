@@ -594,6 +594,20 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .profile-stats .stat strong { display: block; font-family: var(--font-display); font-size: 1.5rem; color: var(--ink); line-height: 1.2; }
 .profile-stats .stat span { font-size: 0.78rem; color: var(--ink-faint); }
 
+/* Visão geral do painel do cliente — mostra o que tem em cada aba antes de
+   clicar (quantas buscas, favoritos, mensagens não lidas), em vez de tudo
+   ficar escondido até abrir a aba. Cada tile pula direto pra aba
+   correspondente reaproveitando activateProfileTab. */
+.dash-overview { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+.dash-overview-tile {
+  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-md);
+  padding: 18px; text-align: left; cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease;
+}
+.dash-overview-tile:hover { border-color: var(--terracotta); box-shadow: var(--shadow-sm); }
+.dash-overview-tile strong { display: block; font-family: var(--font-display); font-size: 1.3rem; color: var(--ink); line-height: 1.2; margin-bottom: 4px; }
+.dash-overview-tile span { font-size: 0.8rem; color: var(--ink-faint); }
+@media (max-width: 720px) { .dash-overview { grid-template-columns: repeat(2, 1fr); } }
+
 .profile-tabs {
   display: flex; gap: 4px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
   margin-bottom: 32px; overflow-x: auto; overflow-y: hidden;
@@ -1269,15 +1283,19 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px;
   scrollbar-width: thin;
 }
-.showcase-card {
-  scroll-snap-align: start; flex: 0 0 260px; background: var(--white); border: 1px solid var(--line);
-  border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm);
-}
+/* Sem moldura/caixa no card — a foto vai até a borda (a mesma ideia dos
+   cards de listagem do Airbnb), com o selo de compatibilidade sobreposto
+   na própria imagem em vez de texto solto embaixo. */
+.showcase-card { scroll-snap-align: start; flex: 0 0 260px; }
+.showcase-card-media { position: relative; border-radius: var(--radius-md); overflow: hidden; }
 .showcase-card img, .showcase-card-noimg { width: 100%; height: 160px; object-fit: cover; display: block; background: var(--bg-alt); }
-.showcase-card-info { padding: 14px; }
+.showcase-compat {
+  position: absolute; top: 10px; left: 10px; background: var(--sage); color: var(--on-accent);
+  font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+}
+.showcase-card-info { padding: 12px 2px 0; }
 .showcase-card-info h4 { margin: 0 0 4px; font-size: 0.94rem; }
 .showcase-card-info p { margin: 0; font-size: 0.8rem; color: var(--ink-faint); }
-.showcase-compat { display: inline-block; margin-top: 8px; font-size: 0.74rem; font-weight: 700; color: var(--sage-dark); }
 .showcase-nav { display: flex; gap: 8px; margin-top: 12px; }
 .showcase-nav button {
   background: var(--white); border: 1px solid var(--line); border-radius: 999px; width: 34px; height: 34px;

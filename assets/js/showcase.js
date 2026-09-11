@@ -14,11 +14,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   function projectCardHtml(c) {
     return `
       <div class="showcase-card">
-        ${c.image ? `<img src="${c.image}" alt="${c.title}" loading="lazy">` : '<div class="showcase-card-noimg"></div>'}
+        <div class="showcase-card-media">
+          ${c.image ? `<img src="${c.image}" alt="${c.title}" loading="lazy">` : '<div class="showcase-card-noimg"></div>'}
+          ${typeof c.compatibilityScore === 'number' ? `<span class="showcase-compat">${c.compatibilityScore}% match</span>` : ''}
+        </div>
         <div class="showcase-card-info">
           <h4>${c.title}</h4>
           <p>${c.architectName || 'Arquiteto'}${c.style ? ` · ${c.style}` : ''}${c.areaM2 ? ` · ${c.areaM2} m²` : ''}</p>
-          ${typeof c.compatibilityScore === 'number' ? `<span class="showcase-compat">${c.compatibilityScore}% de compatibilidade</span>` : ''}
         </div>
       </div>`;
   }
