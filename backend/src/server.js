@@ -22,6 +22,7 @@ import favoriteRoutes from "./routes/favorites.js";
 import timelineRoutes from "./routes/timeline.js";
 import caseStudyRoutes from "./routes/caseStudies.js";
 import briefRoutes from "./routes/briefs.js";
+import commissionRoutes from "./routes/commissions.js";
 
 const app = express(),
   root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
@@ -51,6 +52,7 @@ app.use("/api/favorites", favoriteRoutes);
 app.use("/api/timeline", timelineRoutes);
 app.use("/api/case-studies", caseStudyRoutes);
 app.use("/api/briefs", briefRoutes);
+app.use("/api/commissions", commissionRoutes);
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
 // Site (front-end) servido pelo mesmo processo/porta que a API — sem
