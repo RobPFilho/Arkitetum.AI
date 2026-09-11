@@ -18,9 +18,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let requestSeq = 0;
   const compareSelection = new Map();
 
-  function ratingHtml(a) {
-    if (!a.reviewCount) return '<span style="font-size:0.78rem; color:var(--ink-faint);">Sem avaliações ainda</span>';
-    return `<span style="font-size:0.8rem;">★ ${a.avgRating} <span style="color:var(--ink-faint);">(${a.reviewCount})</span></span>`;
+  function ratingText(a) {
+    return a.reviewCount ? `★ ${a.avgRating} (${a.reviewCount})` : 'Sem avaliações ainda';
   }
 
   function cardHtml(a) {
@@ -30,23 +29,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const proBadge = a.isPro ? '<span class="badge-pro" style="margin-left:6px;">★ Pro</span>' : '';
     const trackRecordBadge = a.isVerifiedTrackRecord ? '<span class="status-pill badge-validated" style="margin-left:6px;">Trajetória verificada</span>' : '';
     const checked = compareSelection.has(a.id) ? 'checked' : '';
+    const location = [a.city, a.state].filter(Boolean).join(' · ') || 'Localização não informada';
+    const experience = p.yearsExperience ? `${p.yearsExperience} anos de experiência` : 'Experiência não informada';
     return `
-      <div class="material-card" style="position:relative;">
-        <label style="position:absolute; top:10px; right:10px; z-index:1; background:var(--bg); border-radius:6px; padding:4px 6px; display:flex; align-items:center; gap:5px; font-size:0.72rem; box-shadow:var(--shadow-sm); cursor:pointer;">
-          <input type="checkbox" data-compare="${a.id}" ${checked}> Comparar
-        </label>
-        <a href="arquiteto.html?id=${a.id}" style="text-decoration:none; color:inherit;">
-          <div class="thumb" style="display:flex; align-items:center; justify-content:center; background:var(--brand-gradient);">
-            <span style="font-family:var(--font-display); font-size:1.6rem; color:var(--on-accent);">${initials}</span>
-          </div>
-          <div class="info">
-            <span class="cat">${[a.city, a.state].filter(Boolean).join(' · ') || 'Localização não informada'}</span>
+      <div class="architect-row">
+        <a href="arquiteto.html?id=${a.id}" class="architect-row-link">
+          <div class="architect-row-avatar">${initials}</div>
+          <div class="architect-row-body">
             <h4>${a.name}${verified}${proBadge}${trackRecordBadge}</h4>
-            <div class="tag-row" style="margin:6px 0;">${(p.styles || []).slice(0, 3).map(s => `<span class="tag">${s}</span>`).join('') || ''}</div>
-            <p style="font-size:0.8rem; color:var(--ink-faint); margin:4px 0;">${p.yearsExperience ? `${p.yearsExperience} anos de experiência` : 'Experiência não informada'}</p>
-            ${ratingHtml(a)}
+            <p class="muted">${location} · ${experience} · ${ratingText(a)}</p>
+            <div class="tag-row">${(p.styles || []).slice(0, 3).map(s => `<span class="tag">${s}</span>`).join('') || ''}</div>
           </div>
         </a>
+        <label class="architect-row-compare">
+          <input type="checkbox" data-compare="${a.id}" ${checked}> Comparar
+        </label>
       </div>`;
   }
 
@@ -100,12 +97,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function skeletonCardHtml() {
     return `
-      <div class="skeleton-card">
-        <div class="skeleton-block thumb"></div>
+      <div class="skeleton-result">
+        <div class="skeleton-block avatar"></div>
         <div class="skeleton-lines">
-          <div class="skeleton-block line" style="width:60%;"></div>
-          <div class="skeleton-block line" style="width:85%;"></div>
           <div class="skeleton-block line" style="width:40%;"></div>
+          <div class="skeleton-block line" style="width:70%;"></div>
+          <div class="skeleton-block line" style="width:30%;"></div>
         </div>
       </div>`;
   }
