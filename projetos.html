@@ -187,15 +187,26 @@
     </div>
   </section>
 
-  <section class="section section-alt">
+  <section class="section section-alt" id="vitrine-de-projetos">
     <div class="container">
-      <div class="showcase-3d reveal">
-        <span class="badge-3d">Estudo volumétrico 3D · arraste para girar, role para zoom</span>
-        <iframe src="assets/3d/mansion-3d.html" title="Residência Cantiléver — estudo volumétrico 3D interativo" loading="lazy"></iframe>
+      <div class="section-head reveal">
+        <span class="eyebrow">Prova real, não promessa</span>
+        <h2>Projetos que já viraram match na plataforma</h2>
+        <p>Cada card abaixo é um projeto de verdade, com match verificado pelos dois lados — e ao lado, os arquitetos com melhor mérito na plataforma agora.</p>
       </div>
-      <div class="section-head reveal" style="margin-top:32px; margin-bottom:0;">
-        <h2 style="font-size:1.4rem;">Residência Cantiléver — Estudo Volumétrico</h2>
-        <p>Concreto, madeira e vidro. Exemplo de como a IA do match.IA pode transformar o briefing de um cliente — estilo contemporâneo, integração de ambientes, piscina e paisagismo — em um volume 3D navegável para apoiar a fase de concepção do arquiteto.</p>
+      <div class="showcase-grid reveal">
+        <div class="showcase-carousel">
+          <div class="showcase-track" id="showcaseTrack"><p class="showcase-empty">Carregando...</p></div>
+          <div class="showcase-nav">
+            <button type="button" id="showcasePrev" aria-label="Anterior">←</button>
+            <button type="button" id="showcaseNext" aria-label="Próximo">→</button>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-size:1rem; margin:0 0 12px;">Arquitetos em destaque</h3>
+          <div class="showcase-ranking" id="showcaseRanking"><p class="showcase-empty">Carregando...</p></div>
+          <a href="destaques.html" class="btn btn-secondary btn-sm" style="margin-top:14px;">Ver diretório completo</a>
+        </div>
       </div>
     </div>
   </section>
@@ -274,6 +285,7 @@
 </footer>
 
 <script src="assets/js/api.js"></script>
+<script src="assets/js/showcase.js"></script>
 <script src="assets/js/theme.js"></script>
 <script src="assets/js/site.js"></script>
 <script src="assets/js/projetos.js"></script>

@@ -58,7 +58,7 @@
       <div class="hero-copy">
         <span class="eyebrow">Mais assertividade, menos dor de cabeça</span>
         <h1>Encontre seu arquiteto ideal com <span class="accent">Inteligência Artificial</span></h1>
-        <p class="lead">Conectamos você ao seu arquiteto perfeito para o seu projeto. Nossa IA analisa estilo, orçamento e necessidades para potencializar cada etapa do processo — do primeiro match ao projeto final.</p>
+        <p class="lead">Encontre o arquiteto certo para o seu projeto, sem perder horas procurando.</p>
         <div class="hero-actions">
           <a href="cadastro.html?tipo=cliente" class="btn btn-primary">Encontrar meu arquiteto</a>
           <a href="cadastro.html?tipo=arquiteto" class="btn btn-secondary">Sou arquiteto</a>
@@ -107,7 +107,7 @@
         <div class="step">
           <div class="step-num">2</div>
           <h3>IA analisa seu perfil</h3>
-          <p>Nosso algoritmo cruza seus dados com o portfólio de arquitetos cadastrados.</p>
+          <p>A tecnologia do match.IA cruza seu projeto com o portfólio de arquitetos cadastrados.</p>
         </div>
         <div class="step">
           <div class="step-num">3</div>
@@ -243,19 +243,28 @@
     </div>
   </section>
 
-  <!-- 3D SHOWCASE -->
-  <section class="section section-alt" id="ia-projeto">
+  <!-- VITRINE: PROJETOS QUE JÁ VIRARAM MATCH -->
+  <section class="section section-alt" id="vitrine-de-projetos">
     <div class="container">
       <div class="section-head reveal">
-        <span class="eyebrow">IA auxiliando no desenvolvimento do projeto</span>
-        <h2>Do match ao volume construído</h2>
-        <p>Depois da contratação, a IA apoia o arquiteto sugerindo conceitos, materiais e referências. Explore abaixo um estudo volumétrico 3D interativo — gire, dê zoom e veja o projeto de todos os ângulos.</p>
+        <span class="eyebrow">Prova real, não promessa</span>
+        <h2>Projetos que já viraram match na plataforma</h2>
+        <p>Cada card abaixo é um projeto de verdade, com match verificado pelos dois lados — e ao lado, os arquitetos com melhor mérito na plataforma agora.</p>
       </div>
-      <div class="showcase-3d reveal">
-        <span class="badge-3d">Interativo · arraste para girar</span>
-        <iframe src="assets/3d/mansion-3d.html" title="Estudo volumétrico 3D — Residência Cantiléver" loading="lazy"></iframe>
+      <div class="showcase-grid reveal">
+        <div class="showcase-carousel">
+          <div class="showcase-track" id="showcaseTrack"><p class="showcase-empty">Carregando...</p></div>
+          <div class="showcase-nav">
+            <button type="button" id="showcasePrev" aria-label="Anterior">←</button>
+            <button type="button" id="showcaseNext" aria-label="Próximo">→</button>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-size:1rem; margin:0 0 12px;">Arquitetos em destaque</h3>
+          <div class="showcase-ranking" id="showcaseRanking"><p class="showcase-empty">Carregando...</p></div>
+          <a href="destaques.html" class="btn btn-secondary btn-sm" style="margin-top:14px;">Ver diretório completo</a>
+        </div>
       </div>
-      <p class="showcase-hint">Modelo gerado com IA a partir do briefing de estilo do cliente · <a href="projetos.html#ia-sob-medida" style="color:var(--terracotta); font-weight:600;">ver como a IA respeita o estilo de cada arquiteto →</a></p>
     </div>
   </section>
 
@@ -314,6 +323,7 @@
 </footer>
 
 <script src="assets/js/api.js"></script>
+<script src="assets/js/showcase.js"></script>
 <script src="assets/js/theme.js"></script>
 <script src="assets/js/site.js"></script>
 </body>
