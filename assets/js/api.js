@@ -83,6 +83,7 @@ const MatchAPI = (() => {
     myStoreReferrals: () => request('/stores/me/referrals', { auth: true }),
     suggestedProducts: (projectId) => request(`/projects/${encodeURIComponent(projectId)}/suggested-products`, { auth: true }),
     createStoreReferral: (productId, projectId) => request('/stores/referrals', { method: 'POST', auth: true, body: { productId, projectId } }),
+    featuredCaseStudies: (limit) => request(`/case-studies/featured${limit ? `?limit=${limit}` : ''}`),
     deletePortfolio: (id) => request(`/dashboard/portfolio/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true }),
     materials: () => request('/materials'),
     architect: (id) => request(`/architects/${id}`),
