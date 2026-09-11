@@ -43,7 +43,7 @@
     </ul>
     <div class="nav-actions" data-auth-slot>
       <a href="login.html" class="login-link">Entrar</a>
-      <a href="cadastro.html" class="btn btn-primary btn-sm">Cadastrar</a>
+      <a href="cadastro.html" class="btn btn-secondary btn-sm">Cadastrar</a>
     </div>
     <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema" type="button"></button>
     <button class="nav-toggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
@@ -63,7 +63,7 @@
 
       <div class="chip-select" id="styleFilters" style="margin:24px 0 16px;"></div>
 
-      <div class="form-grid" style="max-width:520px; margin-bottom:20px;">
+      <div class="form-grid" style="grid-template-columns:repeat(3,1fr); margin-bottom:8px;">
         <div class="form-field">
           <label for="cityFilter">Cidade</label>
           <input type="text" id="cityFilter" placeholder="Ex.: São Paulo">
@@ -89,7 +89,11 @@
         </div>
       </div>
 
-      <p style="font-size:0.82rem; color:var(--ink-faint); margin:-8px 0 20px;">Marque até 4 arquitetos pra comparar lado a lado, sem precisar entrar.</p>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:20px;">
+        <p style="font-size:0.82rem; color:var(--ink-faint); margin:0;">Marque até 4 arquitetos pra comparar lado a lado, sem precisar entrar.</p>
+        <p id="archResultCount" style="font-size:0.82rem; color:var(--ink-faint); margin:0;"></p>
+      </div>
+      <p id="compareLimitNote" class="form-field-error" style="display:none; margin:-12px 0 20px;">Você pode comparar até 4 arquitetos por vez.</p>
 
       <div id="archGrid" class="material-grid" style="margin-top:10px;"></div>
       <div id="archEmpty" class="empty-state" style="display:none;">

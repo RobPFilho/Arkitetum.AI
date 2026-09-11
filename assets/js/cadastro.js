@@ -36,6 +36,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function val(id) { return document.getElementById(id).value.trim(); }
 
+  // Erro por campo (além do banner geral) — a pessoa vê exatamente qual
+  // campo precisa corrigir, não só uma mensagem genérica no topo do form.
+  function setFieldError(id, message) {
+    const field = document.getElementById(id).closest('.form-field');
+    field.classList.add('has-error');
+    let msg = field.querySelector('.form-field-error');
+    if (!msg) {
+      msg = document.createElement('span');
+      msg.className = 'form-field-error';
+      field.appendChild(msg);
+    }
+    msg.textContent = message;
+  }
+  function clearFieldErrors(...ids) {
+    ids.forEach((id) => {
+      const field = document.getElementById(id).closest('.form-field');
+      field.classList.remove('has-error');
+      field.querySelector('.form-field-error')?.remove();
+    });
+  }
+
   // Foto de perfil — vira data URI (mesmo mecanismo já usado nas fotos de
   // portfólio), sem exigir um serviço de upload dedicado. Opcional.
   let avatarDataUri = '';
@@ -45,12 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     formError.classList.remove('show');
     formSuccess.classList.remove('show');
+    clearFieldErrors('password', 'confirmPassword', 'email');
 
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     if (password !== confirmPassword) {
-      formError.textContent = 'As senhas não coincidem.';
-      formError.classList.add('show');
+      setFieldError('confirmPassword', 'As senhas não coincidem.');
+      document.getElementById('confirmPassword').focus();
       return;
     }
 
@@ -85,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         : err.message || 'Não foi possível criar a conta.';
       formError.classList.add('show');
       if (err.offline) apiBanner.classList.add('show');
+      else if (/e-?mail/i.test(err.message || '')) setFieldError('email', err.message);
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = `Criar conta de ${roleLabels[role]}`;

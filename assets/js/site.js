@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       authSlot.innerHTML = `
         <a href="login.html" class="login-link">Entrar</a>
-        <a href="cadastro.html" class="btn btn-primary btn-sm">Cadastrar</a>
+        <a href="cadastro.html" class="btn btn-secondary btn-sm">Cadastrar</a>
       `;
     }
   }

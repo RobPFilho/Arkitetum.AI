@@ -141,10 +141,7 @@
           <div class="dash-card" id="projectsCard">
             <h3>Meus projetos</h3>
             <p class="card-lead">Cada projeto guarda seu próprio estilo, metragem e prioridades — o match é feito a partir do projeto que você abrir, não de um perfil único.</p>
-            <button type="button" id="openProjectsDrawerBtn" class="btn btn-primary btn-sm">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-              Meus projetos
-            </button>
+            <button type="button" id="openProjectsDrawerBtn" class="btn btn-secondary btn-sm">Ver meus projetos</button>
           </div>
         </div>
 
@@ -218,8 +215,8 @@
             <span class="mock-label">Paleta de cores</span>
             <div class="swatch-select" id="dashPalette" style="margin-bottom:20px;"></div>
 
-            <span class="mock-label">Palavras-chave</span>
             <div class="form-field full" style="margin-bottom:14px;">
+              <label for="dashKeywords">Palavras-chave</label>
               <input type="text" id="dashKeywords" placeholder="Luz natural, linhas limpas, integração">
             </div>
             <button id="saveStyleProfileBtn" class="btn btn-secondary btn-sm">Salvar perfil de estilo</button>
@@ -257,10 +254,7 @@
           <div class="dash-card">
             <h3>Meu portfólio</h3>
             <p class="card-lead">O estilo, os materiais e a metragem de cada peça são o que alimenta o match — não um perfil escolhido uma vez só.</p>
-            <button type="button" id="openPortfolioDrawerBtn" class="btn btn-primary btn-sm">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-              Meu portfólio
-            </button>
+            <button type="button" id="openPortfolioDrawerBtn" class="btn btn-secondary btn-sm">Ver meu portfólio</button>
           </div>
 
           <div class="dash-card" id="caseStudiesCard" style="display:none;">
@@ -324,10 +318,7 @@
           <div class="dash-card">
             <h3>Meus produtos</h3>
             <p class="card-lead">A IA sugere seus produtos pros clientes durante o desenvolvimento do projeto, quando o estilo/categoria combina.</p>
-            <button type="button" id="openProductsDrawerBtn" class="btn btn-primary btn-sm">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-              Meus produtos
-            </button>
+            <button type="button" id="openProductsDrawerBtn" class="btn btn-secondary btn-sm">Ver meus produtos</button>
           </div>
         </div>
 
@@ -365,21 +356,19 @@
         </div>
 
         <div class="dash-card">
-          <h3 style="font-size:1rem;">Convide e ganhe</h3>
+          <div class="dash-subhead" style="margin-top:0;">Convide e ganhe</div>
           <p class="card-lead" id="referralExplainer">Compartilhe seu link — cada pessoa que se cadastrar por ele te dá um bônus.</p>
           <div class="share-row" style="margin-bottom:10px;">
             <input type="text" id="referralLinkInput" readonly>
-            <button type="button" id="copyReferralLinkBtn" class="btn btn-secondary btn-sm">Copiar link</button>
+            <button type="button" id="copyReferralLinkBtn" class="btn btn-tertiary btn-sm">Copiar link</button>
           </div>
           <p style="font-size:0.78rem; color:var(--ink-faint); margin:0;" id="referralBonusCount"></p>
-        </div>
 
-        <div class="dash-card">
-          <h3 style="font-size:1rem;">Privacidade (LGPD)</h3>
+          <div class="dash-subhead">Privacidade (LGPD)</div>
           <p class="card-lead">Seus dados são seus. Baixe tudo que a plataforma guarda sobre você ou apague sua conta permanentemente.</p>
-          <div style="display:flex; flex-direction:column; gap:8px; max-width:320px;">
-            <button type="button" id="exportDataBtn" class="btn btn-secondary btn-sm btn-block">Baixar meus dados</button>
-            <button type="button" id="deleteAccountBtn" class="btn btn-secondary btn-sm btn-block" style="color:var(--terracotta-dark); border-color:var(--terracotta-dark);">Excluir minha conta</button>
+          <div class="card-actions">
+            <button type="button" id="exportDataBtn" class="btn btn-tertiary btn-sm">Baixar meus dados</button>
+            <button type="button" id="deleteAccountBtn" class="btn btn-danger btn-sm">Excluir minha conta</button>
           </div>
         </div>
       </div>

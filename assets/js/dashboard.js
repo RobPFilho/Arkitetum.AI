@@ -405,9 +405,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
         </div>
         <div class="drawer-detail-actions">
-          <button type="submit" class="btn btn-primary btn-sm">${project ? 'Salvar alterações' : 'Criar projeto'}</button>
-          ${project ? '<button type="button" class="btn btn-sage btn-sm" id="drawerRunMatchBtn">Rodar match</button>' : ''}
-          ${project ? '<button type="button" class="btn btn-secondary btn-sm" id="drawerDeleteProjectBtn">Excluir</button>' : ''}
+          <button type="submit" class="btn ${project ? 'btn-secondary' : 'btn-primary'} btn-sm">${project ? 'Salvar alterações' : 'Criar projeto'}</button>
+          ${project ? '<button type="button" class="btn btn-primary btn-sm" id="drawerRunMatchBtn">Rodar match</button>' : ''}
+          ${project ? '<button type="button" class="btn btn-danger btn-sm" id="drawerDeleteProjectBtn">Excluir</button>' : ''}
         </div>
       </form>
       ${project ? '<div id="suggestedProductsBox" style="margin-top:20px;"></div>' : ''}`;
@@ -1272,7 +1272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
         <div class="drawer-detail-actions">
           <button type="submit" class="btn btn-primary btn-sm">${item ? 'Salvar alterações' : 'Adicionar ao portfólio'}</button>
-          ${item ? '<button type="button" class="btn btn-secondary btn-sm" id="drawerDeletePortfolioBtn">Remover</button>' : ''}
+          ${item ? '<button type="button" class="btn btn-danger btn-sm" id="drawerDeletePortfolioBtn">Remover</button>' : ''}
         </div>
       </form>`;
 
@@ -1395,7 +1395,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
         <div class="drawer-detail-actions">
           <button type="submit" class="btn btn-primary btn-sm">${product ? 'Salvar alterações' : 'Adicionar produto'}</button>
-          ${product ? '<button type="button" class="btn btn-secondary btn-sm" id="drawerDeleteProductBtn">Remover</button>' : ''}
+          ${product ? '<button type="button" class="btn btn-danger btn-sm" id="drawerDeleteProductBtn">Remover</button>' : ''}
         </div>
       </form>`;
 

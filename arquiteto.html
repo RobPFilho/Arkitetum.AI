@@ -43,7 +43,7 @@
     </ul>
     <div class="nav-actions" data-auth-slot>
       <a href="login.html" class="login-link">Entrar</a>
-      <a href="cadastro.html" class="btn btn-primary btn-sm">Cadastrar</a>
+      <a href="cadastro.html" class="btn btn-secondary btn-sm">Cadastrar</a>
     </div>
     <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema" type="button"></button>
     <button class="nav-toggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
@@ -90,47 +90,14 @@
             <div class="tag-row" id="archSpecialties"></div>
             <div class="dash-subhead">Materiais favoritos</div>
             <div class="tag-row" id="archMaterials"></div>
+            <div class="dash-subhead">Bio</div>
+            <p id="archBio" style="margin:0;">—</p>
           </div>
         </div>
         <div>
-          <div class="dash-card">
-            <h3>Bio</h3>
-            <p id="archBio" style="margin:0;">—</p>
-          </div>
-          <div class="dash-card style-profile-card" id="stylePaletteCard" style="display:none;">
-            <h3>Perfil de estilo</h3>
-            <p style="font-size:0.86rem;">Paleta e palavras-chave que guiam as sugestões de IA deste arquiteto.</p>
-            <span class="mock-label">Paleta de cores</span>
-            <div class="mock-palette" id="archPalette"></div>
-            <span class="mock-label">Palavras-chave</span>
-            <div class="tag-row" id="archKeywords"></div>
-          </div>
-          <div class="dash-card" id="archReferenceImageCard" style="display:none;">
-            <h3>Referência visual</h3>
-            <p style="font-size:0.86rem;">Uma foto real parecida com o estilo deste arquiteto, pra ajudar a visualizar antes de conversar.</p>
-            <div id="archReferenceImageContent"></div>
-          </div>
-          <div class="dash-card">
-            <h3>Sugestões de materiais</h3>
-            <p style="font-size:0.86rem;">Combinações geradas só a partir dos materiais favoritos deste arquiteto.</p>
-            <div id="archCombos"></div>
-          </div>
-          <div class="dash-card">
-            <h3>Portfólio</h3>
-            <div id="archPortfolio"></div>
-          </div>
-          <div class="dash-card" id="archCaseStudiesCard" style="display:none;">
-            <h3>Cases de sucesso</h3>
-            <p style="font-size:0.86rem;">Projetos reais, validados com o cliente que contratou.</p>
-            <div id="archCaseStudiesContent"></div>
-          </div>
-          <div class="dash-card">
-            <h3>Avaliações</h3>
-            <div id="archReviews"></div>
-          </div>
           <div class="dash-card" id="messageCard">
             <h3>Enviar mensagem</h3>
-            <p style="font-size:0.86rem;">Fale direto com este arquiteto pela plataforma.</p>
+            <p class="card-lead">Fale direto com este arquiteto pela plataforma.</p>
             <div id="messageLoggedOut" style="display:none;">
               <p style="font-size:0.86rem;">Você precisa <a href="login.html" style="color:var(--terracotta); font-weight:600;">entrar</a> como cliente para enviar uma mensagem.</p>
             </div>
@@ -141,6 +108,37 @@
               <button type="button" class="btn btn-primary btn-sm" id="sendMessageBtn">Enviar mensagem</button>
               <p id="messageSentNote" style="display:none; color:var(--sage-dark); font-size:0.86rem; margin-top:10px;">✓ Mensagem enviada! Acompanhe a conversa no seu painel.</p>
             </div>
+          </div>
+          <div class="dash-card style-profile-card" id="stylePaletteCard" style="display:none;">
+            <h3>Perfil de estilo</h3>
+            <p class="card-lead">Paleta e palavras-chave que guiam as sugestões de IA deste arquiteto.</p>
+            <span class="mock-label">Paleta de cores</span>
+            <div class="mock-palette" id="archPalette"></div>
+            <span class="mock-label">Palavras-chave</span>
+            <div class="tag-row" id="archKeywords"></div>
+          </div>
+          <div class="dash-card" id="archReferenceImageCard" style="display:none;">
+            <h3>Referência visual</h3>
+            <p class="card-lead">Uma foto real parecida com o estilo deste arquiteto, pra ajudar a visualizar antes de conversar.</p>
+            <div id="archReferenceImageContent"></div>
+          </div>
+          <div class="dash-card">
+            <h3>Sugestões de materiais</h3>
+            <p class="card-lead">Combinações geradas só a partir dos materiais favoritos deste arquiteto.</p>
+            <div id="archCombos"></div>
+          </div>
+          <div class="dash-card">
+            <h3>Portfólio</h3>
+            <div id="archPortfolio"></div>
+          </div>
+          <div class="dash-card" id="archCaseStudiesCard" style="display:none;">
+            <h3>Cases de sucesso</h3>
+            <p class="card-lead">Projetos reais, validados com o cliente que contratou.</p>
+            <div id="archCaseStudiesContent"></div>
+          </div>
+          <div class="dash-card">
+            <h3>Avaliações</h3>
+            <div id="archReviews"></div>
           </div>
         </div>
       </div>

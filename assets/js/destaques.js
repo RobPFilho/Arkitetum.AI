@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </label>
         <a href="arquiteto.html?id=${a.id}" style="text-decoration:none; color:inherit;">
           <div class="thumb" style="display:flex; align-items:center; justify-content:center; background:var(--brand-gradient);">
-            <span style="font-family:var(--font-display); font-size:1.6rem; color:var(--white);">${initials}</span>
+            <span style="font-family:var(--font-display); font-size:1.6rem; color:var(--on-accent);">${initials}</span>
           </div>
           <div class="info">
             <span class="cat">${[a.city, a.state].filter(Boolean).join(' · ') || 'Localização não informada'}</span>
@@ -82,7 +82,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (box.checked) {
           if (compareSelection.size >= MAX_COMPARE) {
             box.checked = false;
-            alert(`Você pode comparar até ${MAX_COMPARE} arquitetos por vez.`);
+            const note = document.getElementById('compareLimitNote');
+            note.style.display = 'block';
+            clearTimeout(note._hideTimer);
+            note._hideTimer = setTimeout(() => { note.style.display = 'none'; }, 3000);
             return;
           }
           const arch = loadedArchitects.find(a => a.id === id);
@@ -117,15 +120,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     empty.style.display = 'none';
     loadMoreBtn.disabled = true;
     try {
-      const { architects, hasMore } = await MatchAPI.architects(currentParams(currentPage));
+      const { architects, hasMore, total } = await MatchAPI.architects(currentParams(currentPage));
       if (seq !== requestSeq) return; // uma busca mais recente já foi disparada, descarta esta resposta atrasada
       loadedArchitects = reset ? architects : loadedArchitects.concat(architects);
+      const countLabel = document.getElementById('archResultCount');
       if (!loadedArchitects.length) {
         grid.innerHTML = '';
         empty.style.display = 'block';
         loadMoreBtn.style.display = 'none';
+        if (countLabel) countLabel.textContent = '';
         return;
       }
+      if (countLabel) countLabel.textContent = `${total} arquiteto${total === 1 ? '' : 's'} encontrado${total === 1 ? '' : 's'}`;
       grid.innerHTML = loadedArchitects.map(cardHtml).join('');
       bindCompareCheckboxes();
       loadMoreBtn.style.display = hasMore ? 'inline-flex' : 'none';

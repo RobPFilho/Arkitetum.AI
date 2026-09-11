@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     formError.classList.remove('show');
+    document.getElementById('email').closest('.form-field').classList.remove('has-error');
+    document.getElementById('password').closest('.form-field').classList.remove('has-error');
     submitBtn.disabled = true;
     submitBtn.textContent = 'Entrando...';
     try {
@@ -26,6 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
         : err.message || 'E-mail ou senha inválidos.';
       formError.classList.add('show');
       if (err.offline) apiBanner.classList.add('show');
+      else {
+        document.getElementById('email').closest('.form-field').classList.add('has-error');
+        document.getElementById('password').closest('.form-field').classList.add('has-error');
+      }
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Entrar';
