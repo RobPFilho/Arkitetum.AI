@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('cadastroForm');
-  const btnCliente = document.getElementById('btnCliente');
-  const btnArquiteto = document.getElementById('btnArquiteto');
+  const roleButtons = document.querySelectorAll('.auth-role-step');
   const formError = document.getElementById('formError');
   const formSuccess = document.getElementById('formSuccess');
   const apiBanner = document.getElementById('apiBanner');
@@ -10,29 +9,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   apiBaseLabel.textContent = MatchAPI.base();
 
+  // As três opções (cliente/arquiteto/loja parceira) agora têm o mesmo peso
+  // visual -- antes a loja só existia como um link discreto escondido atrás
+  // de ?tipo=loja, sem botão próprio no toggle.
   const roleLabels = { client: 'cliente', architect: 'arquiteto', store: 'loja' };
   let role = 'client';
   function setRole(next) {
     role = next;
-    btnCliente.classList.toggle('active', role === 'client');
-    btnArquiteto.classList.toggle('active', role === 'architect');
+    roleButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.role === role));
     submitBtn.textContent = `Criar conta de ${roleLabels[role]}`;
     document.getElementById('storeNameField').style.display = role === 'store' ? '' : 'none';
   }
-  btnCliente.addEventListener('click', () => setRole('client'));
-  btnArquiteto.addEventListener('click', () => setRole('architect'));
+  roleButtons.forEach((btn) => btn.addEventListener('click', () => setRole(btn.dataset.role)));
 
   const params = new URLSearchParams(location.search);
   const tipo = params.get('tipo');
-  if (tipo === 'loja') {
-    // Loja parceira não escolhe papel pelo toggle -- chega direto pelo link
-    // discreto "Sou uma loja parceira".
-    document.getElementById('roleToggle').style.display = 'none';
-    document.getElementById('storeLinkNote').style.display = 'none';
-    setRole('store');
-  } else {
-    setRole(tipo === 'arquiteto' ? 'architect' : 'client');
-  }
+  setRole(tipo === 'arquiteto' ? 'architect' : tipo === 'loja' ? 'store' : 'client');
+
+  // Mostrar/ocultar senha -- um botão por campo, alterna o próprio type do
+  // input ao lado dele via data-toggle-for.
+  document.querySelectorAll('.password-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.toggleFor);
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      btn.setAttribute('aria-label', showing ? 'Mostrar senha' : 'Ocultar senha');
+    });
+  });
 
   function val(id) { return document.getElementById(id).value.trim(); }
 

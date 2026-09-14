@@ -41,15 +41,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       </a>`;
   }
 
+  const prevBtn = document.getElementById('showcasePrev');
+  const nextBtn = document.getElementById('showcaseNext');
+  let carousel3d = null;
+
   try {
     const [caseStudies, archResult] = await Promise.all([
       MatchAPI.featuredCaseStudies(12),
       MatchAPI.architects({ pageSize: 5 }),
     ]);
 
-    track.innerHTML = caseStudies.length
-      ? caseStudies.map(projectCardHtml).join('')
-      : '<p class="showcase-empty">Ainda não temos projetos publicados o suficiente — os primeiros matches confirmados aparecerão aqui.</p>';
+    // Carrossel 3D exige espaço e alguns cards pra fazer sentido girar;
+    // window.ProjectCarousel3D.create já recusa sozinho (retorna null) em
+    // prefers-reduced-motion, telas pequenas ou poucos itens — nesses casos
+    // caímos na lista simples com scroll que já existia.
+    carousel3d = window.ProjectCarousel3D?.create(track, caseStudies) || null;
+
+    if (!carousel3d) {
+      track.innerHTML = caseStudies.length
+        ? caseStudies.map(projectCardHtml).join('')
+        : '<p class="showcase-empty">Ainda não temos projetos publicados o suficiente — os primeiros matches confirmados aparecerão aqui.</p>';
+    }
 
     ranking.innerHTML = archResult.architects.length
       ? archResult.architects.map(rankingItemHtml).join('')
@@ -59,6 +71,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     ranking.innerHTML = '';
   }
 
-  document.getElementById('showcasePrev')?.addEventListener('click', () => track.scrollBy({ left: -320, behavior: 'smooth' }));
-  document.getElementById('showcaseNext')?.addEventListener('click', () => track.scrollBy({ left: 320, behavior: 'smooth' }));
+  prevBtn?.addEventListener('click', () => {
+    if (carousel3d) carousel3d.prev();
+    else track.scrollBy({ left: -320, behavior: 'smooth' });
+  });
+  nextBtn?.addEventListener('click', () => {
+    if (carousel3d) carousel3d.next();
+    else track.scrollBy({ left: 320, behavior: 'smooth' });
+  });
 });

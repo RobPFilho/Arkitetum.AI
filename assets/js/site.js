@@ -121,6 +121,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ---- Vidro líquido: brilho especular que varre cada card de vidro na
+  // primeira vez que ele aparece. Precisa ser um <span> de verdade (não um
+  // ::before/::after) porque esses cards já usam os dois slots de
+  // pseudo-elemento pra outras coisas (bisel/borda com brilho, spotlight
+  // do cursor). Cobre também os que só existem depois de uma resposta da
+  // API (painel, perfil de arquiteto, notificações), não só os do HTML
+  // estático, observando o DOM em vez de rodar só uma vez no load.
+  if (!reduceMotion) {
+    const GLASS_SHEEN_SELECTOR = '.dash-card, .dash-hero, .auth-card, .match-card, .architect-row, .result-card, .feature-card, .article-card, .material-card, .founder-modal, .checkout-modal, .color-wheel-panel, .project-drawer, .notif-dropdown';
+    const addSheenTo = (el) => {
+      if (el.dataset.sheenApplied) return;
+      el.dataset.sheenApplied = '1';
+      const sheen = document.createElement('span');
+      sheen.className = 'glass-sheen';
+      sheen.setAttribute('aria-hidden', 'true');
+      el.appendChild(sheen);
+    };
+    const applySheen = (root) => {
+      if (!(root instanceof Element)) return;
+      if (root.matches(GLASS_SHEEN_SELECTOR)) addSheenTo(root);
+      root.querySelectorAll(GLASS_SHEEN_SELECTOR).forEach(addSheenTo);
+    };
+    applySheen(document.body);
+    const sheenObserver = new MutationObserver((mutations) => {
+      mutations.forEach((m) => m.addedNodes.forEach(applySheen));
+    });
+    sheenObserver.observe(document.body, { childList: true, subtree: true });
+  }
+
   // ---- Contador numérico: sobe de 0 até o valor real quando entra na tela ----
   document.querySelectorAll('[data-count-to]').forEach((el) => {
     const target = parseFloat(el.dataset.countTo);

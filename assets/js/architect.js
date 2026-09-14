@@ -3,6 +3,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   const id = new URLSearchParams(location.search).get('id');
   if (!id) { document.getElementById('noId').style.display = 'block'; return; }
 
+  // Fundo do hero por enquanto: sem foto própria cadastrada, cai numa das
+  // fotos ilustrativas (mesmas da vitrine de destaques.html) escolhida de
+  // forma fixa a partir do id -- a pessoa sempre vê a mesma foto no próprio
+  // perfil, em vez de uma trocando a cada visita. Some pra referência visual
+  // real (MatchAPI.architectReferenceImage) assim que ela carrega, mais abaixo.
+  const FALLBACK_HERO_PHOTOS = [
+    'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260727_225202_f9e684f3-dc19-469a-8142-eb391bfc601b.png&w=1280&q=85',
+    'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260727_225149_7937e8ea-3b0a-46ab-919f-775627695a23.png&w=1280&q=85',
+    'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260727_225153_f2b1fc04-776a-4f2e-879b-b764ea762e77.png&w=1280&q=85',
+    'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260727_225847_f456fd9c-8938-4103-836d-51b0e88a9510.png&w=1280&q=85',
+    'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260727_225854_3958a522-6203-4f84-a7fa-3b3f1dcd7256.png&w=1280&q=85',
+    'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260727_231111_fcefaa07-6851-4fdc-ac7b-98754ac9d5c4.png&w=1280&q=85',
+    'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260727_231124_9a1505aa-8c44-4046-aff8-1aa0bc7b3ef3.png&w=1280&q=85',
+    'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260727_230413_62e8b331-89be-4d35-84fe-330ba9b1b64f.png&w=1280&q=85',
+  ];
+  const heroBg = document.getElementById('archHeroBg');
+  if (heroBg) {
+    const hash = [...id].reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+    heroBg.style.backgroundImage = `url("${FALLBACK_HERO_PHOTOS[hash % FALLBACK_HERO_PHOTOS.length]}")`;
+  }
+
   try {
     const arch = await MatchAPI.architect(id);
     const p = arch.profile || {};
@@ -27,6 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('archWebsite').innerHTML = p.website ? `<a href="${p.website}" target="_blank" rel="noopener" style="color:var(--terracotta);">${p.website}</a>` : '—';
     document.getElementById('archInstagram').textContent = p.instagram || '—';
     document.getElementById('archBio').textContent = p.bio || 'Este arquiteto ainda não adicionou uma bio.';
+    document.getElementById('archHeroBio').textContent = p.bio || `${arch.name} ainda não escreveu uma bio.`;
 
     const cauStatus = p.cauVerification?.status;
     document.getElementById('archVerifiedBadge').innerHTML = cauStatus === 'verified'
@@ -53,7 +75,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('archReferenceImageContent').innerHTML = `
         <img src="${photo.imageUrl}" alt="${photo.description}" style="width:100%; border-radius:12px; display:block;">
         <p style="font-size:0.76rem; color:var(--ink-faint); margin-top:8px;">Foto: <a href="${photo.photographerUrl}" target="_blank" rel="noopener" style="color:inherit;">${photo.photographerName}</a> via <a href="https://unsplash.com/?utm_source=matchia&utm_medium=referral" target="_blank" rel="noopener" style="color:inherit;">Unsplash</a></p>`;
-    }).catch(() => { /* sem estilo/materiais suficientes, ou API fora do ar — card fica oculto */ });
+      // Referência visual real do arquiteto virou a foto do hero também,
+      // no lugar da ilustrativa (ver fallback acima) -- assim que carrega.
+      if (heroBg) heroBg.style.backgroundImage = `url("${photo.imageUrl}")`;
+    }).catch(() => { /* sem estilo/materiais suficientes, ou API fora do ar — card fica oculto, hero mantém a foto ilustrativa */ });
 
     const combos = MatchExtras.generateMaterialCombos(p.favoriteMaterials);
     document.getElementById('archCombos').innerHTML = combos.length

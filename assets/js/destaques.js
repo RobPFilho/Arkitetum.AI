@@ -2,6 +2,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Quem pede menos animação no sistema também não quer rolagem suave.
   const SCROLL_BEHAVIOR = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
   const STYLES = ['Moderno', 'Contemporâneo', 'Minimalista', 'Industrial', 'Clássico', 'Rústico', 'Escandinavo', 'Biofílico', 'Brutalista', 'Alto padrão'];
+  // Mesmas fotos da vitrine "Estilos arquitetônicos" da home -- o filtro
+  // vira uma miniatura do estilo em vez de só um nome, mais fácil de
+  // reconhecer rápido numa lista de 10 opções.
+  const STYLE_THUMBS = {
+    'Moderno': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=80&q=70',
+    'Contemporâneo': 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=80&q=70',
+    'Minimalista': 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=80&q=70',
+    'Industrial': 'https://images.unsplash.com/photo-1567767292278-a4f21aa2d36e?auto=format&fit=crop&w=80&q=70',
+    'Clássico': 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=80&q=70',
+    'Rústico': 'https://images.unsplash.com/photo-1523755231516-e43fd2e8dca5?auto=format&fit=crop&w=80&q=70',
+    'Escandinavo': 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=80&q=70',
+    'Biofílico': 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=80&q=70',
+    'Brutalista': 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=80&q=70',
+    'Alto padrão': 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=80&q=70',
+  };
   const grid = document.getElementById('archGrid');
   const empty = document.getElementById('archEmpty');
   const filters = document.getElementById('styleFilters');
@@ -49,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function buildFilters() {
     filters.innerHTML = `<button type="button" class="chip active" data-style="">Todos</button>` +
-      STYLES.map(s => `<button type="button" class="chip" data-style="${s}">${s}</button>`).join('');
+      STYLES.map(s => `<button type="button" class="chip has-thumb" data-style="${s}"><img class="chip-thumb" src="${STYLE_THUMBS[s]}" alt="" loading="lazy">${s}</button>`).join('');
     filters.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => {
         filters.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));

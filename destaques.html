@@ -53,6 +53,30 @@
 <main id="main-content">
   <section class="section" style="padding-top:56px;">
     <div class="container">
+      <!-- Vitrine com crossfade de foto + seletor de avatares -- por
+           enquanto usa fotos ilustrativas (não são fotos reais dos
+           arquitetos ainda), mas os dados (nome, cidade, bio, nota) e o
+           link "Ver perfil" já são reais, vindos do ranking por mérito. -->
+      <section class="featured-hero" id="featuredHero" style="display:none;">
+        <div class="fh-bgs" id="fhBgs"></div>
+        <div class="fh-scrim"></div>
+        <div class="fh-content">
+          <div class="fh-top">
+            <p class="fh-headline">O arquiteto certo se constrói a cada projeto, não escolhe uma vez só</p>
+            <p class="fh-desc" id="fhDesc">—</p>
+          </div>
+          <div class="fh-bottom">
+            <div class="fh-avatars" id="fhAvatars"></div>
+            <div class="fh-meta">
+              <span class="fh-name" id="fhName">—</span>
+              <span class="fh-role" id="fhRole">—</span>
+              <span class="fh-tenure">Ranking por mérito, nunca por pagamento</span>
+              <a href="#" class="fh-link" id="fhLink">Ver perfil</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <span class="eyebrow reveal">Arquitetos match.IA</span>
       <h1 class="reveal" style="font-size:2.1rem; margin:6px 0 10px; --reveal-delay:70ms;">Arquitetos em destaque</h1>
       <p class="reveal" style="max-width:640px; color:var(--ink-soft); --reveal-delay:140ms;">Conheça quem já está na plataforma. Filtre por estilo e veja o perfil completo — portfólio, avaliações e como entrar em contato.</p>
@@ -133,6 +157,7 @@
 <script src="assets/js/api.js"></script>
 <script src="assets/js/theme.js"></script>
 <script src="assets/js/site.js"></script>
+<script src="assets/js/featured-architects.js"></script>
 <script src="assets/js/destaques.js"></script>
 </body>
 </html>

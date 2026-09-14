@@ -50,23 +50,47 @@
   </nav>
 </header>
 
-<main id="main-content" class="auth-shell">
-  <div class="container">
-    <div class="auth-card reveal" style="max-width:560px;">
-      <div class="center" style="margin-bottom:24px;">
-        <div class="auth-badge"><img src="assets/img/mark.png" alt=""></div>
-        <span class="eyebrow">Cadastro</span>
-        <h1 style="font-size:1.7rem; margin-bottom:6px;">Crie sua conta no match.IA</h1>
-        <p style="margin:0;">Rápido de criar — o resto (seus projetos, seu portfólio) você adiciona depois, direto no painel.</p>
+<main id="main-content" class="auth-split">
+  <div class="auth-hero">
+    <img class="auth-hero-bg" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80" alt="">
+    <div class="auth-hero-scrim"></div>
+    <div class="auth-hero-content reveal">
+      <a href="index.html" class="auth-hero-brand">
+        <img src="assets/img/mark.png" alt="">
+        <span>match<em>.IA</em></span>
+      </a>
+      <div class="auth-hero-copy">
+        <h1>Crie sua conta no match.IA</h1>
+        <p>Rápido de criar — o resto (seus projetos, seu portfólio) você adiciona depois, direto no painel.</p>
+      </div>
+      <div class="auth-role-steps" id="roleToggle" data-stagger>
+        <button type="button" class="auth-role-step active" data-role="client"><span class="auth-step-num">1</span><span class="step-label">Sou cliente</span></button>
+        <button type="button" class="auth-role-step" data-role="architect"><span class="auth-step-num">2</span><span class="step-label">Sou arquiteto</span></button>
+        <button type="button" class="auth-role-step" data-role="store"><span class="auth-step-num">3</span><span class="step-label">Sou loja parceira</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-form-col">
+    <div class="auth-form-wrap reveal">
+      <span class="eyebrow">Cadastro</span>
+      <h2 style="font-size:1.5rem; margin-bottom:6px;">Crie seu perfil</h2>
+      <p style="color:var(--ink-faint); font-size:0.9rem; margin-bottom:24px;">Informe seus dados básicos pra começar.</p>
+
+      <!-- Mesmos botões de papel do painel da esquerda, só que ele fica
+           escondido no mobile (não cabe do lado da foto) -- sem isso, quem
+           acessa pelo celular não teria como escolher cliente/arquiteto/
+           loja. Compartilham a mesma classe .auth-role-step, então o
+           cadastro.js atualiza os dois conjuntos juntos, qualquer que seja
+           o clicado. -->
+      <div class="auth-role-steps auth-role-steps-mobile" data-stagger>
+        <button type="button" class="auth-role-step active" data-role="client"><span class="auth-step-num">1</span><span class="step-label">Sou cliente</span></button>
+        <button type="button" class="auth-role-step" data-role="architect"><span class="auth-step-num">2</span><span class="step-label">Sou arquiteto</span></button>
+        <button type="button" class="auth-role-step" data-role="store"><span class="auth-step-num">3</span><span class="step-label">Sou loja parceira</span></button>
       </div>
 
       <div id="apiBanner" class="api-banner" role="alert" aria-live="polite">
         Não foi possível conectar à API. Confira se o back-end (<a href="https://github.com/RobPFilho/Arkitetum.AI" target="_blank" rel="noopener">Arkitetum.AI</a>) está rodando em <code id="apiBaseLabel"></code>.
-      </div>
-
-      <div class="role-toggle" id="roleToggle">
-        <button type="button" id="btnCliente" class="active" data-role="client">Sou cliente</button>
-        <button type="button" id="btnArquiteto" data-role="architect">Sou arquiteto</button>
       </div>
 
       <div id="formError" class="form-error" role="alert" aria-live="assertive"></div>
@@ -86,13 +110,20 @@
             <label for="email">E-mail</label>
             <input type="email" id="email" name="email" required autocomplete="email">
           </div>
-          <div class="form-field">
+          <div class="form-field password-field">
             <label for="password">Senha</label>
             <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password">
+            <button type="button" class="password-toggle" data-toggle-for="password" aria-label="Mostrar senha">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <span class="hint">Mínimo de 6 caracteres.</span>
           </div>
-          <div class="form-field">
+          <div class="form-field password-field">
             <label for="confirmPassword">Confirmar senha</label>
             <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6" autocomplete="new-password">
+            <button type="button" class="password-toggle" data-toggle-for="confirmPassword" aria-label="Mostrar senha">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
           </div>
           <div class="form-field full">
             <label>Foto de perfil <span class="hint">(opcional)</span></label>
@@ -111,7 +142,6 @@
 
         <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Criar conta</button>
         <p class="form-note">Já tem uma conta? <a href="login.html">Entrar</a></p>
-        <p class="form-note" id="storeLinkNote"><a href="cadastro.html?tipo=loja">Sou uma loja parceira</a></p>
       </form>
     </div>
   </div>

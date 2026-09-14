@@ -3,5 +3,6 @@ backend/node_modules/
 backend/KEYS.env
 backend/.env
 backend/coverage/
+dist/
 .DS_Store
 Thumbs.db

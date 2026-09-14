@@ -20,7 +20,7 @@
 <meta name="theme-color" content="#B0755A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -84,7 +84,7 @@
         </div>
         <div class="floating-card match glow-border">
           <div class="fc-label">Match encontrado</div>
-          <strong>Studio Cantiléver</strong>
+          <strong>Teresa Younes</strong>
           <div class="fc-score">95% de compatibilidade</div>
         </div>
       </div>
@@ -160,7 +160,7 @@
         </div>
         <div class="match-card result">
           <h4>Arquiteto encontrado</h4>
-          <div class="arch-name">Studio Cantiléver</div>
+          <div class="arch-name">Teresa Younes</div>
           <div class="arch-meta">São Paulo · SP — ★ 4.9 (36)</div>
           <p style="font-size:0.86rem; color:var(--ink-soft); margin:0;">"Excelente opção por estilo arquitetônico compatível, preferências de materiais em comum e 9 anos de experiência."</p>
           <div class="tag-row">
@@ -189,7 +189,7 @@
           <h2>IA como sua parceira-chave</h2>
         </div>
       </div>
-      <div class="feature-grid" data-stagger style="margin-bottom:20px;">
+      <div class="feature-grid for-clients" data-stagger style="margin-bottom:20px;">
         <div class="feature-card spotlight tilt">
           <span class="index">01</span>
           <h3>Encontre seu arquiteto ideal</h3>
@@ -221,7 +221,7 @@
           <p>Do questionário ao acompanhamento do projeto, tudo pensado para você.</p>
         </div>
       </div>
-      <div class="feature-grid" data-stagger>
+      <div class="feature-grid for-architects" data-stagger>
         <div class="feature-card spotlight tilt">
           <span class="index">01</span>
           <h3>Preserve sua identidade autoral</h3>
@@ -252,6 +252,29 @@
           <h3>Mais conversões e projetos fechados</h3>
           <p>Visibilidade priorizada nos resultados de compatibilidade.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTILOS ARQUITETÔNICOS: em imagens, não só em texto -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Estilos arquitetônicos</span>
+        <h2>Do que você gosta, em imagens</h2>
+        <p>Cada estilo que você escolhe no cadastro molda as sugestões da IA. Veja do que estamos falando antes de decidir o seu.</p>
+      </div>
+      <div class="style-showcase" data-stagger>
+        <div class="style-tile" style="background-image:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=500&q=75')"><span class="style-tile-label">Moderno</span></div>
+        <div class="style-tile" style="background-image:url('https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=500&q=75')"><span class="style-tile-label">Contemporâneo</span></div>
+        <div class="style-tile" style="background-image:url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=500&q=75')"><span class="style-tile-label">Minimalista</span></div>
+        <div class="style-tile" style="background-image:url('https://images.unsplash.com/photo-1567767292278-a4f21aa2d36e?auto=format&fit=crop&w=500&q=75')"><span class="style-tile-label">Industrial</span></div>
+        <div class="style-tile" style="background-image:url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=500&q=75')"><span class="style-tile-label">Clássico</span></div>
+        <div class="style-tile" style="background-image:url('https://images.unsplash.com/photo-1523755231516-e43fd2e8dca5?auto=format&fit=crop&w=500&q=75')"><span class="style-tile-label">Rústico</span></div>
+        <div class="style-tile" style="background-image:url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=500&q=75')"><span class="style-tile-label">Escandinavo</span></div>
+        <div class="style-tile" style="background-image:url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=500&q=75')"><span class="style-tile-label">Biofílico</span></div>
+        <div class="style-tile" style="background-image:url('https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=500&q=75')"><span class="style-tile-label">Brutalista</span></div>
+        <div class="style-tile" style="background-image:url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=500&q=75')"><span class="style-tile-label">Alto padrão</span></div>
       </div>
     </div>
   </section>
@@ -336,6 +359,7 @@
 </footer>
 
 <script src="assets/js/api.js"></script>
+<script src="assets/js/project-carousel.js"></script>
 <script src="assets/js/showcase.js"></script>
 <script src="assets/js/theme.js"></script>
 <script src="assets/js/site.js"></script>

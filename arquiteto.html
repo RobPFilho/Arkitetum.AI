@@ -64,15 +64,28 @@
     </div>
 
     <div id="profileState" style="display:none;">
-      <div class="dash-card spotlight" data-stagger style="display:flex; gap:26px; align-items:center; flex-wrap:wrap;">
-        <div class="dash-avatar" id="avatar" style="width:88px; height:88px; font-size:1.9rem;">—</div>
-        <div style="flex:1; min-width:220px;">
-          <h1 id="archName" style="font-size:1.8rem; margin-bottom:4px; display:inline;">—</h1>
-          <span id="archVerifiedBadge"></span>
-          <span id="archValidatedBadge"></span>
-          <p id="archLocation" style="margin:4px 0 0;">—</p>
+      <!-- Mesmo hero em vidro fosco do painel (.dash-hero) -- fundo é a
+           referência visual real do arquiteto (gerada a partir do estilo/
+           materiais dele, MatchAPI.architectReferenceImage) quando existe;
+           senão cai numa foto ilustrativa por enquanto (ver architect.js). -->
+      <div class="dash-hero" data-stagger>
+        <div class="dash-hero-bg" id="archHeroBg"></div>
+        <div class="dash-hero-scrim"></div>
+        <div class="dash-hero-content">
+          <div class="dash-hero-left">
+            <div class="dash-avatar" id="avatar" style="width:88px; height:88px; font-size:1.9rem; margin-bottom:0;">—</div>
+            <div class="profile-header-info" style="max-width:420px;">
+              <h1 id="archName" style="font-size:1.8rem; margin-bottom:4px; display:inline;">—</h1>
+              <span id="archVerifiedBadge"></span>
+              <span id="archValidatedBadge"></span>
+              <p class="profile-location" id="archLocation" style="margin:4px 0 0;">—</p>
+              <p id="archHeroBio" style="margin:12px 0 0; font-size:0.92rem; line-height:1.6; color:rgba(255,255,255,.85);">—</p>
+            </div>
+          </div>
+          <div class="dash-hero-rail" style="min-width:0;">
+            <div id="archAvailability" class="tag">—</div>
+          </div>
         </div>
-        <div id="archAvailability" class="tag" style="font-size:0.8rem;">—</div>
       </div>
 
       <div class="dash-grid" style="margin-top:24px;">

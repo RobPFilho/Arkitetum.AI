@@ -26,6 +26,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('apiBaseLabel').textContent = MatchAPI.base();
   const uid = (u) => u.id || u._id;
   const PROJECT_STYLES = ['Moderno', 'Contemporâneo', 'Minimalista', 'Industrial', 'Clássico', 'Rústico', 'Escandinavo', 'Biofílico', 'Brutalista', 'Alto padrão'];
+  // Mesmas fotos da vitrine "Estilos arquitetônicos" da home.
+  const PROJECT_STYLE_THUMBS = {
+    'Moderno': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=80&q=70',
+    'Contemporâneo': 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=80&q=70',
+    'Minimalista': 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=80&q=70',
+    'Industrial': 'https://images.unsplash.com/photo-1567767292278-a4f21aa2d36e?auto=format&fit=crop&w=80&q=70',
+    'Clássico': 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=80&q=70',
+    'Rústico': 'https://images.unsplash.com/photo-1523755231516-e43fd2e8dca5?auto=format&fit=crop&w=80&q=70',
+    'Escandinavo': 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=80&q=70',
+    'Biofílico': 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=80&q=70',
+    'Brutalista': 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=80&q=70',
+    'Alto padrão': 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=80&q=70',
+  };
+
+  // Foto do hero do painel muda a cada visita. Usa fotos diretas do Unsplash
+  // (mesmas já usadas no hero da home/carrossel de projetos), não a busca
+  // por chave do back-end (imageSearchService.js) -- essa é limitada a
+  // 50 buscas/hora, compartilhada por todo mundo no site, e reservada pra
+  // referência visual do arquiteto; chamá-la de novo aqui, a cada
+  // carregamento do painel, estouraria essa cota rapidinho.
+  const HERO_BACKGROUNDS = [
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1600&q=80',
+  ];
+  function pickHeroBackground() {
+    const bg = document.getElementById('dashHeroBg');
+    if (!bg) return;
+    const url = HERO_BACKGROUNDS[Math.floor(Math.random() * HERO_BACKGROUNDS.length)];
+    bg.style.backgroundImage = `url("${url}")`;
+  }
 
   async function refreshUnreadBadge(badgeId, mirrorId) {
     const badge = document.getElementById(badgeId);
@@ -67,6 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   document.getElementById('dashState').style.display = 'block';
+  pickHeroBackground();
   renderProfile(me);
   renderPlanCard(me);
 
@@ -335,7 +370,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function buildProjectStyleChips(containerId, selected = []) {
     const container = document.getElementById(containerId);
     container.innerHTML = PROJECT_STYLES.map(style =>
-      `<button type="button" class="chip${selected.includes(style) ? ' active' : ''}" data-style="${style}">${style}</button>`
+      `<button type="button" class="chip has-thumb${selected.includes(style) ? ' active' : ''}" data-style="${style}"><img class="chip-thumb" src="${PROJECT_STYLE_THUMBS[style]}" alt="" loading="lazy">${style}</button>`
     ).join('');
     container.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => chip.classList.toggle('active'));
@@ -356,6 +391,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch {
       myProjects = [];
     }
+    renderHeroProjects();
+  }
+
+  // "Meus projetos" na estante do hero -- sempre visível ao carregar o
+  // painel, sem precisar clicar em "Ver meus projetos" primeiro. Clicar num
+  // item abre a mesma gaveta que já existia (lista completa + detalhe).
+  function renderHeroProjects() {
+    const rail = document.getElementById('heroProjectsRail');
+    if (!rail) return;
+    if (!myProjects.length) { rail.style.display = 'none'; return; }
+    rail.style.display = 'flex';
+    rail.innerHTML = myProjects.slice(0, 3).map((p) => `
+      <button type="button" class="dash-hero-project-item" data-hero-project="${p._id}">
+        <strong>${p.name}</strong>
+        <span>${p.propertyType || 'Projeto'}</span>
+      </button>`).join('');
+    rail.querySelectorAll('[data-hero-project]').forEach((btn) => {
+      btn.addEventListener('click', () => document.getElementById('openProjectsDrawerBtn').click());
+    });
   }
 
   function renderProjectDetail(project, container, { back }, user) {

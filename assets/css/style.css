@@ -199,14 +199,83 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   transition: transform 0.18s var(--ease-spring), box-shadow 0.18s var(--ease-out), background 0.18s ease, color 0.18s ease, border-color .18s ease;
   white-space: nowrap;
 }
-.btn-primary { background: var(--terracotta); color: var(--on-accent); box-shadow: var(--shadow-glow); }
-.btn-primary:hover { background: var(--terracotta-dark); transform: translateY(-2px); box-shadow: 0 18px 40px rgba(176, 117, 90, 0.38); }
-.btn-secondary { background: transparent; color: var(--ink); border-color: var(--line); }
-.btn-secondary:hover { border-color: var(--ink); transform: translateY(-2px); }
-.btn-ghost-light { background: rgba(255,255,255,0.08); color: var(--bg); border-color: rgba(250,249,246,0.3); }
-.btn-ghost-light:hover { background: rgba(255,255,255,0.16); }
-.btn-sage { background: var(--sage); color: var(--on-accent); }
-.btn-sage:hover { background: var(--sage-dark); transform: translateY(-2px); }
+.btn-primary { background: linear-gradient(135deg, rgba(255,255,255,.35), rgba(255,255,255,0) 48%), var(--terracotta); box-shadow: var(--shadow-glow); }
+.btn-primary:hover { background: linear-gradient(135deg, rgba(255,255,255,.4), rgba(255,255,255,0) 48%), var(--terracotta-dark); transform: translateY(-2px); box-shadow: 0 18px 40px rgba(176, 117, 90, 0.38); }
+.btn-secondary {
+  background: linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,0) 48%), color-mix(in srgb, var(--bg) 55%, transparent);
+  color: var(--ink); border-color: var(--line);
+  backdrop-filter: blur(10px) saturate(120%); -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
+.btn-secondary:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,.28), rgba(255,255,255,0) 48%), color-mix(in srgb, var(--bg) 72%, transparent);
+  border-color: var(--ink); transform: translateY(-2px);
+}
+.btn-ghost-light { background: linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,0) 48%), rgba(255,255,255,0.08); color: var(--bg); border-color: rgba(250,249,246,0.3); }
+.btn-ghost-light:hover { background: linear-gradient(135deg, rgba(255,255,255,.28), rgba(255,255,255,0) 48%), rgba(255,255,255,0.16); }
+.btn-sage { background: linear-gradient(135deg, rgba(255,255,255,.35), rgba(255,255,255,0) 48%), var(--sage); }
+.btn-sage:hover { background: linear-gradient(135deg, rgba(255,255,255,.4), rgba(255,255,255,0) 48%), var(--sage-dark); transform: translateY(-2px); }
+/* Acabamento "vidro líquido" de verdade, na mesma lógica estrutural dos
+   componentes de referência (GlassButton/LiquidButton/MetalButton): a peça
+   não é UMA camada só, são três, empilhadas com isolation pra não vazar
+   blend mode pro resto da página —
+   1) ::after, atrás de tudo (z-index -1): um "blob" de cor borrado e
+      recolhido pra dentro, imitando a div .glass-button-shadow separada do
+      botão no componente de referência — é o que dá a sensação de peça de
+      vidro pousada sobre um brilho próprio, não uma sombra de caixa comum;
+   2) o próprio fundo do botão (acima), com um gradiente diagonal de brilho
+      embutido simulando o reflexo curvo de uma superfície de vidro/metal
+      (ou um vidro fosco com blur, nos botões que já eram transparentes);
+   3) ::before, na frente (z-index 1): bisel de sombras internas em camada
+      (realce por dentro num canto, sombra por dentro no oposto) + glow externo.
+   Em todos os botões do sistema (.btn-primary/.btn-sage/.btn-ghost-light/
+   .btn-secondary/.btn-danger) — só .btn-tertiary fica de fora, de propósito:
+   é texto puro sem nenhuma superfície (sem fundo, sem borda), então não há
+   "vidro" nenhum pra aplicar sem contradizer o próprio motivo dele existir
+   (ação de baixíssimo peso visual, ver comentário mais abaixo). */
+.btn-primary, .btn-sage, .btn-ghost-light, .btn-secondary, .btn-danger { position: relative; isolation: isolate; }
+.btn-primary::after, .btn-sage::after, .btn-ghost-light::after, .btn-secondary::after, .btn-danger::after {
+  content: ''; position: absolute; left: 10%; right: 10%; bottom: -10px; height: 55%;
+  border-radius: 999px; z-index: -1; pointer-events: none; filter: blur(14px);
+  opacity: .5; transition: opacity .18s ease, transform .18s var(--ease-spring);
+}
+.btn-primary::after { background: var(--terracotta); }
+.btn-sage::after { background: var(--sage); }
+.btn-ghost-light::after { background: rgba(255,255,255,.5); opacity: .28; }
+.btn-secondary::after { background: var(--ink); opacity: .1; }
+.btn-danger::after { background: var(--terracotta-dark); opacity: .22; }
+.btn-primary:hover::after, .btn-sage:hover::after { opacity: .7; transform: translateY(3px) scale(1.06); }
+.btn-ghost-light:hover::after { opacity: .4; transform: translateY(3px) scale(1.06); }
+.btn-secondary:hover::after { opacity: .16; transform: translateY(3px) scale(1.06); }
+.btn-danger:hover::after { opacity: .6; transform: translateY(3px) scale(1.06); }
+.btn-primary::before, .btn-sage::before, .btn-ghost-light::before, .btn-secondary::before, .btn-danger::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+  box-shadow:
+    inset 3px 3px 1px -3px rgba(255, 255, 255, .95),
+    inset -3px -3px 1px -3px rgba(0, 0, 0, .5),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, .7),
+    inset -1px -1px 1px -0.5px rgba(0, 0, 0, .35),
+    inset 0 0 6px 6px rgba(255, 255, 255, .1),
+    0 0 12px rgba(255, 255, 255, .18);
+  mix-blend-mode: overlay;
+}
+:root:not([data-theme="light"]) .btn-primary::before,
+:root:not([data-theme="light"]) .btn-sage::before,
+:root:not([data-theme="light"]) .btn-ghost-light::before,
+:root:not([data-theme="light"]) .btn-secondary::before,
+:root:not([data-theme="light"]) .btn-danger::before,
+[data-theme="dark"] .btn-primary::before,
+[data-theme="dark"] .btn-sage::before,
+[data-theme="dark"] .btn-ghost-light::before,
+[data-theme="dark"] .btn-secondary::before,
+[data-theme="dark"] .btn-danger::before {
+  box-shadow:
+    inset 3px 3px 1px -3px rgba(255, 255, 255, .9),
+    inset -3px -3px 1px -3px rgba(0, 0, 0, .6),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, .55),
+    inset -1px -1px 1px -0.5px rgba(0, 0, 0, .4),
+    inset 0 0 6px 6px rgba(255, 255, 255, .08),
+    0 0 12px rgba(0, 0, 0, .3);
+}
 /* Ação de baixo risco/consequência (copiar link, exportar PDF, ver
    referência) — texto puro, sem borda, pra não competir visualmente com
    .btn-secondary (que deve sinalizar uma ação de peso médio real). */
@@ -214,8 +283,15 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .btn-tertiary:hover { color: var(--terracotta); transform: none; text-decoration: underline; }
 /* Ação destrutiva/irreversível (excluir conta, remover peça) — nunca deve
    ter o mesmo peso visual de uma ação neutra só porque os dois usam borda. */
-.btn-danger { background: transparent; color: var(--terracotta-dark); border-color: var(--terracotta-dark); }
-.btn-danger:hover { background: var(--terracotta-dark); color: var(--on-accent); transform: translateY(-2px); }
+.btn-danger {
+  background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,0) 48%), color-mix(in srgb, var(--terracotta-dark) 8%, transparent);
+  color: var(--terracotta-dark); border-color: var(--terracotta-dark);
+  backdrop-filter: blur(10px) saturate(120%); -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
+.btn-danger:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,.4), rgba(255,255,255,0) 48%), var(--terracotta-dark);
+  color: var(--on-accent); transform: translateY(-2px);
+}
 /* Feedback de clique — nenhum botão do site tinha estado :active antes, só
    hover. Vem depois de todos os :hover de propósito, pra vencer o lift
    deles enquanto o botão está pressionado (o caso comum: mouse down em
@@ -236,17 +312,40 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .skip-link:focus { top: 12px; }
 
 /* ---------- Header ---------- */
+/* Navbar flutuante: pílula solta com respiro em todos os lados, não mais
+   colada nas bordas da janela. min()/calc() garante o respiro tanto em
+   telas largas (max-width trava em 1240px) quanto estreitas (nunca menos
+   que 16px de cada lado, sem precisar de um breakpoint pra cada tamanho). */
 .site-header {
-  position: sticky; top: 0; z-index: 50;
+  position: sticky; top: 16px; z-index: 50; isolation: isolate;
+  margin: 16px auto 0; max-width: min(1240px, calc(100% - 32px));
   background: var(--header-bg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--line);
-  box-shadow: 0 1px 0 var(--header-glow) inset, 0 8px 24px rgba(0,0,0,0.06);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-radius: 999px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .12), 0 2px 8px rgba(0, 0, 0, .06);
+}
+/* Aro de vidro com brilho que some no meio de cada lado -- mesma técnica
+   mask-composite dos outros cards do site, agora nas quatro bordas em vez
+   de só embaixo (fazia sentido quando a barra ia de ponta a ponta; numa
+   pílula flutuante o aro precisa fechar o contorno inteiro). */
+.site-header::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .6) 0%,
+    rgba(255, 255, 255, .2) 22%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, .18) 78%,
+    rgba(255, 255, 255, .55) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
 }
 .nav {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 24px; max-width: var(--container); margin: 0 auto;
+  padding: 12px 26px; max-width: var(--container); margin: 0 auto;
 }
 .logo { display: flex; align-items: center; gap: 10px; transition: opacity .15s ease; }
 .logo:hover { opacity: 0.82; }
@@ -271,8 +370,25 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .notif-bell:hover { color: var(--terracotta); }
 .notif-bell .unread-badge { position: absolute; top: -4px; right: -6px; min-width: 16px; height: 16px; font-size: 0.62rem; padding: 0 4px; }
 .notif-dropdown {
-  position: absolute; top: calc(100% + 10px); right: 0; width: 300px; max-height: 360px; overflow-y: auto;
-  background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); z-index: 60;
+  position: absolute; top: calc(100% + 10px); right: 0; width: 300px; max-height: 360px; overflow-y: auto; isolation: isolate;
+  background: color-mix(in srgb, var(--bg) 74%, transparent);
+  backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: none; border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg), inset 0 1px 1px rgba(255, 255, 255, .14); z-index: 60;
+}
+.notif-dropdown::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .55) 0%,
+    rgba(255, 255, 255, .18) 22%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, .16) 78%,
+    rgba(255, 255, 255, .5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
 }
 .notif-item { display: flex; flex-direction: column; gap: 3px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 0.84rem; color: var(--ink); text-decoration: none; }
 .notif-item:last-child { border-bottom: none; }
@@ -293,13 +409,20 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 
 @media (max-width: 1180px) {
   .nav-toggle { display: block; }
+  /* Painel do menu mobile também flutua, solto a 16px da barra flutuante
+     e das laterais, com o mesmo vidro fosco -- em vez de um retângulo
+     colado nas bordas indo até o rodapé da tela. */
   .nav-links {
-    position: fixed; top: 72px; left: 0; right: 0; height: calc(100vh - 72px); overflow-y: auto;
-    background: var(--bg); flex-direction: column;
-    padding: 32px 24px; gap: 22px; transform: translateY(-110%); transition: transform 0.25s ease;
-    border-top: 1px solid var(--line); align-items: flex-start;
+    position: fixed; top: 88px; left: 16px; right: 16px; max-height: calc(100vh - 104px); overflow-y: auto;
+    background: color-mix(in srgb, var(--bg) 95%, transparent);
+    backdrop-filter: blur(36px) saturate(160%); -webkit-backdrop-filter: blur(36px) saturate(160%);
+    flex-direction: column; border-radius: var(--radius-lg);
+    padding: 28px 24px; gap: 22px; transform: translateY(-16px); opacity: 0; pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+    border: 1px solid color-mix(in srgb, var(--white) 45%, transparent);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .18); align-items: flex-start;
   }
-  .nav-links.open { transform: translateY(0); }
+  .nav-links.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
   .nav-actions { gap: 10px; }
   .nav-actions .btn { padding: 10px 18px; font-size: 0.85rem; }
 }
@@ -309,6 +432,8 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
    texto por cima dos botões ao lado. Aperta espaçamentos pra caber sem cortar
    nem sobrepor nada. */
 @media (max-width: 430px) {
+  .site-header { margin: 8px auto 0; top: 8px; max-width: calc(100% - 16px); border-radius: 26px; }
+  .nav-links { left: 8px; right: 8px; top: 72px; }
   .nav { padding-left: 10px; padding-right: 10px; }
   .logo { flex-shrink: 0; gap: 6px; }
   .logo img { height: 26px; }
@@ -345,10 +470,18 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   border: 1px solid rgba(255,255,255,0.5);
 }
 .hero-photo img { width: 100%; height: 100%; object-fit: cover; }
+/* Vidro líquido: translúcido (não opaco) + blur real do que passa atrás +
+   bisel (realce claro em cima, sombra escura embaixo, por dentro) — em vez
+   do card branco chapado de antes. color-mix mantém a cor certa nos dois
+   temas (--white já inverte entre claro/escuro sozinho). */
 .floating-card {
-  position: absolute; background: var(--white); border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg); padding: 18px 20px; z-index: 2;
-  border: 1px solid rgba(255,255,255,0.7);
+  position: absolute; border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--white) 72%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, .5), inset 0 -1px 0 rgba(0, 0, 0, .06);
+  padding: 18px 20px; z-index: 2;
+  border: 1px solid color-mix(in srgb, var(--white) 45%, transparent);
 }
 .floating-card.profile { top: -8%; left: -8%; width: 220px; }
 .floating-card.profile .fc-label { font-size: 0.68rem; letter-spacing: 0.1em; color: var(--ink-faint); text-transform: uppercase; margin-bottom: 8px; }
@@ -395,22 +528,61 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 
 /* ---------- Match demo ---------- */
 .match-demo { display: grid; grid-template-columns: 1fr auto 1fr; gap: 40px; align-items: center; }
-.match-card { background: var(--white); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 28px; }
+/* Cards de vidro líquido: mesma receita translúcida de .floating-card/
+   .pricing-card (fundo em color-mix + blur/saturate real do que passa
+   atrás) + o bisel em camada dos botões (::before, realce por dentro num
+   canto/sombra no oposto) — pra ficar consistente com o resto do site. */
+.match-card {
+  position: relative; isolation: isolate;
+  background: color-mix(in srgb, var(--white) 78%, transparent);
+  backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid color-mix(in srgb, var(--white) 45%, transparent);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 28px;
+}
+.match-card::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+  box-shadow:
+    inset 3px 3px 1px -3px rgba(255, 255, 255, .8),
+    inset -3px -3px 1px -3px rgba(0, 0, 0, .12),
+    inset 0 0 16px 8px rgba(255, 255, 255, .06);
+  mix-blend-mode: overlay;
+}
 .match-card h4 { font-family: var(--font-body); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 16px; }
 .match-card ul li { font-size: 0.94rem; padding: 6px 0; display: flex; gap: 8px; align-items: center; }
 .match-card ul li::before { content: '✓'; color: var(--sage-dark); font-weight: 700; }
 .match-score { text-align: center; }
 .score-ring {
-  width: 132px; height: 132px; border-radius: 50%; background: var(--brand-gradient); color: var(--on-accent);
+  position: relative; isolation: isolate;
+  width: 132px; height: 132px; border-radius: 50%; color: var(--on-accent);
+  background: linear-gradient(135deg, rgba(255,255,255,.4), rgba(255,255,255,0) 50%), var(--brand-gradient);
   display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto;
   box-shadow: var(--shadow-glow);
+}
+.score-ring::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+  box-shadow:
+    inset 3px 3px 1px -3px rgba(255, 255, 255, .95),
+    inset -3px -3px 1px -3px rgba(0, 0, 0, .5),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, .7),
+    inset -1px -1px 1px -0.5px rgba(0, 0, 0, .35),
+    0 0 12px rgba(255, 255, 255, .18);
+  mix-blend-mode: overlay;
+}
+.score-ring::after {
+  content: ''; position: absolute; left: 14%; right: 14%; bottom: -12px; height: 45%;
+  border-radius: 50%; z-index: -1; pointer-events: none; filter: blur(16px);
+  background: var(--terracotta); opacity: .45;
 }
 .score-ring strong { font-family: var(--font-display); font-size: 1.9rem; line-height: 1; }
 .score-ring span { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
 .match-card.result .arch-name { font-family: var(--font-display); font-size: 1.15rem; margin-bottom: 2px; }
 .match-card.result .arch-meta { font-size: 0.82rem; color: var(--ink-faint); margin-bottom: 10px; }
 .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-.tag { background: var(--bg-alt); color: var(--ink); font-size: 0.72rem; padding: 5px 12px; border-radius: 999px; }
+.tag {
+  background: color-mix(in srgb, var(--bg-alt) 75%, transparent); color: var(--ink);
+  font-size: 0.72rem; padding: 5px 12px; border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(0,0,0,.06);
+}
 .tag-samecity { background: var(--sage); color: var(--on-accent); }
 .tag.custom { background: transparent; border: 1px dashed var(--ink-faint); }
 @media (max-width: 860px) { .match-demo { grid-template-columns: 1fr; } }
@@ -418,33 +590,104 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 /* ---------- Feature grid (para clientes / arquitetos) ---------- */
 .split-head { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
 .split-head h2 { margin-bottom: 4px; }
+/* Lado do arquiteto usa sálvia em vez do terracota padrão do .eyebrow --
+   primeiro sinal de cor que separa os dois grupos, antes mesmo dos cards. */
+.split-head > div:last-child .eyebrow { color: var(--sage-dark); }
 .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .feature-card {
-  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--white) 70%, transparent);
+  backdrop-filter: blur(28px) saturate(170%); -webkit-backdrop-filter: blur(28px) saturate(170%);
+  border: none; border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .16);
   padding: 26px 22px; transition: box-shadow .22s ease, transform .22s ease, border-color .22s ease;
-  position: relative; overflow: hidden;
+  position: relative; overflow: hidden; isolation: isolate;
 }
 .feature-card::before {
   content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
   background: var(--brand-gradient); opacity: 0;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
-  transition: opacity .22s ease; pointer-events: none;
+  transition: opacity .22s ease; pointer-events: none; z-index: 2;
 }
-.feature-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); border-color: transparent; }
+.feature-card::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  padding: 1.4px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .7) 0%,
+    rgba(255, 255, 255, .22) 22%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, .2) 78%,
+    rgba(255, 255, 255, .6) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.feature-card:hover { box-shadow: var(--shadow-md), inset 0 1px 1px rgba(255, 255, 255, .16); transform: translateY(-6px); }
 .feature-card:hover::before { opacity: 1; }
-/* Numeração discreta no lugar de um ícone decorativo — mesma função de
-   "marcador visual" sem depender de um pictograma aleatório por card. */
+/* Número grande em Playfair (em vez do índice discreto de antes) -- é o
+   principal marcador visual de cada card agora, na cor do grupo (terracota
+   pro lado do cliente, sálvia pro lado do arquiteto), sempre visível, não
+   só no hover. */
 .feature-card .index {
   display: block; font-family: var(--font-display); font-weight: 700;
-  font-size: 0.92rem; color: var(--ink-faint); margin-bottom: 14px;
-  letter-spacing: 0.02em; transition: color .22s ease;
+  font-size: 2.4rem; line-height: 1; color: var(--terracotta); margin-bottom: 12px;
+  letter-spacing: -0.02em; opacity: .85; transition: opacity .22s ease, transform .22s ease;
 }
-.feature-card:hover .index { color: var(--terracotta); }
+.feature-card:hover .index { opacity: 1; transform: translateY(-2px); }
 .feature-card h3 { font-size: 1.02rem; margin-bottom: 6px; }
 .feature-card p { font-size: 0.88rem; margin: 0; }
+/* Vidro colorido: em vez de vidro neutro igual pros dois grupos, cada lado
+   ganha um leve banho de cor na própria superfície translúcida -- não só
+   um detalhe de acento. É a separação "bem clara" pedida entre cliente e
+   arquiteto, e deixa o glassmorphism mais expressivo que um vidro só branco. */
+.for-clients .feature-card {
+  background: linear-gradient(160deg,
+    color-mix(in srgb, var(--terracotta) 16%, transparent),
+    color-mix(in srgb, var(--white) 68%, transparent) 65%);
+}
+.for-clients .feature-card::before { background: var(--terracotta); }
+.for-clients .feature-card:hover { box-shadow: var(--shadow-md), inset 0 1px 1px rgba(255, 255, 255, .16), 0 0 32px -8px var(--terracotta); }
+.for-architects .feature-card {
+  background: linear-gradient(160deg,
+    color-mix(in srgb, var(--sage) 18%, transparent),
+    color-mix(in srgb, var(--white) 68%, transparent) 65%);
+}
+.for-architects .feature-card::before { background: var(--sage-dark); }
+.for-architects .feature-card .index { color: var(--sage-dark); }
+.for-architects .feature-card:hover { box-shadow: var(--shadow-md), inset 0 1px 1px rgba(255, 255, 255, .16), 0 0 32px -8px var(--sage-dark); }
 @media (max-width: 900px) { .split-head { grid-template-columns: 1fr; } .feature-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .feature-grid { grid-template-columns: 1fr; } }
+
+/* ---------- Estilos arquitetônicos (fotos + legenda em vidro) ----------
+   O glassmorphism fica mais impactante em cima de uma foto de verdade do
+   que de uma cor lisa -- aqui é o oposto do .feature-card (foto primeiro,
+   vidro só na legenda por cima, não na peça inteira). */
+.style-showcase { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+.style-tile {
+  position: relative; aspect-ratio: 4/5; border-radius: var(--radius-md); overflow: hidden;
+  background-size: cover; background-position: center; isolation: isolate;
+  box-shadow: var(--shadow-sm); transition: box-shadow .25s ease;
+}
+.style-tile::before {
+  content: ''; position: absolute; inset: 0; z-index: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(15, 12, 10, .78) 100%);
+  transition: opacity .25s ease;
+}
+.style-tile:hover { box-shadow: var(--shadow-md); }
+.style-tile-label {
+  position: absolute; left: 8px; right: 8px; bottom: 8px; z-index: 1;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; color: #fff;
+  padding: 10px 8px; border-radius: var(--radius-sm);
+  background: rgba(15, 12, 10, .38);
+  backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18);
+  transition: transform .3s var(--ease-out);
+}
+.style-tile:hover .style-tile-label { transform: translateY(-3px); }
+@media (max-width: 1024px) { .style-showcase { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px) { .style-showcase { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
 
 /* ---------- 3D teaser ---------- */
 .showcase-3d {
@@ -465,17 +708,37 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
     radial-gradient(480px 300px at 88% 100%, rgba(255,255,255,0.12), transparent 60%),
     linear-gradient(120deg, var(--terracotta), var(--sage-dark));
   border-radius: var(--radius-lg); padding: 64px; text-align: center; color: var(--on-accent);
-  box-shadow: var(--shadow-lg); position: relative; overflow: hidden;
+  box-shadow: var(--shadow-lg); position: relative; overflow: hidden; isolation: isolate;
 }
 .cta-banner h2 { color: var(--on-accent); }
 .cta-banner p { color: rgba(255,255,255,0.85); max-width: 520px; margin: 0 auto 28px; }
 .cta-banner .btn-primary { background: var(--white); color: var(--ink); }
 .cta-banner .btn-primary:hover { background: var(--bg-alt); }
+/* Mesmo bisel de vidro dos botões, só que na escala do banner inteiro —
+   realce por dentro no canto superior-esquerdo, sombra por dentro no
+   oposto, por cima do gradiente já existente (overflow:hidden do banner
+   contém tudo, isolation garante que o blend não vaze pra fora dele). */
+.cta-banner::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  box-shadow:
+    inset 6px 6px 2px -6px rgba(255, 255, 255, .8),
+    inset -6px -6px 2px -6px rgba(0, 0, 0, .35),
+    inset 0 0 40px 10px rgba(255, 255, 255, .06);
+  mix-blend-mode: overlay;
+}
 
 /* ---------- Footer ---------- */
 /* Faixa sempre escura, nos dois temas — por isso cores fixas em vez de var(--ink)/
    var(--bg), que invertem no modo escuro e deixavam fundo e texto ambos claros. */
-.site-footer { background: #333333; color: rgba(250,249,246,0.7); padding: 72px 0 28px; }
+.site-footer {
+  background:
+    radial-gradient(600px 360px at 8% 0%, rgba(176,117,90,0.14), transparent 60%),
+    radial-gradient(560px 340px at 96% 0%, rgba(123,142,126,0.12), transparent 60%),
+    #333333;
+  color: rgba(250,249,246,0.7); padding: 72px 0 28px;
+  position: relative; isolation: isolate;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
 .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 52px; }
 .footer-brand .logo-word { color: #FAF9F6; }
 .footer-brand p { max-width: 260px; font-size: 0.88rem; margin-top: 14px; }
@@ -500,11 +763,17 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   background: radial-gradient(circle, rgba(123,142,126,0.16), transparent 70%); pointer-events: none;
 }
 .auth-card {
-  max-width: 620px; margin: 0 auto; background: var(--white); border-radius: var(--radius-lg);
+  max-width: 620px; margin: 0 auto; border-radius: var(--radius-lg); isolation: isolate;
+  backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%);
   box-shadow: var(--shadow-lg); padding: 44px; width: 100%; position: relative; z-index: 1;
   border-top: 3px solid transparent;
-  background-image: linear-gradient(var(--white), var(--white)), var(--brand-gradient);
+  background-image: linear-gradient(color-mix(in srgb, var(--white) 85%, transparent), color-mix(in srgb, var(--white) 85%, transparent)), var(--brand-gradient);
   background-origin: border-box; background-clip: padding-box, border-box;
+}
+.auth-card::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), inset 0 -1px 0 rgba(0, 0, 0, .06);
+  mix-blend-mode: overlay;
 }
 .auth-badge {
   width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 16px; background: var(--bg-alt);
@@ -554,7 +823,9 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .chip-select { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip-select .chip {
   border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-size: 0.84rem;
-  background: var(--bg); transition: 0.15s;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+  transition: 0.15s;
 }
 .chip-select .chip.has-thumb { display: inline-flex; align-items: center; gap: 8px; padding: 5px 16px 5px 5px; }
 .chip-thumb { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
@@ -595,6 +866,97 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   .form-grid { grid-template-columns: 1fr; }
 }
 
+/* ---------- Cadastro: layout dividido em 2 colunas ----------
+   Só usado em cadastro.html — login/recuperação continuam com .auth-shell/
+   .auth-card acima, intocados. A coluna da esquerda reaproveita a mesma
+   foto de arquitetura do hero da home (Unsplash, já usada lá) e o mesmo
+   efeito Ken Burns do carrossel de projetos (@keyframes pc3d-kenburns). */
+.auth-split { display: flex; min-height: calc(100vh - 74px); }
+.auth-hero {
+  position: relative; display: none; flex-direction: column; justify-content: flex-end;
+  width: 44%; padding: 48px; overflow: hidden; flex-shrink: 0;
+}
+.auth-hero-bg {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  animation: pc3d-kenburns 22s ease-in-out infinite alternate;
+}
+.auth-hero-scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(20, 15, 12, 0.9), rgba(20, 15, 12, 0.4) 55%, rgba(20, 15, 12, 0.12));
+}
+.auth-hero-content { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 36px; }
+.auth-hero-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; width: fit-content; }
+.auth-hero-brand img { width: 30px; height: 30px; }
+.auth-hero-brand span { font-family: var(--font-logo); font-size: 1.1rem; font-weight: 700; color: #fff; }
+.auth-hero-brand span em { font-style: normal; color: var(--terracotta); }
+.auth-hero-copy h1 { font-size: 2rem; color: #fff; margin-bottom: 10px; }
+.auth-hero-copy p { color: rgba(255, 255, 255, 0.72); font-size: 0.92rem; max-width: 320px; margin: 0; }
+.auth-role-steps { display: flex; flex-direction: column; gap: 10px; }
+/* Número preso na ponta esquerda + rótulo logo em seguida (não centralizado
+   nem "flutuando" no meio do card) -- width:100% garante que o botão ocupe
+   a largura toda antes de distribuir os itens, e justify-content explícito
+   evita depender do default do flex. Fundo bem mais opaco (era só
+   rgba(255,255,255,0.08), quase transparente) pra não sumir sobre trechos
+   claros da foto atrás -- é uma tarja escura sólida, não vidro fosco. */
+.auth-role-step {
+  display: flex; align-items: center; justify-content: flex-start; gap: 14px;
+  width: 100%; padding: 14px 16px; border-radius: var(--radius-md);
+  background: rgba(15, 12, 10, 0.72); border: 1px solid rgba(255, 255, 255, 0.18); color: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 -1px 0 rgba(0, 0, 0, .28);
+  text-align: left; font-size: 0.92rem; font-weight: 600; transition: 0.2s;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+/* auth-step-num (não .step-num) de propósito -- essa classe já existia
+   pros círculos de "Como funciona" na home, com margin:0 auto 20px que
+   vazava aqui e empurrava o número pra fora do centro vertical. */
+.auth-role-step .auth-step-num {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; align-self: center;
+  width: 26px; height: 26px; border-radius: 50%; font-size: 0.78rem; font-weight: 700;
+  background: rgba(255, 255, 255, 0.18); color: #fff;
+}
+.auth-role-step .step-label { flex: 1; }
+.auth-role-step:hover:not(.active) { border-color: rgba(255, 255, 255, 0.4); background: rgba(15, 12, 10, 0.85); }
+.auth-role-step.active { background: #fff; color: var(--ink); border-color: #fff; }
+.auth-role-step.active .auth-step-num { background: var(--terracotta); color: var(--on-accent); }
+
+.auth-form-col { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 24px; }
+.auth-form-wrap { width: 100%; max-width: 480px; }
+
+/* Versão da coluna do formulário (sem foto atrás) -- paleta normal do
+   tema em vez do vidro fosco sobre a foto escura. O selecionado usa
+   --terracotta sólido (não --white): no modo escuro, --white vira uma
+   superfície quase idêntica a --bg-alt (as duas ficam bem escuras), então
+   o card "ativo" quase desaparecia contra os outros -- terracota nunca
+   colide com o fundo em nenhum dos dois temas. */
+.auth-role-steps-mobile { margin-bottom: 24px; }
+.auth-role-steps-mobile .auth-role-step {
+  background: var(--bg-alt); border-color: var(--line); color: var(--ink-soft); backdrop-filter: none;
+}
+.auth-role-steps-mobile .auth-role-step .auth-step-num { background: var(--white); color: var(--ink-faint); }
+.auth-role-steps-mobile .auth-role-step:hover:not(.active) { border-color: var(--ink-faint); color: var(--ink); }
+.auth-role-steps-mobile .auth-role-step.active { background: var(--terracotta); color: var(--on-accent); border-color: var(--terracotta); }
+.auth-role-steps-mobile .auth-role-step.active .auth-step-num { background: rgba(255, 255, 255, 0.25); color: var(--on-accent); }
+
+.password-field { position: relative; }
+.password-field input { padding-right: 42px; }
+.password-toggle {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; color: var(--ink-faint); background: none;
+}
+.password-toggle:hover { color: var(--ink); background: var(--bg-alt); }
+
+@media (min-width: 960px) {
+  /* Sem isso, a coluna da direita (formulário, mais alta que a tela)
+     esticava o .auth-split inteiro, empurrando os botões de papel da
+     esquerda pra muito além do rodapé da foto. Cada coluna rola por conta
+     própria dentro da altura fixa da viewport (descontado o header). */
+  .auth-split { height: calc(100vh - 74px); overflow: hidden; }
+  .auth-hero { display: flex; }
+  .auth-form-col { height: 100%; overflow-y: auto; align-items: flex-start; padding-top: 56px; padding-bottom: 56px; }
+  .auth-role-steps-mobile { display: none; }
+}
+
 /* ---------- Dashboard ---------- */
 .dash-shell { padding: 48px 0 96px; }
 .dash-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 36px; flex-wrap: wrap; gap: 16px; }
@@ -604,7 +966,104 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
    com avatar grande + bio, uma fileira de números tipo "posts/seguidores", e
    abas horizontais trocando o conteúdo abaixo — em vez da barra lateral fixa
    com uma pilha de cards que o painel era antes. ---- */
-.profile-header { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; padding-bottom: 24px; }
+/* ---- Hero do painel: vidro fosco sobre uma foto de arquitetura que troca
+   a cada visita (pickHeroBackground em dashboard.js) -- mesma linguagem de
+   "cartão escuro com scrim + texto claro" já usada no hero do cadastro e
+   no verso do carrossel de projetos, adaptada pro cabeçalho de perfil. */
+.dash-hero {
+  position: relative; border-radius: var(--radius-lg); overflow: hidden;
+  margin-bottom: 28px; padding: 32px; min-height: 300px;
+  display: flex; align-items: flex-end; box-shadow: var(--shadow-lg);
+}
+.dash-hero-bg {
+  position: absolute; inset: 0; background-size: cover; background-position: center;
+  animation: pc3d-kenburns 26s ease-in-out infinite alternate;
+}
+.dash-hero-scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(15, 12, 10, .32) 0%, rgba(15, 12, 10, .52) 55%, rgba(15, 12, 10, .84) 100%),
+              linear-gradient(100deg, rgba(15, 12, 10, .55) 0%, transparent 55%);
+}
+.dash-hero-content {
+  position: relative; z-index: 1; width: 100%;
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; flex-wrap: wrap;
+}
+.dash-hero-left { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; flex: 1; min-width: 280px; }
+/* Texto do hero fica claro sempre, independente do tema -- é a mesma razão
+   do hero do cadastro: a foto atrás é sempre escura, então var(--ink) (que
+   inverte com o tema) ficaria ilegível no modo claro. */
+.dash-hero .eyebrow { color: var(--terracotta); }
+.dash-hero .profile-header-info h1 { color: #fff; }
+.dash-hero .profile-handle { color: rgba(255, 255, 255, .72); }
+.dash-hero .profile-location { color: rgba(255, 255, 255, .78); }
+.dash-hero .profile-details-row { border-top-color: rgba(255, 255, 255, .2); }
+.dash-hero .profile-detail span:first-child { color: rgba(255, 255, 255, .55); }
+.dash-hero .profile-detail span:last-child { color: #fff; }
+.dash-hero .btn-secondary {
+  background: rgba(15, 12, 10, .5); color: #fff; border-color: rgba(255, 255, 255, .3);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 -1px 0 rgba(0, 0, 0, .3);
+}
+.dash-hero .btn-secondary:hover { background: rgba(15, 12, 10, .68); border-color: #fff; }
+/* Usado no hero do perfil do arquiteto (arquiteto.html): avatar e tag de
+   disponibilidade também precisam do tratamento "sempre legível sobre
+   foto", como o resto do hero. */
+.dash-hero .dash-avatar {
+  background: linear-gradient(rgba(15, 12, 10, .55), rgba(15, 12, 10, .55)) padding-box, var(--brand-gradient) border-box;
+  color: #fff;
+}
+.dash-hero .tag {
+  background: rgba(15, 12, 10, .55); color: #fff; border: 1px solid rgba(255, 255, 255, .2);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 -1px 0 rgba(0, 0, 0, .3);
+}
+
+.dash-hero-rail { display: flex; flex-direction: column; gap: 12px; min-width: 260px; }
+.dash-hero-rail .profile-stats {
+  position: relative; border-radius: var(--radius-md);
+  background: rgba(15, 12, 10, .45);
+  backdrop-filter: blur(22px) saturate(130%); -webkit-backdrop-filter: blur(22px) saturate(130%);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .25), inset 0 1px 1px rgba(255, 255, 255, .12);
+  padding: 16px; gap: 20px;
+}
+/* Mesmo anel de vidro líquido do .dash-card, mas sobre foto (fundo escuro)
+   em vez de bg-alt -- por isso vira ::before aqui também, sem border real. */
+.dash-hero-rail .profile-stats::before,
+.dash-hero-project-item::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .55) 0%,
+    rgba(255, 255, 255, .16) 24%,
+    rgba(255, 255, 255, 0) 45%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, .16) 80%,
+    rgba(255, 255, 255, .5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.dash-hero-rail .profile-stats .stat strong { color: #fff; }
+.dash-hero-rail .profile-stats .stat span { color: rgba(255, 255, 255, .6); }
+.dash-hero-projects { display: flex; flex-direction: column; gap: 8px; }
+.dash-hero-project-item {
+  position: relative;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;
+  padding: 10px 14px; border-radius: var(--radius-sm); text-align: left;
+  background: rgba(15, 12, 10, .45);
+  backdrop-filter: blur(16px) saturate(130%); -webkit-backdrop-filter: blur(16px) saturate(130%);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .2), inset 0 1px 1px rgba(255, 255, 255, .1);
+  color: #fff; font-size: 0.84rem; font-weight: 600;
+  transition: background .15s ease;
+}
+.dash-hero-project-item:hover { background: rgba(15, 12, 10, .62); }
+.dash-hero-project-item span { color: rgba(255, 255, 255, .55); font-size: 0.76rem; font-weight: 400; }
+@media (max-width: 760px) {
+  .dash-hero { align-items: flex-start; min-height: 0; padding: 22px; }
+  .dash-hero-content { flex-direction: column; align-items: stretch; }
+  .dash-hero-left { flex-direction: column; align-items: flex-start; }
+}
+
 .profile-avatar-lg {
   width: 96px; height: 96px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--terracotta); flex-shrink: 0;
@@ -637,10 +1096,33 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
    correspondente reaproveitando activateProfileTab. */
 .dash-overview { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
 .dash-overview-tile {
-  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-md);
-  padding: 18px; text-align: left; cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease;
+  position: relative;
+  background: color-mix(in srgb, var(--white) 70%, transparent);
+  backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: none; border-radius: var(--radius-md);
+  padding: 18px; text-align: left; cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .05), inset 0 1px 1px rgba(255, 255, 255, .14);
+  transition: box-shadow .15s ease, transform .15s ease;
 }
-.dash-overview-tile:hover { border-color: var(--terracotta); box-shadow: var(--shadow-sm); }
+.dash-overview-tile::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .5) 0%,
+    rgba(255, 255, 255, .14) 24%,
+    rgba(255, 255, 255, 0) 45%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, .14) 80%,
+    rgba(255, 255, 255, .45) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.dash-overview-tile:hover {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .08), inset 0 1px 1px rgba(255, 255, 255, .2),
+    0 0 0 1px color-mix(in srgb, var(--terracotta) 55%, transparent);
+  transform: translateY(-1px);
+}
 .dash-overview-tile strong { display: block; font-family: var(--font-display); font-size: 1.3rem; color: var(--ink); line-height: 1.2; margin-bottom: 4px; }
 .dash-overview-tile span { font-size: 0.8rem; color: var(--ink-faint); }
 @media (max-width: 720px) { .dash-overview { grid-template-columns: repeat(2, 1fr); } }
@@ -662,7 +1144,33 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   .profile-header-info h1 { font-size: 1.3rem; }
   .profile-details-row, .profile-stats { gap: 22px; }
 }
-.dash-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 26px; margin-bottom: 20px; }
+/* .dash-card também carrega .spotlight (brilho que segue o cursor, usa
+   ::after) — o anel de vidro líquido aqui vai em ::before pra não colidir.
+   O anel usa a técnica mask-composite: exclude (recorta o miolo, sobra só
+   uma borda de ~1.2px) com um gradiente vertical que brilha mais em cima
+   e embaixo e esmaece no meio — como luz pegando a borda de um vidro. */
+.dash-card {
+  position: relative;
+  background: color-mix(in srgb, var(--white) 74%, transparent);
+  backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: none;
+  border-radius: var(--radius-md); padding: 26px; margin-bottom: 20px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, .06), inset 0 1px 1px rgba(255, 255, 255, .14);
+}
+.dash-card::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .55) 0%,
+    rgba(255, 255, 255, .18) 22%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, .16) 78%,
+    rgba(255, 255, 255, .5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
 .dash-card h3 { font-size: 1rem; margin-bottom: 14px; }
 /* Parágrafo introdutório padrão de card — antes cada dash-card repetia
    style="font-size:0.88rem" inline; centralizado aqui pra manter consistência
@@ -703,7 +1211,28 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .match-tab.active .count { color: var(--terracotta); }
 .match-tabpanel-note { font-size: 0.84rem; color: var(--ink-faint); margin: 0 0 16px; }
 .result-list { display: flex; flex-direction: column; gap: 16px; }
-.result-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 24px; display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center; }
+.result-card {
+  position: relative; isolation: isolate;
+  background: color-mix(in srgb, var(--white) 74%, transparent);
+  backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: none;
+  border-radius: var(--radius-md); padding: 24px; display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, .06), inset 0 1px 1px rgba(255, 255, 255, .14);
+}
+.result-card::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .55) 0%,
+    rgba(255, 255, 255, .18) 22%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, .16) 78%,
+    rgba(255, 255, 255, .5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
 .result-rank {
   width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display); color: var(--terracotta); font-weight: 700;
@@ -754,7 +1283,28 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 
 /* ---------- Materials / project support ---------- */
 .material-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
-.material-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; transition: transform .2s ease, box-shadow .2s ease; }
+.material-card {
+  position: relative;
+  background: color-mix(in srgb, var(--white) 74%, transparent);
+  backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: none; border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .14);
+  overflow: hidden; transition: transform .2s ease, box-shadow .2s ease;
+}
+.material-card::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .55) 0%,
+    rgba(255, 255, 255, .18) 22%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, .16) 78%,
+    rgba(255, 255, 255, .5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
 .material-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
 .material-card .thumb { aspect-ratio: 4/3; background: var(--bg-alt); overflow: hidden; }
 .material-card .thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -768,11 +1318,29 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
    o perfil. Reaproveita o mesmo padrão de avatar em anel do .result-card. */
 .architect-row-list { display: flex; flex-direction: column; gap: 14px; }
 .architect-row {
-  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-md);
+  position: relative; isolation: isolate;
+  background: color-mix(in srgb, var(--white) 74%, transparent);
+  backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: none; border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .14);
   padding: 18px 22px; display: flex; align-items: center; gap: 16px;
   transition: border-color .15s ease, box-shadow .15s ease;
 }
-.architect-row:hover { border-color: var(--terracotta); box-shadow: var(--shadow-sm); }
+.architect-row::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .55) 0%,
+    rgba(255, 255, 255, .18) 22%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, .16) 78%,
+    rgba(255, 255, 255, .5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.architect-row:hover { box-shadow: var(--shadow-sm), inset 0 1px 1px rgba(255, 255, 255, .14), 0 0 0 1px var(--terracotta); }
 .architect-row-link { flex: 1; min-width: 0; display: flex; align-items: center; gap: 18px; text-decoration: none; color: inherit; }
 .architect-row-avatar {
   width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -795,16 +1363,124 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 /* Sem hover de "levantar"/zoom: estes cards ainda não linkam pra lugar
    nenhum (conteúdo "em breve") — um hover de card clicável aqui prometeria
    uma interação que não existe. */
-.article-card { background: var(--white); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--line); position: relative; }
-.article-card .thumb { aspect-ratio: 16/10; overflow: hidden; }
-.article-card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.article-card {
+  background: color-mix(in srgb, var(--white) 74%, transparent);
+  backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border-radius: var(--radius-md); overflow: hidden;
+  border: none; box-shadow: inset 0 1px 1px rgba(255, 255, 255, .14);
+  position: relative; isolation: isolate;
+}
+.article-card::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .55) 0%,
+    rgba(255, 255, 255, .18) 22%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, .16) 78%,
+    rgba(255, 255, 255, .5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.article-card .thumb { position: relative; aspect-ratio: 16/10; overflow: hidden; }
+.article-card .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s cubic-bezier(.33,1,.68,1); }
 .article-card .info { padding: 20px; }
 .article-card .eyebrow { margin-bottom: 8px; }
-.article-card .status-pill { position: absolute; top: 14px; right: 14px; background: var(--white); color: var(--ink-soft); box-shadow: var(--shadow-sm); }
-.article-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+.article-card .status-pill { position: absolute; top: 14px; right: 14px; background: var(--white); color: var(--ink-soft); box-shadow: var(--shadow-sm); z-index: 2; }
+.article-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.article-card h3 { font-size: 1.1rem; margin: 0; }
 .article-card p { font-size: 0.88rem; }
 @media (max-width: 900px) { .article-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 600px) { .article-grid { grid-template-columns: 1fr; } }
+
+/* ---------- Post em destaque (blog.html) ---------- */
+/* Mesmo card de vidro líquido do .article-card, só que grande e em duas
+   colunas -- referência: layout "featured post" de blogs editoriais, com
+   badge da categoria, texto e um rodapé (autor + categoria) empurrado pro
+   fim via margin-top:auto. */
+.featured-post {
+  display: grid; grid-template-columns: 1fr 1fr; min-height: 420px;
+  border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 28px;
+  position: relative; isolation: isolate;
+  background: color-mix(in srgb, var(--white) 74%, transparent);
+  backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .14);
+}
+.featured-post::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .55) 0%,
+    rgba(255, 255, 255, .18) 22%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, .16) 78%,
+    rgba(255, 255, 255, .5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.featured-post-media { position: relative; overflow: hidden; }
+.featured-post-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s cubic-bezier(.33,1,.68,1); }
+.featured-post-body { padding: 44px; display: flex; flex-direction: column; }
+.post-badge {
+  align-self: flex-start; background: var(--ink); color: var(--bg);
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 6px 14px; border-radius: 999px; margin-bottom: 18px;
+}
+.featured-post-body h2 { font-size: clamp(1.5rem, 2.6vw, 2.1rem); margin-bottom: 12px; letter-spacing: -0.01em; }
+.featured-post-body p { font-size: 0.98rem; color: var(--ink-soft); max-width: 90%; }
+.featured-post-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 24px; }
+.post-author { font-size: 0.84rem; color: var(--ink-faint); font-weight: 600; }
+.post-category {
+  color: var(--on-accent); font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.03em; padding: 4px 12px; border-radius: 999px; white-space: nowrap; flex-shrink: 0;
+}
+@media (max-width: 900px) {
+  .featured-post { grid-template-columns: 1fr; }
+  .featured-post-media { min-height: 240px; }
+  .featured-post-body { padding: 28px; }
+  .featured-post-body h2 { font-size: 1.5rem; }
+}
+
+/* ---------- Hover de "ver post": zoom na imagem + véu escuro + ícone "+"
+   + cantos em L (mesma linguagem em .featured-post-media e .article-card
+   .thumb) -- puramente decorativo por enquanto (nenhum artigo tem link
+   próprio ainda), reaproveitado quando os posts ganharem página própria. ---------- */
+.featured-post-media::before, .article-card .thumb::before {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: rgba(0, 0, 0, .25); opacity: 0; transition: opacity .4s ease;
+}
+.featured-post-media::after, .article-card .thumb::after {
+  content: ''; position: absolute; inset: 15px; z-index: 1; pointer-events: none;
+  opacity: 0; transition: opacity .3s ease;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.9) 1.5px, transparent 1.5px), linear-gradient(to bottom, rgba(255,255,255,.9) 1.5px, transparent 1.5px),
+    linear-gradient(to left, rgba(255,255,255,.9) 1.5px, transparent 1.5px), linear-gradient(to bottom, rgba(255,255,255,.9) 1.5px, transparent 1.5px),
+    linear-gradient(to right, rgba(255,255,255,.9) 1.5px, transparent 1.5px), linear-gradient(to top, rgba(255,255,255,.9) 1.5px, transparent 1.5px),
+    linear-gradient(to left, rgba(255,255,255,.9) 1.5px, transparent 1.5px), linear-gradient(to top, rgba(255,255,255,.9) 1.5px, transparent 1.5px);
+  background-size: 12px 1.5px, 1.5px 12px, 12px 1.5px, 1.5px 12px, 12px 1.5px, 1.5px 12px, 12px 1.5px, 1.5px 12px;
+  background-position: top left, top left, top right, top right, bottom left, bottom left, bottom right, bottom right;
+}
+.thumb-plus {
+  position: absolute; top: 50%; left: 50%; z-index: 2; pointer-events: none;
+  width: 56px; height: 56px; border-radius: 50%; background: rgba(255, 255, 255, .22);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  color: #fff; font-size: 1.6rem; font-weight: 300; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transform: translate(-50%, -50%) scale(.7); opacity: 0;
+  transition: transform .3s ease, opacity .3s ease;
+}
+.featured-post-media:hover img, .article-card .thumb:hover img { transform: scale(1.08); }
+.featured-post-media:hover::before, .article-card .thumb:hover::before,
+.featured-post-media:hover::after, .article-card .thumb:hover::after { opacity: 1; }
+.featured-post-media:hover .thumb-plus, .article-card .thumb:hover .thumb-plus { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .featured-post-media img, .article-card .thumb img, .thumb-plus { transition: none; }
+}
 
 /* Lista de itens explicativos (FAQ, "como funciona") sem virar uma pilha de
    cards idênticos — cada item só precisa de um título e um parágrafo, um
@@ -850,10 +1526,28 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   opacity: 0; pointer-events: none; transition: opacity .2s var(--ease-out);
 }
 .founder-modal-overlay.open { opacity: 1; pointer-events: auto; }
+/* Painéis flutuantes (modais + drawer): o encaixe mais natural do vidro
+   líquido — são superfícies que literalmente pairam sobre o resto da
+   página. Só 1 instância visível de cada vez, então full glass (blur real)
+   sem custo de performance perceptível. */
+.founder-modal, .checkout-modal, .color-wheel-panel {
+  position: relative; isolation: isolate;
+  background: color-mix(in srgb, var(--white) 88%, transparent);
+  backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid color-mix(in srgb, var(--white) 45%, transparent);
+}
+.founder-modal::before, .checkout-modal::before, .color-wheel-panel::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+  box-shadow:
+    inset 2px 2px 1px -2px rgba(255, 255, 255, .8),
+    inset -2px -2px 1px -2px rgba(0, 0, 0, .15),
+    inset 0 0 24px 10px rgba(255, 255, 255, .05);
+  mix-blend-mode: overlay;
+}
 .founder-modal {
-  background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
   padding: 44px 40px 36px; max-width: 880px; width: 100%; max-height: 88vh; overflow-y: auto;
-  position: relative; transform: translateY(12px); transition: transform .22s var(--ease-out);
+  transform: translateY(12px); transition: transform .22s var(--ease-out);
 }
 .founder-modal-overlay.open .founder-modal { transform: translateY(0); }
 .founder-close {
@@ -942,21 +1636,43 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
    ========================================================= */
 
 .insight-quote {
-  display: flex; gap: 20px; align-items: flex-start; background: var(--white);
+  display: flex; gap: 20px; align-items: flex-start;
+  background: color-mix(in srgb, var(--white) 72%, transparent);
+  backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
   border-left: 4px solid var(--terracotta); border-radius: var(--radius-sm);
-  padding: 24px 28px; box-shadow: var(--shadow-sm); max-width: 760px; margin: 0 auto 56px;
+  padding: 24px 28px; box-shadow: var(--shadow-sm), inset 0 1px 1px rgba(255, 255, 255, .16);
+  max-width: 760px; margin: 0 auto 56px;
 }
 .insight-quote .mark { font-family: var(--font-display); font-size: 2.6rem; color: var(--terracotta); line-height: 1; }
 .insight-quote p { margin: 0 0 6px; font-size: 1.02rem; color: var(--ink); font-style: italic; }
 .insight-quote cite { font-style: normal; font-size: 0.8rem; color: var(--ink-faint); }
 
 .mock-window {
-  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md); overflow: hidden; display: flex; flex-direction: column; height: 100%;
+  position: relative; isolation: isolate;
+  background: color-mix(in srgb, var(--white) 76%, transparent);
+  backdrop-filter: blur(26px) saturate(160%); -webkit-backdrop-filter: blur(26px) saturate(160%);
+  border: none; border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md), inset 0 1px 1px rgba(255, 255, 255, .16);
+  overflow: hidden; display: flex; flex-direction: column; height: 100%;
+}
+.mock-window::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .6) 0%,
+    rgba(255, 255, 255, .2) 22%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, .18) 78%,
+    rgba(255, 255, 255, .55) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
 }
 .mock-titlebar {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--bg);
+  padding: 12px 16px; border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 65%, transparent);
 }
 .mock-titlebar .mock-brand { display: flex; align-items: center; gap: 6px; font-family: var(--font-display); font-weight: 700; font-size: 0.86rem; }
 .mock-titlebar .mock-brand img { width: 16px; height: 16px; }
@@ -983,7 +1699,11 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   padding: 10px 14px; font-size: 0.78rem; color: var(--ink-soft); margin-bottom: 18px;
 }
 
-.combo-card { border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; }
+.combo-card {
+  background: color-mix(in srgb, var(--white) 55%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3);
+  border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center;
+}
 .combo-card .swatches { display: flex; gap: 4px; flex-shrink: 0; }
 .combo-card .swatches span { width: 16px; height: 16px; border-radius: 4px; display: inline-block; }
 .combo-card .combo-name { font-weight: 600; font-size: 0.86rem; }
@@ -1041,7 +1761,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 }
 .color-wheel-overlay.open { opacity: 1; pointer-events: auto; }
 .color-wheel-panel {
-  background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
   padding: 30px; display: flex; gap: 30px; align-items: flex-start; position: relative;
   max-width: 560px; width: 100%; flex-wrap: wrap;
   max-height: 100%; overflow-y: auto;
@@ -1214,23 +1934,64 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .plan-toggle button { flex: 1; padding: 11px 0; border: none; background: none; border-radius: 999px; font-weight: 600; font-size: 0.9rem; color: var(--ink-soft); transition: 0.2s; }
 .plan-toggle button.active { background: var(--white); color: var(--terracotta); box-shadow: var(--shadow-sm); }
 
-.pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 48px; max-width: 780px; margin: 0 auto; align-items: stretch; }
-/* Colunas planas com um filete no topo em vez de cards com caixa/sombra —
-   o plano em destaque só troca a cor do filete, sem ribbon flutuante. */
+.pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; max-width: 780px; margin: 0 auto; align-items: stretch; }
+/* Cards em caixa com anel de 1px que segue o cursor (mesma técnica de
+   máscara CSS do .glow-border, só que como contorno reto em vez de anel
+   giratório) e o plano em destaque com um selo flutuante — pedido
+   explícito pra trocar o filete plano anterior por esse card premium. */
+/* Vidro líquido aqui também: translúcido + blur + bisel, no lugar do
+   branco chapado — mesma receita do .floating-card. */
 .pricing-card {
-  border-top: 3px solid var(--line); padding: 28px 2px 0; display: flex; flex-direction: column;
+  position: relative; display: flex; flex-direction: column;
+  background: color-mix(in srgb, var(--white) 80%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), inset 0 -1px 0 rgba(0, 0, 0, .05);
+  padding: 32px 28px 28px;
 }
-.pricing-card.featured { border-top-color: var(--terracotta); }
-.pricing-card .plan-highlight-label { margin-bottom: 10px; }
-.pricing-card h3 { font-size: 1.3rem; margin-bottom: 4px; }
-.pricing-card .plan-price { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; margin: 14px 0 4px; }
+.pricing-card.featured {
+  border-color: var(--terracotta);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-alt) 75%, transparent), color-mix(in srgb, var(--white) 80%, transparent) 60%);
+}
+/* .spotlight (usado só pra herdar o --mx/--my do pointermove delegado)
+   define overflow:hidden -- isso cortava o selo "Recomendado", que fica de
+   propósito meio pra fora do card no topo. Especificidade maior que
+   .spotlight sozinho pra vencer a cascata (mesma lição do .glow-border). */
+.pricing-card.spotlight { overflow: visible; }
+.pricing-card::before {
+  content: ''; position: absolute; inset: 0; padding: 1px; border-radius: inherit;
+  background: radial-gradient(180px circle at var(--mx, -999px) var(--my, -999px), rgba(176, 117, 90, 0.55), transparent 65%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events: none; opacity: 0; transition: opacity .3s ease;
+}
+.pricing-card:hover::before { opacity: 1; }
+.pricing-card .plan-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); }
+.pricing-card .plan-eyebrow {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.16em; font-weight: 700;
+  color: var(--ink-faint); margin: 0;
+}
+.pricing-card .plan-divider { margin: 12px 0 0; border-top: 1px solid var(--line); }
+.pricing-card .plan-price { font-family: var(--font-display); font-size: 2.6rem; font-weight: 700; margin: 22px 0 0; color: var(--ink); }
 .pricing-card .plan-price span { font-family: var(--font-body); font-size: 0.9rem; font-weight: 500; color: var(--ink-faint); }
-.pricing-card .plan-desc { font-size: 0.86rem; margin-bottom: 24px; min-height: 40px; }
-.pricing-card ul { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; flex: 1; }
-.pricing-card ul li { display: flex; gap: 10px; align-items: flex-start; font-size: 0.9rem; color: var(--ink); }
-.pricing-card ul li::before { content: '✓'; color: var(--sage-dark); font-weight: 700; flex-shrink: 0; }
+.pricing-card .plan-desc { font-size: 0.88rem; color: var(--ink-soft); margin: 10px 0 22px; min-height: 40px; }
+.pricing-card .btn-block { margin-bottom: 22px; }
+.pricing-card ul { display: flex; flex-direction: column; flex: 1; }
+.pricing-card ul li {
+  display: flex; align-items: center; gap: 12px; padding: 12px 0; font-size: 0.88rem; color: var(--ink);
+}
+.pricing-card ul li + li { border-top: 1px solid var(--line); }
 .pricing-card ul li.unavailable { color: var(--ink-faint); }
-.pricing-card ul li.unavailable::before { content: '—'; color: var(--ink-faint); }
+.pricing-card .plan-feature-icon {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--line);
+  color: var(--ink-faint);
+}
+.pricing-card .plan-feature-icon svg { width: 10px; height: 10px; }
+.pricing-card ul li:not(.unavailable) .plan-feature-icon {
+  background: rgba(123, 142, 126, 0.16); border-color: var(--sage); color: var(--sage-dark);
+}
 
 .plan-status-card {
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
@@ -1274,7 +2035,7 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 }
 .checkout-modal-overlay.open { opacity: 1; pointer-events: auto; }
 .checkout-modal {
-  background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 34px;
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 34px;
   max-width: 420px; width: 100%; text-align: center; transform: translateY(10px); transition: transform .22s var(--ease-out);
 }
 .checkout-modal-overlay.open .checkout-modal { transform: translateY(0); }
@@ -1291,9 +2052,17 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 }
 .project-drawer-overlay.open { opacity: 1; pointer-events: auto; }
 .project-drawer {
-  position: fixed; top: 0; left: 0; height: 100%; width: 380px; max-width: 88vw;
-  background: var(--white); box-shadow: var(--shadow-lg); display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; height: 100%; width: 380px; max-width: 88vw; isolation: isolate;
+  background: color-mix(in srgb, var(--white) 90%, transparent);
+  backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border-right: 1px solid color-mix(in srgb, var(--white) 45%, transparent);
+  box-shadow: var(--shadow-lg); display: flex; flex-direction: column;
   transform: translateX(-100%); transition: transform .3s var(--ease-out);
+}
+.project-drawer::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  box-shadow: inset -2px 0 1px -2px rgba(0, 0, 0, .15), inset 1px 0 0 rgba(255, 255, 255, .5);
+  mix-blend-mode: overlay;
 }
 .project-drawer-overlay.open .project-drawer { transform: translateX(0); }
 .drawer-header { display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
@@ -1307,7 +2076,9 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .drawer-new-btn { width: 100%; margin-bottom: 14px; }
 .drawer-list { display: flex; flex-direction: column; gap: 8px; }
 .drawer-list-item {
-  display: block; width: 100%; text-align: left; background: var(--bg); border: 1px solid var(--line);
+  display: block; width: 100%; text-align: left;
+  background: color-mix(in srgb, var(--bg) 65%, transparent);
+  border: 1px solid var(--line); box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
   border-radius: var(--radius-md); padding: 12px 14px; cursor: pointer; transition: background .15s ease, border-color .15s ease; font: inherit; color: inherit;
 }
 .drawer-list-item:hover, .drawer-list-item:focus-visible { background: var(--bg-alt); border-color: var(--terracotta); }
@@ -1326,6 +2097,13 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .showcase-track {
   display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px;
   scrollbar-width: thin;
+}
+/* Combinada com .showcase-track pra ganhar a cascata sem !important
+   (mesma lição do .glow-border: especificidade maior, não força bruta) —
+   quando o JS liga o modo 3D, o track vira a viewport de perspectiva em
+   vez da lista com scroll. */
+.showcase-track.pc3d-viewport {
+  display: flex; overflow: visible; scroll-snap-type: none; padding-bottom: 0;
 }
 /* Sem moldura/caixa no card — a foto vai até a borda (a mesma ideia dos
    cards de listagem do Airbnb), com o selo de compatibilidade sobreposto
@@ -1348,11 +2126,20 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .showcase-nav button:hover { background: var(--bg-alt); }
 .showcase-ranking { display: flex; flex-direction: column; gap: 8px; }
 .showcase-rank-item {
-  display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--white);
-  border: 1px solid var(--line); border-radius: var(--radius-md); text-decoration: none; color: inherit;
+  position: relative; isolation: isolate;
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  background: color-mix(in srgb, var(--white) 80%, transparent);
+  backdrop-filter: blur(12px) saturate(140%); -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid color-mix(in srgb, var(--white) 45%, transparent); border-radius: var(--radius-md);
+  text-decoration: none; color: inherit;
   transition: border-color .15s ease, background .15s ease;
 }
-.showcase-rank-item:hover { border-color: var(--terracotta); background: var(--bg-alt); }
+.showcase-rank-item::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), inset 0 -1px 0 rgba(0, 0, 0, .08);
+  mix-blend-mode: overlay;
+}
+.showcase-rank-item:hover { border-color: var(--terracotta); background: color-mix(in srgb, var(--bg-alt) 85%, transparent); }
 .showcase-rank-num { font-family: var(--font-display); font-size: 1.1rem; color: var(--terracotta); width: 22px; flex-shrink: 0; text-align: center; }
 .showcase-rank-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .showcase-rank-info strong { font-size: 0.9rem; }
@@ -1392,12 +2179,69 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .budget-per-m2 { font-size: 0.86rem; color: var(--ink-faint); margin: 0 0 22px; }
 .budget-facts { font-size: 0.82rem; color: var(--ink-soft); margin: 0 0 22px; }
 .budget-facts span:not(:last-child)::after { content: '·'; margin: 0 10px; color: var(--ink-faint); }
+/* Comparação de vidro líquido -- a faixa de preço acima é a mesma nos três
+   casos (é o custo real de mercado, o match.IA não "desconta" a obra); o
+   que muda é o risco/tempo de cada caminho, terminando no card em destaque
+   que é o motivo do produto existir. Mesma receita de aro com brilho dos
+   outros cards do site, e o destacado reaproveita o gradiente + brilho
+   diagonal dos botões primários. */
+.budget-compare { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 0 0 26px; text-align: left; }
+.budget-compare-card {
+  position: relative; isolation: isolate;
+  background: color-mix(in srgb, var(--white) 74%, transparent);
+  backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .14);
+  padding: 16px 16px 18px;
+}
+.budget-compare-card::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .55) 0%,
+    rgba(255, 255, 255, .18) 22%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, .16) 78%,
+    rgba(255, 255, 255, .5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.budget-compare-card .bcc-title { display: block; font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; color: var(--ink); }
+.budget-compare-card .bcc-note { display: block; font-size: 0.78rem; color: var(--ink-faint); line-height: 1.4; }
+.budget-compare-card.featured {
+  background: linear-gradient(135deg, rgba(255,255,255,.35), rgba(255,255,255,0) 48%), var(--brand-gradient);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: var(--shadow-glow), inset 0 1px 1px rgba(255, 255, 255, .2);
+}
+.budget-compare-card.featured .bcc-title, .budget-compare-card.featured .bcc-note { color: var(--on-accent); }
+.budget-compare-card.featured .bcc-title::before { content: '✓ '; }
+@media (max-width: 640px) { .budget-compare { grid-template-columns: 1fr; } }
 .budget-disclaimer { font-size: 0.76rem; color: var(--ink-faint); max-width: 460px; margin: 0 auto 26px; }
 
 /* =========================================================
    Mensagens (chat)
    ========================================================= */
-.chat-layout { display: grid; grid-template-columns: 240px 1fr; gap: 0; border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; background: var(--white); height: 480px; }
+.chat-layout {
+  position: relative; isolation: isolate;
+  display: grid; grid-template-columns: 240px 1fr; gap: 0;
+  background: color-mix(in srgb, var(--white) 76%, transparent);
+  backdrop-filter: blur(26px) saturate(160%); -webkit-backdrop-filter: blur(26px) saturate(160%);
+  border: none; box-shadow: inset 0 1px 1px rgba(255, 255, 255, .16);
+  border-radius: var(--radius-md); overflow: hidden; height: 480px;
+}
+.chat-layout::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3;
+  padding: 1.2px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .6) 0%, rgba(255, 255, 255, .2) 22%,
+    rgba(255, 255, 255, 0) 42%, rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, .18) 78%, rgba(255, 255, 255, .55) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
 .conversation-list { border-right: 1px solid var(--line); overflow-y: auto; padding: 8px; }
 .conversation-list-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: var(--radius-sm); cursor: pointer; transition: background .15s ease; }
 .conversation-list-item:hover, .conversation-list-item.active { background: var(--bg-alt); }
@@ -1546,11 +2390,38 @@ body::before {
 .spotlight { position: relative; overflow: hidden; }
 .spotlight::after {
   content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  opacity: 0; transition: opacity .3s ease;
+  border-radius: inherit; opacity: 0; transition: opacity .3s ease;
   background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(176, 117, 90, 0.16), transparent 70%);
 }
 .spotlight:hover::after { opacity: 1; }
 .spotlight > * { position: relative; z-index: 1; }
+
+/* ---- Vidro líquido: brilho especular que varre o card quando ele aparece
+   (mesma linguagem de dashboards em liquid glass) ---- */
+/* .glass-sheen é um <span> real injetado por site.js, não um pseudo-elemento
+   -- vários dos cards de vidro (.dash-card, .material-card...) já usam
+   ::before/::after pra outra coisa (bisel, spotlight, borda com brilho), e
+   um terceiro efeito visual precisa de um nó de verdade pra não competir
+   pelo mesmo slot. A varredura roda uma vez só (animation-iteration: 1) e
+   termina totalmente transparente, então não deixa rastro depois. */
+.glass-sheen {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+  border-radius: inherit; z-index: 3;
+}
+.glass-sheen::after {
+  content: '';
+  position: absolute; top: -20%; bottom: -20%; left: 0; width: 38%;
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, .55) 50%, transparent 100%);
+  transform: translate3d(-150%, 0, 0) skewX(-18deg);
+  animation: glass-sheen-sweep 1.15s var(--ease-out) .3s 1 both;
+}
+@keyframes glass-sheen-sweep {
+  from { transform: translate3d(-150%, 0, 0) skewX(-18deg); }
+  to   { transform: translate3d(360%, 0, 0) skewX(-18deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-sheen { display: none; }
+}
 
 /* ---- Tilt 3D: perspectiva que segue o mouse ---- */
 .tilt {
@@ -1588,4 +2459,143 @@ body::before {
 .shimmer-text {
   background-size: 200% auto;
   animation: text-shimmer 4s linear infinite;
+}
+
+/* ============================================================
+   CARROSSEL 3D DE PROJETOS (vitrine da home)
+   Cilindro horizontal com profundidade volumétrica (camadas
+   empilhadas), parallax de mouse com damping e frente/verso reais
+   por rotação — adaptado de um conceito de cartão bancário: eixo
+   trocado de vertical pra horizontal (cabe melhor numa faixa de
+   "carrossel" no meio da página) e conteúdo trocado de cartão
+   (número/CVV) pra ficha de projeto (foto, título, arquiteto,
+   compatibilidade). Ver assets/js/project-carousel.js.
+   ============================================================ */
+.pc3d-viewport {
+  display: flex; align-items: center; justify-content: center;
+  perspective: 1350px; overflow: visible;
+}
+.pc3d-stage { position: relative; transform-style: preserve-3d; }
+.pc3d-card {
+  position: absolute; inset: 0; transform-style: preserve-3d;
+  text-decoration: none; color: inherit; display: block; cursor: pointer;
+}
+.pc3d-layer {
+  position: absolute; inset: 0; border-radius: 16px; overflow: hidden;
+  backface-visibility: hidden;
+}
+.pc3d-layer.pc3d-edge {
+  background: linear-gradient(160deg, var(--terracotta-dark), var(--sage-dark));
+  opacity: 0.9;
+}
+.pc3d-layer.pc3d-front,
+.pc3d-layer.pc3d-back {
+  background: var(--ink); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.pc3d-media { position: absolute; inset: 0; }
+.pc3d-media img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  animation: pc3d-kenburns 16s ease-in-out infinite alternate;
+}
+.pc3d-media-fallback { position: absolute; inset: 0; background: var(--brand-gradient); }
+@keyframes pc3d-kenburns { from { transform: scale(1); } to { transform: scale(1.1); } }
+.pc3d-media-scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.65), transparent 60%);
+}
+
+/* Frente: só a foto do projeto, um selo simples de compatibilidade e o
+   título — sem nada que lembre um cartão (sem chip, sem tarja, sem
+   logo de emissor no canto). */
+.pc3d-front-content { position: absolute; inset: 0; }
+.pc3d-badge {
+  position: absolute; left: 16px; top: 14px;
+  background: var(--sage); color: var(--on-accent); font-family: var(--font-body);
+  font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+}
+.pc3d-title {
+  position: absolute; left: 16px; right: 16px; bottom: 14px;
+  color: #fff; font-family: var(--font-display); font-weight: 600; font-size: 0.94rem;
+  line-height: 1.25; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Verso: a mesma foto borrada e a ficha do projeto (arquiteto, cidade,
+   estilo, metragem) em monoespaçado — só dado, sem tarja magnética. */
+.pc3d-back-content { position: absolute; inset: 0; }
+.pc3d-back-content .pc3d-media { filter: blur(14px); transform: scale(1.15); }
+.pc3d-spec {
+  position: absolute; left: 16px; right: 16px; bottom: 14px; color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+}
+.pc3d-spec-name {
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pc3d-spec-line {
+  margin-top: 4px; font-size: 0.66rem; color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pc3d-media img { animation: none; }
+}
+
+/* ============================================================
+   VITRINE "ARQUITETOS EM DESTAQUE" (crossfade + seletor de avatares)
+   Mesma linguagem visual do .dash-hero (foto + degradê escuro + texto
+   claro), adaptada pra alternar entre várias pessoas em vez de mostrar só
+   uma. Ver assets/js/featured-architects.js.
+   ============================================================ */
+.featured-hero {
+  position: relative; overflow: hidden; border-radius: var(--radius-lg);
+  min-height: 460px; margin-bottom: 40px; padding: 40px;
+  flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-lg);
+}
+.fh-bg {
+  position: absolute; inset: 0; background-size: cover; background-position: center;
+  opacity: 0; transition: opacity .7s var(--ease-out);
+}
+.fh-bg.active { opacity: 1; }
+.fh-scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(15, 12, 10, .25) 0%, rgba(15, 12, 10, .18) 40%, rgba(15, 12, 10, .78) 100%);
+}
+.fh-content { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 40px; height: 100%; justify-content: space-between; }
+.fh-top { display: flex; flex-direction: column; gap: 18px; }
+@media (min-width: 760px) { .fh-top { flex-direction: row; justify-content: space-between; align-items: flex-start; gap: 40px; } }
+.fh-headline {
+  font-family: var(--font-display); font-weight: 600; font-style: italic;
+  font-size: clamp(1.5rem, 3.2vw, 2.4rem); line-height: 1.18; letter-spacing: -0.01em;
+  max-width: 460px; margin: 0; color: #fff;
+}
+.fh-desc { max-width: 340px; font-size: 0.92rem; line-height: 1.6; color: rgba(255, 255, 255, .85); margin: 0; }
+@keyframes fh-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.fh-fade { animation: fh-fade-in .5s ease; }
+
+.fh-bottom { display: flex; flex-direction: column; gap: 18px; }
+.fh-avatars { display: flex; align-items: flex-end; gap: 10px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.fh-avatars::-webkit-scrollbar { display: none; }
+.fh-avatar-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; background: none; border: none; padding: 0; }
+.fh-avatar-dot { width: 5px; height: 5px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .3s ease; }
+.fh-avatar-btn.active .fh-avatar-dot { opacity: 1; }
+.fh-avatar-thumb { display: block; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid rgba(255, 255, 255, .28); transition: border-color .2s ease; }
+.fh-avatar-btn.active .fh-avatar-thumb { border-color: #fff; }
+.fh-avatar-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fh-meta {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+  padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, .22); font-size: 0.86rem; font-weight: 600;
+}
+.fh-name { color: #fff; }
+.fh-role { color: rgba(255, 255, 255, .72); font-weight: 500; display: none; }
+.fh-tenure { color: rgba(255, 255, 255, .6); font-weight: 500; display: none; }
+.fh-link { color: #fff; text-decoration: underline; text-underline-offset: 4px; font-weight: 600; transition: color .15s ease; }
+.fh-link:hover { color: rgba(255, 255, 255, .7); }
+@media (min-width: 620px) { .fh-role { display: inline; } }
+@media (min-width: 860px) { .fh-tenure { display: inline; } }
+@media (max-width: 600px) {
+  .featured-hero { padding: 24px; min-height: 420px; }
+  .fh-avatar-thumb { width: 38px; height: 38px; }
 }

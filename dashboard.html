@@ -64,38 +64,52 @@
 
     <div id="dashState" style="display:none;">
 
-      <!-- Cabeçalho de perfil (avatar + nome + bio), inspirado em como
-           Instagram/X/TikTok mostram um perfil, em vez da barra lateral
-           fixa que o painel tinha antes. -->
-      <div class="profile-header" data-stagger>
-        <div class="profile-avatar-lg" id="avatarInitials">—</div>
-        <div class="profile-header-info">
-          <span class="eyebrow" id="roleLabel">Painel</span>
-          <h1 id="profileName">—</h1>
-          <p class="profile-handle" id="profileEmail">—</p>
-          <p class="profile-location"><span id="profileCity">—</span>, <span id="profileState">—</span></p>
-        </div>
-        <div class="profile-header-actions">
-          <div id="clientActions" style="display:none;">
-            <button id="runMatchBtn" class="btn btn-primary">Rodar match com IA</button>
+      <!-- Hero em vidro fosco sobre uma foto de arquitetura (troca a cada
+           visita, ver pickHeroBackground em dashboard.js) -- o cabeçalho de
+           perfil de antes (avatar + nome + bio) vira o lado esquerdo, e as
+           estatísticas + projetos do cliente viram uma "estante" sempre
+           visível do lado direito, sem precisar clicar em nada. -->
+      <div class="dash-hero" data-stagger>
+        <div class="dash-hero-bg" id="dashHeroBg"></div>
+        <div class="dash-hero-scrim"></div>
+        <div class="dash-hero-content">
+          <div class="dash-hero-left">
+            <div class="profile-avatar-lg" id="avatarInitials">—</div>
+            <div class="profile-header-info">
+              <span class="eyebrow" id="roleLabel">Painel</span>
+              <h1 id="profileName">—</h1>
+              <p class="profile-handle" id="profileEmail">—</p>
+              <p class="profile-location"><span id="profileCity">—</span>, <span id="profileState">—</span></p>
+              <div class="profile-details-row">
+                <div class="profile-detail" id="profileExtraRow1" style="display:none;"><span></span><span></span></div>
+                <div class="profile-detail" id="profileExtraRow2" style="display:none;"><span></span><span></span></div>
+              </div>
+              <div class="profile-header-actions">
+                <div id="clientActions" style="display:none;">
+                  <button id="runMatchBtn" class="btn btn-primary">Rodar match com IA</button>
+                </div>
+                <button id="editProfileBtn" class="btn btn-secondary btn-sm">Editar perfil</button>
+              </div>
+            </div>
           </div>
-          <button id="editProfileBtn" class="btn btn-secondary btn-sm">Editar perfil</button>
+
+          <div class="dash-hero-rail">
+            <div class="profile-stats">
+              <div class="stat" id="clientStatMatch" style="display:none;"><strong id="statMatchCount">0</strong><span>buscas feitas</span></div>
+              <div class="stat" id="clientStatFav" style="display:none;"><strong id="statFavCount">0</strong><span>favoritos</span></div>
+              <div class="stat" id="architectStatRating" style="display:none;"><strong id="statRatingValue">—</strong><span id="statReviewCount">avaliação</span></div>
+              <div class="stat" id="architectStatPortfolio" style="display:none;"><strong id="statPortfolioCount">0</strong><span>no portfólio</span></div>
+              <div class="stat"><strong id="planName">—</strong><span id="planUsage">plano</span></div>
+            </div>
+            <button id="upgradePlanBtn" class="btn btn-primary btn-sm" style="display:none;">Fazer upgrade</button>
+
+            <!-- "Meus projetos" sempre visível aqui, sem precisar abrir a
+                 gaveta (ver renderHeroProjects em dashboard.js) -- só pra
+                 cliente, arquiteto/loja não têm projetos próprios. -->
+            <div class="dash-hero-projects" id="heroProjectsRail" style="display:none;"></div>
+          </div>
         </div>
       </div>
-
-      <div class="profile-details-row">
-        <div class="profile-detail" id="profileExtraRow1" style="display:none;"><span></span><span></span></div>
-        <div class="profile-detail" id="profileExtraRow2" style="display:none;"><span></span><span></span></div>
-      </div>
-
-      <div class="profile-stats">
-        <div class="stat" id="clientStatMatch" style="display:none;"><strong id="statMatchCount">0</strong><span>buscas feitas</span></div>
-        <div class="stat" id="clientStatFav" style="display:none;"><strong id="statFavCount">0</strong><span>favoritos</span></div>
-        <div class="stat" id="architectStatRating" style="display:none;"><strong id="statRatingValue">—</strong><span id="statReviewCount">avaliação</span></div>
-        <div class="stat" id="architectStatPortfolio" style="display:none;"><strong id="statPortfolioCount">0</strong><span>no portfólio</span></div>
-        <div class="stat"><strong id="planName">—</strong><span id="planUsage">plano</span></div>
-      </div>
-      <button id="upgradePlanBtn" class="btn btn-primary btn-sm" style="display:none; margin:-8px 0 20px;">Fazer upgrade</button>
 
       <!-- CLIENTE -->
       <div id="clientPanel" style="display:none;">
