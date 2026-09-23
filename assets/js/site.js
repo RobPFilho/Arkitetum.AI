@@ -73,6 +73,77 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Mesmo parallax sutil do hero, generalizado pra qualquer foto de fundo
+  // marcada com .cta-bg-img (banners de CTA com foto) — um único listener
+  // de scroll cobre todas as ocorrências da página.
+  const bgParallaxEls = document.querySelectorAll('.cta-bg-img');
+  if (bgParallaxEls.length && !reduceMotion) {
+    let bgTicking = false;
+    const updateBgParallax = () => {
+      bgParallaxEls.forEach((el) => {
+        const rect = el.parentElement.getBoundingClientRect();
+        const offset = Math.max(-30, Math.min(30, rect.top * -0.06));
+        el.style.transform = `translateY(${offset}px)`;
+      });
+      bgTicking = false;
+    };
+    window.addEventListener('scroll', () => {
+      if (!bgTicking) { requestAnimationFrame(updateBgParallax); bgTicking = true; }
+    }, { passive: true });
+    updateBgParallax();
+  }
+
+  // ---- Scrollytelling horizontal: .hscroll-pin ----
+  // Por padrão (sem isto rodar) já é um carrossel com scroll-snap, então
+  // funciona em qualquer navegador. Em telas grandes, com ponteiro fino e
+  // sem prefers-reduced-motion, promove a section a "pinada": ela ganha
+  // altura extra e o próprio scroll vertical desloca a trilha lateralmente
+  // via transform, gerando o efeito de scroll-jacking horizontal.
+  const canPinHorizontal = !reduceMotion && matchMedia('(min-width: 860px)').matches && matchMedia('(pointer: fine)').matches;
+  document.querySelectorAll('.hscroll-pin').forEach((section) => {
+    const sticky = section.querySelector('.hscroll-pin-sticky');
+    const track = section.querySelector('.hscroll-pin-track');
+    const panelCount = track ? track.children.length : 0;
+    if (!sticky || !track || !panelCount) return;
+    section.style.setProperty('--panel-count', panelCount);
+    if (!canPinHorizontal) return;
+
+    section.classList.add('is-pinned');
+    let pinTicking = false;
+    const updatePin = () => {
+      const rect = section.getBoundingClientRect();
+      const scrollable = section.offsetHeight - window.innerHeight;
+      const progress = scrollable > 0 ? Math.min(1, Math.max(0, -rect.top / scrollable)) : 0;
+      const maxShift = Math.max(0, track.scrollWidth - sticky.clientWidth);
+      track.style.transform = `translateX(-${progress * maxShift}px)`;
+      pinTicking = false;
+    };
+    window.addEventListener('scroll', () => {
+      if (!pinTicking) { requestAnimationFrame(updatePin); pinTicking = true; }
+    }, { passive: true });
+    window.addEventListener('resize', updatePin);
+    updatePin();
+  });
+
+  // ---- Scrollytelling vertical: .narrative-sticky ----
+  // A foto (coluna sticky) troca de imagem conforme cada bloco de texto
+  // ([data-narrative-step]) cruza o meio da viewport — sem isto, a CSS
+  // sozinha já deixa a primeira imagem visível, então degrada bem.
+  document.querySelectorAll('.narrative-sticky').forEach((block) => {
+    const steps = block.querySelectorAll('[data-narrative-step]');
+    const images = block.querySelectorAll('.narrative-sticky-visual img');
+    if (!steps.length || !images.length) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const key = entry.target.dataset.narrativeStep;
+        steps.forEach(s => s.classList.toggle('is-active', s === entry.target));
+        images.forEach(img => img.classList.toggle('is-active', img.dataset.narrativeStep === key));
+      });
+    }, { threshold: 0.5, rootMargin: '-20% 0px -20% 0px' });
+    steps.forEach(s => io.observe(s));
+  });
+
   // ---- Spotlight: brilho que segue o cursor em qualquer .spotlight ----
   if (!reduceMotion) {
     document.addEventListener('pointermove', (e) => {
@@ -129,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // API (painel, perfil de arquiteto, notificações), não só os do HTML
   // estático, observando o DOM em vez de rodar só uma vez no load.
   if (!reduceMotion) {
-    const GLASS_SHEEN_SELECTOR = '.dash-card, .dash-hero, .auth-card, .match-card, .architect-row, .result-card, .feature-card, .article-card, .material-card, .founder-modal, .checkout-modal, .color-wheel-panel, .project-drawer, .notif-dropdown';
+    const GLASS_SHEEN_SELECTOR = '.dash-card, .dash-hero, .auth-card, .match-card, .architect-row, .arch-card, .result-card, .feature-card, .article-card, .material-card, .founder-modal, .checkout-modal, .color-wheel-panel, .project-drawer, .notif-dropdown';
     const addSheenTo = (el) => {
       if (el.dataset.sheenApplied) return;
       el.dataset.sheenApplied = '1';

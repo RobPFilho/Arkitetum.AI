@@ -17,6 +17,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     'Brutalista': 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=80&q=70',
     'Alto padrão': 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=80&q=70',
   };
+  // Fotos de perfil (o cadastro real ainda não tem esse campo) — retratos
+  // diversos, cicla por índice pra cada arquiteto renderizado.
+  const PROFILE_PHOTOS = [
+    'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=480&h=600&q=80',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=480&h=600&q=80',
+    'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=480&h=600&q=80',
+    'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=480&h=600&q=80',
+    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=480&h=600&q=80',
+    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=480&h=600&q=80',
+    'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=480&h=600&q=80',
+    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=480&h=600&q=80',
+  ];
   const grid = document.getElementById('archGrid');
   const empty = document.getElementById('archEmpty');
   const filters = document.getElementById('styleFilters');
@@ -37,28 +49,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     return a.reviewCount ? `★ ${a.avgRating} (${a.reviewCount})` : 'Sem avaliações ainda';
   }
 
-  function cardHtml(a) {
+  function quoteLine(p) {
+    const style = (p.styles || [])[0];
+    if (style && p.yearsExperience) return `Especialista em ${style} — ${p.yearsExperience} anos de experiência.`;
+    if (style) return `Especialista em ${style}.`;
+    if (p.yearsExperience) return `${p.yearsExperience} anos de experiência em arquitetura.`;
+    return 'Perfil em construção na plataforma.';
+  }
+
+  function cardHtml(a, i) {
     const p = a.profile || {};
-    const initials = a.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
-    const verified = p.cauVerification?.status === 'verified' ? '<span class="status-pill badge-validated" style="margin-left:6px;">✓ Verificado</span>' : '';
-    const proBadge = a.isPro ? '<span class="badge-pro" style="margin-left:6px;">★ Pro</span>' : '';
-    const trackRecordBadge = a.isVerifiedTrackRecord ? '<span class="status-pill badge-validated" style="margin-left:6px;">Trajetória verificada</span>' : '';
+    const verified = p.cauVerification?.status === 'verified' ? '<span class="status-pill badge-validated">✓ Verificado</span>' : '';
+    const proBadge = a.isPro ? '<span class="badge-pro">★ Pro</span>' : '';
+    const trackRecordBadge = a.isVerifiedTrackRecord ? '<span class="status-pill badge-validated">Trajetória verificada</span>' : '';
     const checked = compareSelection.has(a.id) ? 'checked' : '';
     const location = [a.city, a.state].filter(Boolean).join(' · ') || 'Localização não informada';
-    const experience = p.yearsExperience ? `${p.yearsExperience} anos de experiência` : 'Experiência não informada';
+    const ratingSuffix = a.reviewCount ? ` · ★ ${a.avgRating}` : '';
+    const photo = PROFILE_PHOTOS[i % PROFILE_PHOTOS.length];
     return `
-      <div class="architect-row">
-        <a href="arquiteto.html?id=${a.id}" class="architect-row-link">
-          <div class="architect-row-avatar">${initials}</div>
-          <div class="architect-row-body">
-            <h4>${a.name}${verified}${proBadge}${trackRecordBadge}</h4>
-            <p class="muted">${location} · ${experience} · ${ratingText(a)}</p>
-            <div class="tag-row">${(p.styles || []).slice(0, 3).map(s => `<span class="tag">${s}</span>`).join('') || ''}</div>
-          </div>
-        </a>
-        <label class="architect-row-compare">
+      <div class="arch-card">
+        <label class="arch-card-compare">
           <input type="checkbox" data-compare="${a.id}" ${checked}> Comparar
         </label>
+        <a href="arquiteto.html?id=${a.id}" class="arch-card-link">
+          <div class="arch-card-photo"><img src="${photo}" alt="" loading="lazy"></div>
+          <div class="arch-card-body">
+            <h4>${a.name}</h4>
+            <span class="arch-card-meta">${location}${ratingSuffix}</span>
+            <p class="arch-card-quote">${quoteLine(p)}</p>
+            ${(verified || proBadge || trackRecordBadge) ? `<div class="arch-card-badges">${verified}${proBadge}${trackRecordBadge}</div>` : ''}
+          </div>
+        </a>
       </div>`;
   }
 
@@ -144,7 +165,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
       if (countLabel) countLabel.textContent = `${total} arquiteto${total === 1 ? '' : 's'} encontrado${total === 1 ? '' : 's'}`;
-      grid.innerHTML = loadedArchitects.map(cardHtml).join('');
+      grid.innerHTML = loadedArchitects.map((arch, i) => cardHtml(arch, i)).join('');
       bindCompareCheckboxes();
       loadMoreBtn.style.display = hasMore ? 'inline-flex' : 'none';
       loadMoreBtn.disabled = false;

@@ -11,6 +11,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const ranking = document.getElementById('showcaseRanking');
   if (!track || !ranking) return;
 
+  // Mesmas fotos de perfil já usadas no diretório de arquitetos
+  // (destaques.js) — reaproveitadas aqui pro card compacto do ranking.
+  const PROFILE_PHOTOS = [
+    'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&h=200&q=80',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&h=200&q=80',
+    'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&h=200&q=80',
+    'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&h=200&q=80',
+    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&h=200&q=80',
+  ];
+
   function projectCardHtml(c) {
     return `
       <div class="showcase-card spotlight tilt">
@@ -29,16 +39,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     const badges = [
       a.isPro ? '<span class="badge-pro">★ Pro</span>' : '',
       a.isVerifiedTrackRecord ? '<span class="status-pill badge-validated">Trajetória verificada</span>' : '',
-    ].filter(Boolean).join(' ');
+    ].filter(Boolean).join('');
+    const location = [a.city, a.state].filter(Boolean).join(' · ') || 'Localização não informada';
+    const photo = PROFILE_PHOTOS[i % PROFILE_PHOTOS.length];
     return `
-      <a href="arquiteto.html?id=${a.id}" class="showcase-rank-item">
-        <span class="showcase-rank-num">${i + 1}</span>
-        <span class="showcase-rank-info">
-          <strong>${a.name}</strong>
-          <span>${[a.city, a.state].filter(Boolean).join(' · ') || 'Localização não informada'}${a.avgRating ? ` · ★ ${a.avgRating}` : ''}</span>
-        </span>
-        ${badges}
-      </a>`;
+      <div class="arch-card arch-card-compact">
+        <a href="arquiteto.html?id=${a.id}" class="arch-card-link">
+          <div class="arch-card-photo">
+            <img src="${photo}" alt="" loading="lazy">
+            <span class="arch-card-rank">${i + 1}</span>
+          </div>
+          <div class="arch-card-body">
+            <h4>${a.name}</h4>
+            <span class="arch-card-meta">${location}${a.avgRating ? ` · ★ ${a.avgRating}` : ''}</span>
+            ${badges ? `<div class="arch-card-badges">${badges}</div>` : ''}
+          </div>
+        </a>
+      </div>`;
   }
 
   const prevBtn = document.getElementById('showcasePrev');
